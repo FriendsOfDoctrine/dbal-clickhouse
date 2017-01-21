@@ -1,6 +1,6 @@
 {
     "name": "mochalygin/doctrine-dbal-clickhouse",
-    "version" : "0.1.1"
+    "version" : "0.1.1",
     "description": "Doctrine DBAL layer for ClickHouse.yandex",
     "keywords": ["doctrine", "dbal", "clickhouse"],
     "homepage": "http://github.com/mochalygin/doctrine-dbal-clickhouse",
