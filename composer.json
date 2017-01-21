@@ -1,0 +1,20 @@
+{
+    "name": "mochalygin/doctrine-dbal-clickhouse",
+    "version" : "0.1.1"
+    "description": "Doctrine DBAL layer for ClickHouse.yandex",
+    "keywords": ["doctrine", "dbal", "clickhouse"],
+    "homepage": "http://github.com/mochalygin/doctrine-dbal-clickhouse",
+    "type": "library",
+    "license": "MIT",
+    "authors": [
+        {
+            "name": "Ololo",
+            "email": "lololo",
+            "homepage": "http://lilu"
+        }
+    ],
+    "require": {
+        "php": ">=5.4.0",
+        "smi2/phpClickHouse": "*"
+    }
+}
