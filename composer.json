@@ -8,13 +8,15 @@
     "license": "MIT",
     "authors": [
         {
-            "name": "Ololo",
-            "email": "lololo",
-            "homepage": "http://lilu"
+            "name": "Mochalygin Aleksandr",
+            "email": "a@mochalygin.ru"
         }
     ],
     "require": {
         "php": ">=5.4.0",
         "smi2/phpClickHouse": "*"
+    },
+    "autoload": {
+        "psr-0": { "Mochalygin\\DoctrineDBALClickHouse\\": "src/" }
     }
 }
