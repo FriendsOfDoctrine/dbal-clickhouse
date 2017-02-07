@@ -1,2 +1,5 @@
 # doctrine-dbal-clickhouse
-A
+
+Doctrine DBAL driver for ClickHouse database (https://clickhouse.yandex/)
+
+Under construction...
