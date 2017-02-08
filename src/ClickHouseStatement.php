@@ -175,6 +175,11 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
                 $completeSql = preg_replace('/(' . (is_int($key) ? '\?' : ':' . $key) . ')/i', $value, $completeSql, 1);
             }
 
+            //TODO smi2 works only with FORMAT JSON, so add it if SELECT statement
+            if (strtoupper(substr($completeSql, 0, 6)) == 'SELECT') {
+                $completeSql .= ' FORMAT JSON';
+            }
+
             $smi2CHStatement = $this->getClient()->write($completeSql);
 //            var_dump($smi2CHStatement->getRequest()->response()->body());
             $this->rows = $smi2CHStatement->rows();
