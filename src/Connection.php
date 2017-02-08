@@ -7,6 +7,7 @@
 namespace Mochalygin\DoctrineDBALClickHouse;
 
 use Doctrine\Common\EventManager;
+use Doctrine\DBAL\DBALException;
 
 /**
  * Connection for ClickHouse database {@link https://clickhouse.yandex/}
@@ -33,7 +34,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function delete($tableExpression, array $identifier, array $types = array())
     {
-        throw new \Exception('Delete is not allowed in ClickHouse');
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -41,7 +42,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function setTransactionIsolation($level)
     {
-        throw new \Exception('Transactions are not allowed in ClickHouse');
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -49,7 +50,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function getTransactionIsolation()
     {
-        throw new \Exception('Transactions are not allowed in ClickHouse');
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -57,7 +58,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function update($tableExpression, array $data, array $identifier, array $types = array())
     {
-        throw new \Exception('Update is not allowed in ClickHouse');
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -84,7 +85,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function getTransactionNestingLevel()
     {
-        throw new \Exception('Transactions are not allowed in ClickHouse');
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -92,7 +93,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function transactional(\Closure $func)
     {
-        throw new \Exception('Transactions are not allowed in ClickHouse');
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -100,7 +101,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function setNestTransactionsWithSavepoints($nestTransactionsWithSavepoints)
     {
-        throw new \Exception('Transactions are not allowed in ClickHouse');
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -108,7 +109,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function getNestTransactionsWithSavepoints()
     {
-        throw new \Exception('Transactions are not allowed in ClickHouse');
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -116,7 +117,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function beginTransaction()
     {
-        throw new \Exception('Transactions are not allowed in ClickHouse');
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -124,7 +125,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function commit()
     {
-        throw new \Exception("Transactions are not allowed in ClickHouse");
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -132,7 +133,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function rollBack()
     {
-        throw new \Exception("Transactions are not allowed in ClickHouse");
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -140,7 +141,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function createSavepoint($savepoint)
     {
-        throw new \Exception("Transactions are not allowed in ClickHouse");
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -148,7 +149,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function releaseSavepoint($savepoint)
     {
-        throw new \Exception("Transactions are not allowed in ClickHouse");
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -156,7 +157,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function rollbackSavepoint($savepoint)
     {
-        throw new \Exception('Transactions are not allowed in ClickHouse');
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -164,7 +165,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function setRollbackOnly()
     {
-        throw new \Exception('Transactions are not allowed in ClickHouse');
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -172,7 +173,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function isRollbackOnly()
     {
-        throw new \Exception('Transactions are not allowed in ClickHouse');
+        throw DBALException::notSupported(__METHOD__);
     }
 
 }
