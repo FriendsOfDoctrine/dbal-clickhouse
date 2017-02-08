@@ -39,7 +39,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     protected $iterator = null;
     
-    private $defaultFetchMode = \PDO::FETCH_BOTH;
+    private $fetchMode = \PDO::FETCH_BOTH;
 
     public function __construct(\ClickHouseDB\Client $client, $sql)
     {
@@ -67,6 +67,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     {
         $this->rows = null;
         $this->iterator = null;
+        $this->fetchMode = \PDO::FETCH_BOTH;
 
         return true;
     }
@@ -86,18 +87,39 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     public function setFetchMode($fetchMode, $arg2 = null, $arg3 = null)
     {
-        $this->defaultFetchMode = $fetchMode;
-        return true; //@todo check allowed fetch modes
+        $this->fetchMode = $this->assumeFetchMode($fetchMode);
+        return true;
+    }
+
+    /**
+     * @param int|null $fetchMode
+     * @return int
+     */
+    protected function assumeFetchMode($fetchMode = null)
+    {
+        $mode = $fetchMode ?: $this->fetchMode;
+        if (! in_array($mode, [
+                    \PDO::FETCH_ASSOC,
+                    \PDO::FETCH_NUM,
+                    \PDO::FETCH_BOTH
+        ])) {
+            $mode = \PDO::FETCH_BOTH;
+        }
+
+        return $mode;
     }
 
     /**
      * {@inheritDoc}
-     * @todo regard fetchMode
+     * @todo other FetchModes
      */
     public function fetch($fetchMode = null)
     {
         $data = $this->getIterator()->current();
         $this->getIterator()->next();
+
+        if (\PDO::FETCH_NUM == $this->assumeFetchMode($fetchMode))
+            $data = array_values($data);
 
         return $data;
     }
