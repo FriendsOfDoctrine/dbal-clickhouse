@@ -73,19 +73,15 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
     }
 
     /**
-     * @param string $input
-     * @param int $type
-     * @return string
+     * {@inheritDoc}
      */
     public function quote($input, $type = \PDO::PARAM_STR)
     {
-        throw new \Exception('You need to implement ClickHouseConnection::quote()');
-//        if (\PDO::PARAM_STR == $type)
-//            return "'" . addslashes($input) . "'";
-//        else if (\PDO::PARAM_INT == $type)
-//            return $input;
-//        else
-//            throw new \Exception('Only strings and integers accepted to quoteing');
+        if (\PDO::PARAM_INT == $type) {
+            return $input;
+        }
+
+        return '\'' . addslashes($input) . '\'';
     }
 
     /**
