@@ -17,11 +17,23 @@ class Connection extends \Doctrine\DBAL\Connection
 {
 
     /**
+     * {@inheritDoc}
+     */
+    public function executeUpdate($query, array $params = array(), array $types = array())
+    {
+        //ClickHouse has no UPDATE (CollapsingMergeTree???) and DELETE statement, so we may do only INSERT with this method
+        if (strtoupper(substr(trim($query), 0, 6) != 'INSERT')) {
+            throw new \Exception('DELETE and UPDATE are not allowed in ClickHouse');
+        }
+
+        return parent::executeUpdate($query, $params, $types);
+    }
+    /**
      * @throws \Exception
      */
     public function delete($tableExpression, array $identifier, array $types = array())
     {
-        throw new \Exception("Deletion is not allowed in ClickHouse");
+        throw new \Exception('Delete is not allowed in ClickHouse');
     }
 
     /**
@@ -45,7 +57,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function update($tableExpression, array $data, array $identifier, array $types = array())
     {
-        throw new \Exception("Update is not allowed in ClickHouse");
+        throw new \Exception('Update is not allowed in ClickHouse');
     }
 
     /**
