@@ -220,7 +220,8 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     public function rowCount()
     {
-        throw new \Exception('Implement it!');
+        //actually ClickHouse server do not return amount of inserted rows, so we will return 1
+        return 1;
     }
 
     /**
