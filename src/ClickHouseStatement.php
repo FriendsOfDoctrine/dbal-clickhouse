@@ -130,6 +130,13 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     public function fetchAll($fetchMode = null)
     {
+        if (\PDO::FETCH_NUM == $this->assumeFetchMode($fetchMode)) {
+            return  array_map(
+                        function ($row) {return array_values($row);},
+                        $this->rows
+                    );
+        }
+
         return $this->rows;
     }
 
