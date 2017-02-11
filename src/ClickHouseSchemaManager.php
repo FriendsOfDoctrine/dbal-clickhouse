@@ -15,4 +15,18 @@ use Doctrine\DBAL\Schema\AbstractSchemaManager;
  *
  * @author Mochalygin <a@mochalygin.ru>
  */
-class ClickHouseSchemaManager extends AbstractSchemaManager {}
+class ClickHouseSchemaManager extends AbstractSchemaManager
+{
+    /**
+     * Gets Table Column Definition.
+     *
+     * @param array $tableColumn
+     *
+     * @return \Doctrine\DBAL\Schema\Column
+     */
+    protected function _getPortableTableColumnDefinition($tableColumn)
+    {
+        throw new \Exception('Ololo');
+    }
+
+}
