@@ -1106,7 +1106,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getListDatabasesSQL()
     {
-        return 'SHOW DATABASES';
+        return 'SHOW DATABASES FORMAT JSON';
     }
 
 

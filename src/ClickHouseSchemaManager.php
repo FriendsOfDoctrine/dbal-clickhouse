@@ -29,4 +29,12 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
         throw new \Exception('Ololo');
     }
 
+    /**
+     * {@inheritdoc}
+     */
+    protected function _getPortableDatabaseDefinition($database)
+    {
+        return $database['name'];
+    }
+
 }
