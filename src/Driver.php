@@ -59,10 +59,6 @@ class Driver implements \Doctrine\DBAL\Driver/*, \Doctrine\DBAL\Driver\Exception
      */
     public function getDatabase(\Doctrine\DBAL\Connection $conn)
     {
-        throw new \Exception('You must implement public function getDatabase()');
-//        $params = $conn->getParams();
-//        return isset($params['database']) ? $params['database'] : 'default';
-        
-        //SELECT currentDatabase()
+        return $conn->fetchColumn('SELECT currentDatabase() as dbname');
     }
 }
