@@ -87,23 +87,23 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     protected function initializeDoctrineTypeMappings()
     {
         $this->doctrineTypeMapping = [
-            'UInt8' => 'smallint',
-            'UInt16' => 'integer',
-            'UInt32' => 'integer',
-            'UInt64' => 'bigint',
-            'Int8' => 'smallint',
-            'Int16' => 'integer',
-            'Int32' => 'integer',
-            'Int64' => 'bigint',
-            'Float32' => 'decimal',
-            'Float64' => 'float',
-            'String' => 'text',
-            'FixedString' => 'string',
-            'Date' => 'date',
-            'DateTime' => 'datetime',
-            'Enum' => 'simple_array', //TODO ???
-            'Array' => 'array', //TODO ???
-            'Tuple' => 'json_array' //TODO ???
+            'uint8' => 'smallint',
+            'uint16' => 'integer',
+            'uint32' => 'integer',
+            'uint64' => 'bigint',
+            'int8' => 'smallint',
+            'int16' => 'integer',
+            'int32' => 'integer',
+            'int64' => 'bigint',
+            'float32' => 'decimal',
+            'float64' => 'float',
+            'string' => 'text',
+            'fixedstring' => 'string',
+            'date' => 'date',
+            'datetime' => 'datetime',
+//            'enum' => 'simple_array', //TODO ???
+//            'array' => 'array', //TODO ???
+//            'tuple' => 'json_array' //TODO ???
         ];
     }
 
@@ -1449,4 +1449,13 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     {
         return '`';
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    protected function getReservedKeywordsClass()
+    {
+        return 'Mochalygin\DoctrineDBALClickHouse\ClickHouseKeywords';
+    }
+
 }
