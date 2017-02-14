@@ -1109,21 +1109,13 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
         return 'SHOW DATABASES FORMAT JSON';
     }
 
-
-    
-
     /**
-     * @param string      $table
-     * @param string|null $database
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
-     * @todo implement it!
+     * {@inheritDoc}
      */
     public function getListTableColumnsSQL($table, $database = null)
     {
-        throw DBALException::notSupported(__METHOD__);
+        //SELECT * FROM columns WHERE database='default' AND table='summing_url_views'
+        return 'DESCRIBE TABLE ' . ($database ? $this->quoteStringLiteral($database) . '.' : '') . $this->quoteStringLiteral($table) . ' FORMAT JSON';
     }
 
     /**
@@ -1131,8 +1123,12 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getListTablesSQL()
     {
-        return 'SHOW TABLES';
+        return 'SHOW TABLES FORMAT JSON';
     }
+
+
+
+
 
     /**
      * @return string
@@ -1447,29 +1443,10 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     }
 
     /**
-     * Quotes a literal string.
-     * This method is NOT meant to fix SQL injections!
-     * It is only meant to escape this platform's string literal
-     * quote character inside the given literal string.
-     *
-     * @param string $str The literal string to be quoted.
-     *
-     * @return string The quoted literal string.
-     */
-    public function quoteStringLiteral($str)
-    {
-        $c = $this->getStringLiteralQuoteCharacter();
-
-        return $c . str_replace($c, $c . $c, $str) . $c;
-    }
-
-    /**
-     * Gets the character used for string literal quoting.
-     *
-     * @return string
+     * {@inheritDoc}
      */
     public function getStringLiteralQuoteCharacter()
     {
-        return "'";
+        return '`';
     }
 }
