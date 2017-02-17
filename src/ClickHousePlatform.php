@@ -1155,28 +1155,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     }
 
     /**
-     * Returns the list of indexes for the current database.
-     *
-     * The current database parameter is optional but will always be passed
-     * when using the SchemaManager API and is the database the given table is in.
-     *
-     * Attention: Some platforms only support currentDatabase when they
-     * are connected with that database. Cross-database information schema
-     * requests may be impossible.
-     *
-     * @param string $table
-     * @param string $currentDatabase
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
-     */
-    public function getListTableIndexesSQL($table, $currentDatabase = null)
-    {
-        throw DBALException::notSupported(__METHOD__);
-    }
-
-    /**
      * @param string $name
      * @param string $sql
      *

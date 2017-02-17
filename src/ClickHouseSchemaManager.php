@@ -21,6 +21,18 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
     /**
      * {@inheritdoc}
      */
+    public function listTableIndexes($table)
+    {
+        return [];
+        //TODO do we need CH indexes???
+//        $sql = $this->_platform->getListTableIndexesSQL($table, $this->_conn->getDatabase());
+//        $tableIndexes = $this->_conn->fetchAll($sql);
+//        return $this->_getPortableTableIndexesList($tableIndexes, $table);
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     protected function _getPortableTableColumnDefinition($tableColumn)
     {
         $tableColumn = array_change_key_case($tableColumn, CASE_LOWER);
