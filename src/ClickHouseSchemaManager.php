@@ -21,6 +21,14 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
     /**
      * {@inheritdoc}
      */
+    protected function _getPortableTableDefinition($table)
+    {
+        return $table['name'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
     public function listTableIndexes($table)
     {
         return [];
