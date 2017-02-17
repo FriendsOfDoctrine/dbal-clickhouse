@@ -1123,7 +1123,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getListTablesSQL()
     {
-        return 'SHOW TABLES FORMAT JSON';
+        return "SELECT name FROM system.tables WHERE database != 'system' AND engine != 'View'";
     }
 
 
@@ -1141,17 +1141,11 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     }
 
     /**
-     * Returns the SQL to list all views of a database or user.
-     *
-     * @param string $database
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     * {@inheritDoc}
      */
     public function getListViewsSQL($database)
     {
-        throw DBALException::notSupported(__METHOD__);
+        return "SELECT name FROM system.tables WHERE database != 'system' AND engine = 'View'";
     }
 
     /**

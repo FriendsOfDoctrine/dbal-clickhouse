@@ -9,6 +9,7 @@ namespace Mochalygin\DoctrineDBALClickHouse;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\View;
 
 /**
  * Schema manager for ClickHouse database {@link https://clickhouse.yandex/}
@@ -24,6 +25,15 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
     protected function _getPortableTableDefinition($table)
     {
         return $table['name'];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    protected function _getPortableViewDefinition($view)
+    {
+        //TODO need SQL too
+        return new View($view['name'], '');
     }
 
     /**
