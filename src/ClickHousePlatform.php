@@ -873,7 +873,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getAlterTableSQL(TableDiff $diff)
     {
-        //TODO this is just code for MySQL, need to change it 
         $columnSql = [];
         $queryParts = [];
         if ($diff->newName !== false) {
