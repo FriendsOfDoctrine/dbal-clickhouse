@@ -867,14 +867,74 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     {
         throw DBALException::notSupported(__METHOD__);
     }    
-    
+
     /**
      * {@inheritDoc}
-     * @todo implement it!
      */
     public function getAlterTableSQL(TableDiff $diff)
     {
-        throw DBALException::notSupported(__METHOD__);
+        //TODO this is just code for MySQL, need to change it 
+        $columnSql = [];
+        $queryParts = [];
+        if ($diff->newName !== false) {
+            throw DBALException::notSupported('RENAME COLUMN');
+        }
+
+        foreach ($diff->addedColumns as $column) {
+            if ($this->onSchemaAlterTableAddColumn($column, $diff, $columnSql)) {
+                continue;
+            }
+
+            $columnArray = $column->toArray();
+            $queryParts[] = 'ADD COLUMN ' . $this->getColumnDeclarationSQL($column->getQuotedName($this), $columnArray);
+        }
+
+        foreach ($diff->removedColumns as $column) {
+            if ($this->onSchemaAlterTableRemoveColumn($column, $diff, $columnSql)) {
+                continue;
+            }
+
+            $queryParts[] =  'DROP COLUMN ' . $column->getQuotedName($this);
+        }
+
+        foreach ($diff->changedColumns as $columnDiff) {
+            if ($this->onSchemaAlterTableChangeColumn($columnDiff, $diff, $columnSql)) {
+                continue;
+            }
+
+            /* @var $columnDiff \Doctrine\DBAL\Schema\ColumnDiff */
+            $column = $columnDiff->column;
+            $columnArray = $column->toArray();
+
+            // Don't propagate default value changes for unsupported column types.
+            if ($columnDiff->hasChanged('default') &&
+                count($columnDiff->changedProperties) === 1 &&
+                ($columnArray['type'] instanceof TextType || $columnArray['type'] instanceof BlobType)
+            ) {
+                continue;
+            }
+
+            $queryParts[] =  'MODIFY COLUMN ' . $this->getColumnDeclarationSQL($column->getQuotedName($this), $columnArray);
+        }
+
+        foreach ($diff->renamedColumns as $oldColumnName => $column) {
+            throw DBALException::notSupported('RENAME COLUMN');
+        }
+
+        if (isset($diff->addedIndexes['primary'])) {
+            throw DBALException::notSupported('ADD PRIMARY KEY');
+        }
+
+        $sql = [];
+        $tableSql = [];
+
+        if ( ! $this->onSchemaAlterTable($diff, $tableSql)) {
+            if (count($queryParts) > 0) {
+                $sql[] = 'ALTER TABLE ' . $diff->getName($this)->getQuotedName($this) . ' ' . implode(", ", $queryParts);
+            }
+        }
+
+        return array_merge($sql, $tableSql, $columnSql);
     }
 
     /**
@@ -911,7 +971,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
 
     /**
      * {@inheritDoc}
-     * @todo test it!
      */
     public function getColumnDeclarationSQL($name, array $field)
     {
@@ -920,26 +979,8 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
         } else {
             $default = $this->getDefaultValueDeclarationSQL($field);
 
-            $charset = (isset($field['charset']) && $field['charset']) ?
-                    ' ' . $this->getColumnCharsetDeclarationSQL($field['charset']) : '';
-
-            $collation = (isset($field['collation']) && $field['collation']) ?
-                    ' ' . $this->getColumnCollationDeclarationSQL($field['collation']) : '';
-
-            $notnull = (isset($field['notnull']) && $field['notnull']) ? ' NOT NULL' : '';
-
-            $unique = (isset($field['unique']) && $field['unique']) ?
-                    ' ' . $this->getUniqueFieldDeclarationSQL() : '';
-
-            $check = (isset($field['check']) && $field['check']) ?
-                    ' ' . $field['check'] : '';
-
             $typeDecl = $field['type']->getSqlDeclaration($field, $this);
-            $columnDef = $typeDecl . $charset . $default . $notnull . $unique . $check . $collation;
-        }
-
-        if ($this->supportsInlineColumnComments() && isset($field['comment']) && $field['comment'] !== '') {
-            $columnDef .= " COMMENT " . $this->quoteStringLiteral($field['comment']);
+            $columnDef = $typeDecl . $default;
         }
 
         return $name . ' ' . $columnDef;
@@ -1075,22 +1116,14 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     {
         return 'CAST(today() AS Date)';
     }
-    
-    
-    
-    
-    
-    
-    
 
     /**
-     * Returns the SQL specific for the platform to get the current time.
-     *
-     * @return string
+     * {@inheritDoc}
+     * @todo check it! time with 1970 year prefix...
      */
     public function getCurrentTimeSQL()
     {
-        return 'CURRENT_TIME';
+        return 'toTime(now())';
     }
 
     /**
@@ -1428,6 +1461,29 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     protected function getReservedKeywordsClass()
     {
         return 'Mochalygin\DoctrineDBALClickHouse\ClickHouseKeywords';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getDefaultValueDeclarationSQL($field)
+    {
+        if (! isset($field['default'])) {
+            return '';
+        }
+            
+        $default = " DEFAULT '" . $field['default'] . "'";
+        if ( isset($field['type']) ) {
+            if (in_array((string)$field['type'], ['Integer', 'BigInt', 'SmallInt', 'Float'])) {
+                $default = ' DEFAULT ' . $field['default'];
+            } else if (in_array((string)$field['type'], ['DateTime']) && $field['default'] == $this->getCurrentTimestampSQL()) {
+                $default = ' DEFAULT ' . $this->getCurrentTimestampSQL();
+            } else if ((string)$field['type'] == 'Date' && $field['default'] == $this->getCurrentDateSQL()) {
+                $default = ' DEFAULT ' . $this->getCurrentDateSQL();
+            }
+        }
+
+        return $default;
     }
 
 }
