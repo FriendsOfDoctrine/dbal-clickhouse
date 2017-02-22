@@ -903,7 +903,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getColumnDeclarationSQL($name, array $field)
     {
-        if (isset($field['columnDefinition'])) { // TODO need this checkings?
+        if (isset($field['columnDefinition'])) {
             $columnDef = $this->getCustomTypeDeclarationSQL($field);
         } else {
             $default = $this->getDefaultValueDeclarationSQL($field);
