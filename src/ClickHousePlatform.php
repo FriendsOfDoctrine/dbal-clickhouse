@@ -10,6 +10,8 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Identifier;
 use Doctrine\DBAL\Types;
+use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\Types\DateType;
 use Doctrine\DBAL\Schema\Constraint;
 use Doctrine\DBAL\Schema\Sequence;
 use Doctrine\DBAL\Schema\Table;
@@ -18,7 +20,6 @@ use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\TableDiff;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\ColumnDiff;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Events;
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\Event\SchemaCreateTableEventArgs;
@@ -698,111 +699,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     }
 
     /**
-     * Returns the SQL statement(s) to create a table with the specified name, columns and constraints
-     * on this platform.
-     *
-     * @param \Doctrine\DBAL\Schema\Table   $table
-     * @param integer                       $createFlags
-     *
-     * @return array The sequence of SQL statements.
-     *
-     * @throws \Doctrine\DBAL\DBALException
-     * @throws \InvalidArgumentException
-     * 
-     * @todo implement this!
-     */
-    public function getCreateTableSQL(Table $table, $createFlags = self::CREATE_INDEXES)
-    {
-        if ( ! is_int($createFlags)) {
-            throw new \InvalidArgumentException("Second argument of AbstractPlatform::getCreateTableSQL() has to be integer.");
-        }
-
-        if (count($table->getColumns()) === 0) {
-            throw DBALException::noColumnsSpecifiedForTable($table->getName());
-        }
-
-        $tableName = $table->getQuotedName($this);
-        $options = $table->getOptions();
-        $options['uniqueConstraints'] = array();
-        $options['indexes'] = array();
-        $options['primary'] = array();
-
-        if (($createFlags&self::CREATE_INDEXES) > 0) {
-            foreach ($table->getIndexes() as $index) {
-                /* @var $index Index */
-                if ($index->isPrimary()) {
-                    $options['primary']       = $index->getQuotedColumns($this);
-                    $options['primary_index'] = $index;
-                } else {
-                    $options['indexes'][$index->getQuotedName($this)] = $index;
-                }
-            }
-        }
-
-        $columnSql = array();
-        $columns = array();
-
-        foreach ($table->getColumns() as $column) {
-            /* @var \Doctrine\DBAL\Schema\Column $column */
-
-            if (null !== $this->_eventManager && $this->_eventManager->hasListeners(Events::onSchemaCreateTableColumn)) {
-                $eventArgs = new SchemaCreateTableColumnEventArgs($column, $table, $this);
-                $this->_eventManager->dispatchEvent(Events::onSchemaCreateTableColumn, $eventArgs);
-
-                $columnSql = array_merge($columnSql, $eventArgs->getSql());
-
-                if ($eventArgs->isDefaultPrevented()) {
-                    continue;
-                }
-            }
-
-            $columnData = $column->toArray();
-            $columnData['name'] = $column->getQuotedName($this);
-            $columnData['version'] = $column->hasPlatformOption("version") ? $column->getPlatformOption('version') : false;
-            $columnData['comment'] = $this->getColumnComment($column);
-
-            if (strtolower($columnData['type']) == "string" && $columnData['length'] === null) {
-                $columnData['length'] = 255;
-            }
-
-            if (in_array($column->getName(), $options['primary'])) {
-                $columnData['primary'] = true;
-            }
-
-            $columns[$columnData['name']] = $columnData;
-        }
-
-        if (($createFlags&self::CREATE_FOREIGNKEYS) > 0) {
-            $options['foreignKeys'] = array();
-            foreach ($table->getForeignKeys() as $fkConstraint) {
-                $options['foreignKeys'][] = $fkConstraint;
-            }
-        }
-
-        if (null !== $this->_eventManager && $this->_eventManager->hasListeners(Events::onSchemaCreateTable)) {
-            $eventArgs = new SchemaCreateTableEventArgs($table, $columns, $options, $this);
-            $this->_eventManager->dispatchEvent(Events::onSchemaCreateTable, $eventArgs);
-
-            if ($eventArgs->isDefaultPrevented()) {
-                return array_merge($eventArgs->getSql(), $columnSql);
-            }
-        }
-
-        $sql = $this->_getCreateTableSQL($tableName, $columns, $options);
-        if ($this->supportsCommentOnStatement()) {
-            foreach ($table->getColumns() as $column) {
-                $comment = $this->getColumnComment($column);
-
-                if (null !== $comment && '' !== $comment) {
-                    $sql[] = $this->getCommentOnColumnSQL($tableName, $column->getQuotedName($this), $comment);
-                }
-            }
-        }
-
-        return array_merge($sql, $columnSql);
-    }
-
-    /**
      * {@inheritDoc}
      */
     public function getCommentOnColumnSQL($tableName, $columnName, $comment)
@@ -811,51 +707,82 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     }
 
     /**
-     * Returns the SQL used to create a table.
-     *
-     * @param string $tableName
-     * @param array  $columns
-     * @param array  $options
-     *
-     * @return array
-     * 
-     * @todo implement this!
+     * {@inheritDoc}
      */
-    protected function _getCreateTableSQL($tableName, array $columns, array $options = array())
+    protected function _getCreateTableSQL($tableName, array $columns, array $options = [])
     {
-        $columnListSql = $this->getColumnDeclarationListSQL($columns);
+        $engine = !empty($options['engine']) ? $options['engine'] : 'MergeTree'; //TODO is it good decision? 
 
         if (isset($options['uniqueConstraints']) && ! empty($options['uniqueConstraints'])) {
-            foreach ($options['uniqueConstraints'] as $name => $definition) {
-                $columnListSql .= ', ' . $this->getUniqueConstraintDeclarationSQL($name, $definition);
-            }
-        }
-
-        if (isset($options['primary']) && ! empty($options['primary'])) {
-            $columnListSql .= ', PRIMARY KEY(' . implode(', ', array_unique(array_values($options['primary']))) . ')';
+            throw DBALException::notSupported('uniqueConstraints');
         }
 
         if (isset($options['indexes']) && ! empty($options['indexes'])) {
-            foreach ($options['indexes'] as $index => $definition) {
-                $columnListSql .= ', ' . $this->getIndexDeclarationSQL($index, $definition);
+            throw DBALException::notSupported('uniqueConstraints');
+        }
+
+
+        /**
+         * MergeTree* specific section
+         */
+        if ( in_array($engine, ['MergeTree', 'CollapsingMergeTree', 'SummingMergeTree', 'AggregatingMergeTree', 'ReplacingMergeTree']) ) {
+            $indexGranularity = !empty($options['indexGranularity']) ? $options['indexGranularity'] : 8192;
+
+            /**
+             * eventDateColumn section
+             */
+            if ( empty($options['eventDateColumn']) ) {
+                $dateColumns = array_filter($columns, function($column) {
+                    return $column['type'] instanceof DateType;
+                });
+
+                if ($dateColumns) {
+                    throw new \Exception('Table `' . $tableName . '` has DateType columns: `' . implode('`, `', array_keys($dateColumns)) . '`, but no one of them is setted as `eventDateColumn` with $table->addOption("eventDateColumn", "%eventDateColumnName%")');
+                } else {
+                    $eventDateColumn = 'EventDate';
+                    $newDateColumn = [$eventDateColumn => [
+                        'name' => $eventDateColumn,
+                        'type' => Type::getType('date'),
+                        'default' => 'today()'
+                    ]];
+                    
+                    $columns = $newDateColumn + $columns; // add at the beginning
+                }
+            } else {
+                if (isset($columns[$options['eventDateColumn']])) {
+                    if ($columns[$options['eventDateColumn']]['type'] instanceof DateType) {
+                        $eventDateColumn = $options['eventDateColumn'];
+                    } else {
+                        throw new \Exception('In table `' . $tableName . '` you have set field `' . $options['eventDateColumn'] . '` (' . get_class($columns[$options['eventDateColumn']]['type']) . ') as `eventDateColumn`, but it is not instance of DateType');
+                    }
+                } else {
+                    $eventDateColumn = $options['eventDateColumn'];
+                    $newDateColumn = [$eventDateColumn => [
+                        'name' => $eventDateColumn,
+                        'type' => Type::getType('date'),
+                        'default' => 'today()'
+                    ]];
+
+                    $columns = $newDateColumn + $columns; // add at the beginning
+                }
             }
+
+            
+            /**
+             * Primary key section
+             */
+            if ( empty($options['primary']) ) {
+                throw new \Exception('You need specify PrimaryKey for MergeTree* tables');
+            }
+
+            $columnListSql = $this->getColumnDeclarationListSQL($columns);
+            $query = 'CREATE TABLE ' . $tableName . ' (' . $columnListSql . ') ENGINE = ' . $engine;
+        
+            $query .=  '(' . $eventDateColumn . ', (' . implode(', ', array_unique(array_values($options['primary']))) . '), ' . $indexGranularity;
+            //TODO any special MergeTree* table parameters
+            $query .= ')';
         }
-
-        $query = 'CREATE TABLE ' . $tableName . ' (' . $columnListSql;
-
-        $check = $this->getCheckDeclarationSQL($columns);
-        if ( ! empty($check)) {
-            $query .= ', ' . $check;
-        }
-        $query .= ')';
-
         $sql[] = $query;
-
-        if (isset($options['foreignKeys'])) {
-            foreach ((array) $options['foreignKeys'] as $definition) {
-                $sql[] = $this->getCreateForeignKeySQL($definition, $tableName);
-            }
-        }
 
         return $sql;
     }
@@ -973,7 +900,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getColumnDeclarationSQL($name, array $field)
     {
-        if (isset($field['columnDefinition'])) {
+        if (isset($field['columnDefinition'])) { // TODO need this checkings?
             $columnDef = $this->getCustomTypeDeclarationSQL($field);
         } else {
             $default = $this->getDefaultValueDeclarationSQL($field);
@@ -1113,7 +1040,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getCurrentDateSQL()
     {
-        return 'CAST(today() AS Date)';
+        return 'today()';
     }
 
     /**
