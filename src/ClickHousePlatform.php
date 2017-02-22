@@ -739,34 +739,33 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                 if ($dateColumns) {
                     throw new \Exception('Table `' . $tableName . '` has DateType columns: `' . implode('`, `', array_keys($dateColumns)) . '`, but no one of them is setted as `eventDateColumn` with $table->addOption("eventDateColumn", "%eventDateColumnName%")');
                 } else {
-                    $eventDateColumn = 'EventDate';
-                    $newDateColumn = [$eventDateColumn => [
-                        'name' => $eventDateColumn,
+                    $eventDateColumnName = 'EventDate';
+                    $dateColumn = [$eventDateColumnName => [
+                        'name' => $eventDateColumnName,
                         'type' => Type::getType('date'),
                         'default' => 'today()'
                     ]];
-                    
-                    $columns = $newDateColumn + $columns; // add at the beginning
                 }
             } else {
                 if (isset($columns[$options['eventDateColumn']])) {
                     if ($columns[$options['eventDateColumn']]['type'] instanceof DateType) {
-                        $eventDateColumn = $options['eventDateColumn'];
+                        $eventDateColumnName = $options['eventDateColumn'];
+                        $dateColumn = [$options['eventDateColumn'] => $columns[$options['eventDateColumn']]];
+                        unset($columns[$options['eventDateColumn']]);
                     } else {
                         throw new \Exception('In table `' . $tableName . '` you have set field `' . $options['eventDateColumn'] . '` (' . get_class($columns[$options['eventDateColumn']]['type']) . ') as `eventDateColumn`, but it is not instance of DateType');
                     }
                 } else {
-                    $eventDateColumn = $options['eventDateColumn'];
-                    $newDateColumn = [$eventDateColumn => [
-                        'name' => $eventDateColumn,
+                    $eventDateColumnName = $options['eventDateColumn'];
+                    $dateColumn = [$eventDateColumnName => [
+                        'name' => $eventDateColumnName,
                         'type' => Type::getType('date'),
                         'default' => 'today()'
                     ]];
 
-                    $columns = $newDateColumn + $columns; // add at the beginning
                 }
             }
-
+            $columns = $dateColumn + $columns; // insert into very beginning
             
             /**
              * Primary key section
@@ -774,14 +773,18 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
             if ( empty($options['primary']) ) {
                 throw new \Exception('You need specify PrimaryKey for MergeTree* tables');
             }
-
-            $columnListSql = $this->getColumnDeclarationListSQL($columns);
-            $query = 'CREATE TABLE ' . $tableName . ' (' . $columnListSql . ') ENGINE = ' . $engine;
         
-            $query .=  '(' . $eventDateColumn . ', (' . implode(', ', array_unique(array_values($options['primary']))) . '), ' . $indexGranularity;
+        }
+
+        $columnListSql = $this->getColumnDeclarationListSQL($columns);
+        $query = 'CREATE TABLE ' . $tableName . ' (' . $columnListSql . ') ENGINE = ' . $engine;
+
+        if ( in_array($engine, ['MergeTree', 'CollapsingMergeTree', 'SummingMergeTree', 'AggregatingMergeTree', 'ReplacingMergeTree']) ) {
+            $query .=  '(' . $eventDateColumnName . ', (' . implode(', ', array_unique(array_values($options['primary']))) . '), ' . $indexGranularity;
             //TODO any special MergeTree* table parameters
             $query .= ')';
         }
+
         $sql[] = $query;
 
         return $sql;
