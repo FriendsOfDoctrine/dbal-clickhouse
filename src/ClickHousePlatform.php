@@ -98,7 +98,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
             'int64' => 'bigint',
             'float32' => 'decimal',
             'float64' => 'float',
-            'string' => 'text',
+            'string' => 'string',//'text',
             'fixedstring' => 'string',
             'date' => 'date',
             'datetime' => 'datetime',
@@ -1403,7 +1403,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                 $default = ' DEFAULT ' . $field['default'];
             } else if (in_array((string)$field['type'], ['DateTime']) && $field['default'] == $this->getCurrentTimestampSQL()) {
                 $default = ' DEFAULT ' . $this->getCurrentTimestampSQL();
-            } else if ((string)$field['type'] == 'Date' && $field['default'] == $this->getCurrentDateSQL()) {
+            } else if ('Date' == (string)$field['type'] && $field['default'] == $this->getCurrentDateSQL()) {
                 $default = ' DEFAULT ' . $this->getCurrentDateSQL();
             }
         }
