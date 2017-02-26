@@ -850,10 +850,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
             throw DBALException::notSupported('RENAME COLUMN');
         }
 
-        if (isset($diff->addedIndexes['primary'])) {
-            throw DBALException::notSupported('ADD PRIMARY KEY');
-        }
-
         $sql = [];
         $tableSql = [];
 
