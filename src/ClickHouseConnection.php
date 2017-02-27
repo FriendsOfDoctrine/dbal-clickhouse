@@ -52,8 +52,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
     }
 
     /**
-     * @param string $prepareString
-     * @return Statement
+     * {@inheritDoc}
      */
     public function prepare($prepareString)
     {
@@ -61,14 +60,14 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
     }
 
     /**
-     * @return Statement
+     * {@inheritDoc}
      */
     public function query()
     {
         $args = func_get_args();
-        $sql = $args[0];
-        $stmt = $this->prepare($sql);
+        $stmt = $this->prepare($args[0]);
         $stmt->execute();
+
         return $stmt;
     }
 
@@ -90,7 +89,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function exec($statement)
     {
-        $stmt = $this->query($statement);
+        $stmt = $this->prepare($statement);
         if (false === $stmt->execute()) {
             throw new \RuntimeException('Unable to execute query: ' . $statement);
         }

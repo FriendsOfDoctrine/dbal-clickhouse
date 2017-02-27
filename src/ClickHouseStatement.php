@@ -228,6 +228,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     public function rowCount()
     {
         //actually ClickHouse server do not return amount of inserted rows, so we will return 1
+        //TODO research
         return 1;
     }
 
