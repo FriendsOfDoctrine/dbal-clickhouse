@@ -40,22 +40,6 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * @throws \Exception
      */
-    public function setTransactionIsolation($level)
-    {
-        throw DBALException::notSupported(__METHOD__);
-    }
-
-    /**
-     * @throws \Exception
-     */
-    public function getTransactionIsolation()
-    {
-        throw DBALException::notSupported(__METHOD__);
-    }
-
-    /**
-     * @throws \Exception
-     */
     public function update($tableExpression, array $data, array $identifier, array $types = array())
     {
         throw DBALException::notSupported(__METHOD__);
@@ -80,6 +64,27 @@ class Connection extends \Doctrine\DBAL\Connection
 //        return $stmt;
 //    }
 
+    
+    /**
+     * all methods below throw exceptions, becouse ClickHouse has not transactions
+     */
+
+    /**
+     * @throws \Exception
+     */
+    public function setTransactionIsolation($level)
+    {
+        throw DBALException::notSupported(__METHOD__);
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public function getTransactionIsolation()
+    {
+        throw DBALException::notSupported(__METHOD__);
+    }
+    
     /**
      * @throws \Exception
      */
