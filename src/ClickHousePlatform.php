@@ -612,29 +612,19 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     }
 
     /**
-     * Returns the SQL bit AND comparison expression.
-     *
-     * @param string $value1
-     * @param string $value2
-     *
-     * @return string
+     * {@inheritDoc}
      */
     public function getBitAndComparisonExpression($value1, $value2)
     {
-        return '(' . $value1 . ' & ' . $value2 . ')';
+        return 'bitAnd(' . $value1 . ', ' . $value2 . ')';
     }
 
     /**
-     * Returns the SQL bit OR comparison expression.
-     *
-     * @param string $value1
-     * @param string $value2
-     *
-     * @return string
+     * {@inheritDoc}
      */
     public function getBitOrComparisonExpression($value1, $value2)
     {
-        return '(' . $value1 . ' | ' . $value2 . ')';
+        return 'bitOr(' . $value1 . ', ' . $value2 . ')';
     }
 
     /**
