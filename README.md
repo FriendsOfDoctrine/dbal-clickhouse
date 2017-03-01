@@ -47,7 +47,7 @@ $conn = $this->get('doctrine.dbal.clickhouse_connection');
 ### Data Retrieval
 ```php
 $stmt = $conn->query('SELECT SUM(views) FROM articles');
-echo $stmt->fetchColumn();
+    echo $stmt->fetchColumn();
 }
 ```
 
