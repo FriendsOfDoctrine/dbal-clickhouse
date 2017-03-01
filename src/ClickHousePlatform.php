@@ -850,7 +850,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
 
         if ( ! $this->onSchemaAlterTable($diff, $tableSql)) {
             if (count($queryParts) > 0) {
-                $sql[] = 'ALTER TABLE ' . $diff->getName($this)->getQuotedName($this) . ' ' . implode(", ", $queryParts);
+                $sql[] = 'ALTER TABLE ' . $diff->getName($this)->getQuotedName($this) . ' ' . implode(', ', $queryParts);
             }
         }
 
@@ -930,64 +930,14 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
         throw DBALException::notSupported(__METHOD__);
     }
 
-    
-    
-    
-    
-    
-    
-    
-    
-    
-    
     /**
-     * Obtains DBMS specific SQL code portion needed to set an index
-     * declaration to be used in statements like CREATE TABLE.
-     *
-     * @param string                      $name  The name of the index.
-     * @param \Doctrine\DBAL\Schema\Index $index The index definition.
-     *
-     * @return string DBMS specific SQL code portion needed to set an index.
-     *
-     * @throws \InvalidArgumentException
+     * {@inheritDoc}
      */
     public function getIndexDeclarationSQL($name, Index $index)
     {
-        $columns = $index->getQuotedColumns($this);
-        $name = new Identifier($name);
-
-        if (count($columns) === 0) {
-            throw new \InvalidArgumentException("Incomplete definition. 'columns' required.");
-        }
-
-        return $this->getCreateIndexSQLFlags($index) . 'INDEX ' . $name->getQuotedName($this) . ' ('
-            . $this->getIndexFieldDeclarationListSQL($columns)
-            . ')' . $this->getPartialIndexSQL($index);
+        // Index declaration in statements like CREATE TABLE is not supported.
+        throw DBALException::notSupported(__METHOD__);
     }
-
-    /**
-     * Obtains DBMS specific SQL code portion needed to set an index
-     * declaration to be used in statements like CREATE TABLE.
-     *
-     * @param array $fields
-     *
-     * @return string
-     */
-    public function getIndexFieldDeclarationListSQL(array $fields)
-    {
-        $ret = array();
-
-        foreach ($fields as $field => $definition) {
-            if (is_array($definition)) {
-                $ret[] = $field;
-            } else {
-                $ret[] = $definition;
-            }
-        }
-
-        return implode(', ', $ret);
-    }
-
 
     /**
      * {@inheritDoc}
@@ -1067,7 +1017,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getListTableColumnsSQL($table, $database = null)
     {
-        //SELECT * FROM columns WHERE database='default' AND table='summing_url_views'
         return 'DESCRIBE TABLE ' . ($database ? $this->quoteStringLiteral($database) . '.' : '') . $this->quoteStringLiteral($table) . ' FORMAT JSON';
     }
 
@@ -1212,7 +1161,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     protected function doModifyLimitQuery($query, $limit, $offset)
     {
-        if (is_null($limit))
+        if ( is_null($limit) )
             return $query;
 
         $query .= ' LIMIT ';
@@ -1234,21 +1183,17 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     }
 
     /**
-     * Generates a Truncate Table SQL statement for a given table.
-     *
-     * Cascade is not supported on many platforms but would optionally cascade the truncate by
-     * following the foreign keys.
-     *
-     * @param string  $tableName
-     * @param boolean $cascade
-     *
-     * @return string
+     * {@inheritDoc}
      */
     public function getTruncateTableSQL($tableName, $cascade = false)
     {
-        $tableIdentifier = new Identifier($tableName);
-
-        return 'TRUNCATE ' . $tableIdentifier->getQuotedName($this);
+        /**
+         * For MergeTree* engines may be done with next workaround:
+         *
+         * SELECT partition FROM system.parts WHERE table= '$tableName';
+         * ALTER TABLE $tableName DROP PARTITION $partitionName
+         */
+        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
