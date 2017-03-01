@@ -1142,20 +1142,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
         return false;
     }
 
-    
-    
-
-    /**
-     * Does this platform have native JSON type.
-     *
-     * @return boolean
-     */
-    public function hasNativeJsonType()
-    {
-        return false;
-    }
-
-
     /**
      * {@inheritDoc}
      */
