@@ -2,7 +2,9 @@
 
 Doctrine DBAL driver for ClickHouse -- an open-source column-oriented database management system by Yandex (https://clickhouse.yandex/)
 
+
 *It is alpha-version!*
+
 
 ## Initialization
 ### Custom PHP script
@@ -42,24 +44,24 @@ doctrine:
 $conn = $this->get('doctrine.dbal.clickhouse_connection');
 ```
 
+
 ## Usage
 
 ### Data Retrieval
 ```php
-$stmt = $conn->query('SELECT SUM(views) FROM articles');
-    echo $stmt->fetchColumn();
-}
+echo $conn->fetchColumn('SELECT SUM(views) FROM articles');
 ```
 
 ### Dynamic Parameters and Prepared Statements
 ```php
 $stmt = $conn->prepare('SELECT authorId, SUM(views) AS total_views FROM articles WHERE category_id = :categoryId AND publish_date = :publishDate GROUP BY authorId');
+
 $stmt->bindValue('categoryId', 123);
 $stmt->bindValue('publishDate', new \DateTime('2017-02-29'), 'datetime');
 $stmt->execute();
 
 while ($row = $stmt->fetch()) {
-    echo $row['authorId] . ': ' . $row['total_views'] . PHP_EOL;
+    echo $row['authorId'] . ': ' . $row['total_views'] . PHP_EOL;
 }
 ```
 ### Insert
