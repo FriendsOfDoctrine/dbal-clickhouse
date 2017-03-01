@@ -159,14 +159,11 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     }
 
     /**
-     * Gets the default length of a varchar field.
-     * ClickHouse length in bytes, not symbols
-     *
-     * @return integer
+     * {@inheritDoc}
      */
     public function getVarcharDefaultLength()
     {
-        return 1000;
+        return 512;
     }
 
     /**
@@ -192,7 +189,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getLengthExpression($column)
     {
-        //TODO length() or lengthUTF8()?
         return 'lengthUTF8(CAST(' . $column . ' AS String))';
     }
 
@@ -281,9 +277,9 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getSubstringExpression($value, $from, $length = null)
     {
-//        if ($length === null) {
-//            return 'substringUTF8(' . $value . ' FROM ' . $from . ')';
-//        }
+        if ( isnull($length) ) {
+            throw new \InvalidArgumentException("'length' argument must be a constant");
+        }
 
         return 'substringUTF8(' . $value . ', ' . $from . ', ' . $length . ')';
     }
@@ -306,7 +302,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
 
     /**
      * {@inheritDoc}
-     * @todo there '1' string may be return (always true
      */
     public function getIsNotNullExpression($expression)
     {
@@ -1084,20 +1079,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
         return "SELECT name FROM system.tables WHERE database != 'system' AND engine != 'View'";
     }
 
-
-
-
-
-    /**
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
-     */
-    public function getListUsersSQL()
-    {
-        throw DBALException::notSupported(__METHOD__);
-    }
-
     /**
      * {@inheritDoc}
      */
@@ -1107,28 +1088,19 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     }
 
     /**
-     * @param string $name
-     * @param string $sql
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     * {@inheritDoc}
      */
     public function getCreateViewSQL($name, $sql)
     {
-        throw DBALException::notSupported(__METHOD__);
+        return 'CREATE VIEW ' . $this->quoteStringLiteral($name) . ' AS ' . $sql;
     }
 
     /**
-     * @param string $name
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     * {@inheritDoc}
      */
     public function getDropViewSQL($name)
     {
-        throw DBALException::notSupported(__METHOD__);
+        return 'DROP TABLE ' . $this->quoteStringLiteral($name);
     }
 
     /**
@@ -1136,7 +1108,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getCreateDatabaseSQL($database)
     {
-        return 'CREATE DATABASE ' . $database;
+        return 'CREATE DATABASE ' . $this->quoteStringLiteral($database);
     }
 
     /**
@@ -1148,17 +1120,12 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     }
 
     /**
-     * Obtains DBMS specific SQL to be used to create datetime with timezone offset fields.
-     *
-     * @param array $fieldDeclaration
-     *
-     * @return string
+     * {@inheritDoc}
      */
     public function getDateTimeTzTypeDeclarationSQL(array $fieldDeclaration)
     {
-        return $this->getDateTimeTypeDeclarationSQL($fieldDeclaration);
+        throw DBALException::notSupported(__METHOD__);
     }
-
 
     /**
      * {@inheritDoc}
@@ -1166,21 +1133,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     public function getDateTypeDeclarationSQL(array $fieldDeclaration)
     {
         return 'Date';
-    }
-
-    /**
-     * Obtains DBMS specific SQL to be used to create time fields in statements
-     * like CREATE TABLE.
-     *
-     * @param array $fieldDeclaration
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
-     */
-    public function getTimeTypeDeclarationSQL(array $fieldDeclaration)
-    {
-        throw DBALException::notSupported(__METHOD__);
     }
 
     /**
@@ -1201,23 +1153,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
 
     /* supports*() methods */
 
-
-
-    /**
-     * Whether the platform supports indexes.
-     *
-     * @return boolean
-     */
-    public function supportsIndexes()
-    {
-        return true;
-    }
-
-    
-    
-    
-    
-    
     /**
      * {@inheritDoc}
      */
@@ -1250,21 +1185,13 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
         return false;
     }
 
-    
-    
-    
     /**
      * {@inheritDoc}
-     * @todo check it!
      */
     public function supportsGettingAffectedRows()
     {
         return false;
     }
-
-
-
-
 
     
     
@@ -1278,30 +1205,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     {
         return false;
     }
-
-    /**
-     * @deprecated
-     * @todo Remove in 3.0
-     */
-    public function getIdentityColumnNullInsertSQL()
-    {
-        return "";
-    }
-
-    /**
-     * Whether this platform supports views.
-     *
-     * @return boolean
-     */
-    public function supportsViews()
-    {
-        return true;
-    }
-
-
-
-
-
 
 
     /**
