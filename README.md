@@ -1,12 +1,12 @@
 # doctrine-dbal-clickhouse
 
-Doctrine DBAL driver for ClickHouse database (https://clickhouse.yandex/)
+Doctrine DBAL driver for ClickHouse -- an open-source column-oriented database management system by Yandex (https://clickhouse.yandex/)
 
-It is alpha-version!
+*It is alpha-version!*
 
 ## Initialization
 ### Custom PHP script
-```
+```php
 $connectionParams = [
     'host' => 'localhost',
     'port' => 8123,
@@ -21,7 +21,7 @@ $conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, new \Doct
 
 ### Symfony 2/3
 configure...
-```
+```yml
 # app/config/config.yml
 doctrine:
     dbal:
@@ -30,7 +30,7 @@ doctrine:
                 host:     localhost
                 port:     8123
                 user:     default
-                password: null
+                password: ""
                 dbname:   default
                 driver_class: Mochalygin\DoctrineDBALClickHouse\Driver
                 wrapper_class: Mochalygin\DoctrineDBALClickHouse\Connection
@@ -38,12 +38,32 @@ doctrine:
             #   ...
 ```
 ...and get from the service container
-```
+```php
 $conn = $this->get('doctrine.dbal.clickhouse_connection');
 ```
 
 ## Usage
-```
+
+### Data Retrieval
+```php
 $stmt = $conn->query('SELECT SUM(views) FROM articles');
-var_dump($stmt->fetchAll());
+echo $stmt->fetchColumn();
+}
 ```
+
+### Dynamic Parameters and Prepared Statements
+```php
+$stmt = $conn->prepare('SELECT authorId, SUM(views) AS total_views FROM articles WHERE category_id = :categoryId AND publish_date = :publishDate GROUP BY authorId');
+$stmt->bindValue('categoryId', 100500);
+$stmt->bindValue('publishDate', new \DateTime('2017-02-29'), 'datetime');
+$stmt->execute();
+
+while ($row = $stmt->fetch()) {
+    echo $row['authorId] . ': ' . $row['total_views'] . PHP_EOL;
+}
+```
+
+### More information in Doctrine DBAL documentation:
+* [Data Retrieval And Manipulation](http://docs.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/data-retrieval-and-manipulation.html)
+* [SQL Query Builder](http://docs.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/query-builder.html)
+* [Schema-Representation](http://docs.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/schema-representation.html)
