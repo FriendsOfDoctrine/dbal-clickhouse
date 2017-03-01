@@ -54,13 +54,18 @@ $stmt = $conn->query('SELECT SUM(views) FROM articles');
 ### Dynamic Parameters and Prepared Statements
 ```php
 $stmt = $conn->prepare('SELECT authorId, SUM(views) AS total_views FROM articles WHERE category_id = :categoryId AND publish_date = :publishDate GROUP BY authorId');
-$stmt->bindValue('categoryId', 100500);
+$stmt->bindValue('categoryId', 123);
 $stmt->bindValue('publishDate', new \DateTime('2017-02-29'), 'datetime');
 $stmt->execute();
 
 while ($row = $stmt->fetch()) {
     echo $row['authorId] . ': ' . $row['total_views'] . PHP_EOL;
 }
+```
+### Insert
+```php
+$conn->insert('articles', ['category_id' => 123, 'author_id' => 777, 'views' => 100500]);
+// INSERT INTO articles (category_id, author_id, views) VALUES (?, ?, ?) (123, 777, 100500)
 ```
 
 ### More information in Doctrine DBAL documentation:
