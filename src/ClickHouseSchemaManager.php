@@ -32,9 +32,8 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
      */
     protected function _getPortableViewDefinition($view)
     {
-        //TODO need SQL too
-        //TODO its seems what we need call "SHOW CREATE TABLE view_name" right here to get sql-declaration
-        return new View($view['name'], '');
+        $statement = $this->_conn->fetchColumn('SHOW CREATE TABLE ' . $view['name'] . ' FORMAT JSON');
+        return new View($view['name'], $statement);
     }
 
     /**
