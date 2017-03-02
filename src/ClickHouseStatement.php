@@ -108,7 +108,8 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
         if (! in_array($mode, [
                     \PDO::FETCH_ASSOC,
                     \PDO::FETCH_NUM,
-                    \PDO::FETCH_BOTH
+                    \PDO::FETCH_BOTH,
+                    \PDO::FETCH_OBJ,
         ])) {
             $mode = \PDO::FETCH_BOTH;
         }
@@ -125,8 +126,17 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
         $data = $this->getIterator()->current();
         $this->getIterator()->next();
 
-        if (\PDO::FETCH_NUM == $this->assumeFetchMode($fetchMode))
-            $data = array_values($data);
+        if (\PDO::FETCH_NUM == $this->assumeFetchMode($fetchMode)) {
+            return array_values($data);
+        }
+
+        if (\PDO::FETCH_BOTH == $this->assumeFetchMode($fetchMode)) {
+            return array_values($data) + $data;
+        }
+
+        if (\PDO::FETCH_OBJ == $this->assumeFetchMode($fetchMode)) {
+            return (object)$data;
+        }
 
         return $data;
     }
@@ -143,6 +153,21 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
                         $this->rows
                     );
         }
+
+        if (\PDO::FETCH_BOTH == $this->assumeFetchMode($fetchMode)) {
+            return  array_map(
+                        function ($row) {return array_values($row) + $row;},
+                        $this->rows
+                    );
+        }
+
+        if (\PDO::FETCH_OBJ == $this->assumeFetchMode($fetchMode)) {
+            return  array_map(
+                        function ($row) {return (object)$row;},
+                        $this->rows
+                    );
+        }
+
 
         return $this->rows;
     }
