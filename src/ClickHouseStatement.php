@@ -21,7 +21,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     /** 
      * @var string 
      */
-    protected $sql;
+    protected $statement;
     
     /**
      * @var array|null
@@ -38,13 +38,20 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      * @var \ArrayIterator|null
      */
     protected $iterator = null;
-    
+
+    /**
+     * @var integer
+     */
     private $fetchMode = \PDO::FETCH_BOTH;
 
-    public function __construct(\ClickHouseDB\Client $client, $sql)
+    /**
+     * @param \ClickHouseDB\Client $client
+     * @param string $statement
+     */
+    public function __construct(\ClickHouseDB\Client $client, $statement)
     {
         $this->smi2CHClient = $client;
-        $this->sql = $sql;
+        $this->statement = $statement;
     }
 
     /**
@@ -192,34 +199,19 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     public function execute($params = null)
     {
-        //@todo to catch \ClickHouseDB\QueryException?
-//        try {
-            if ( is_array($params) )
-                $this->values = array_replace($this->values, $params);//TODO array keys must be all strings or all integers?
+        if ( is_array($params) )
+            $this->values = array_replace($this->values, $params);//TODO array keys must be all strings or all integers?
 
-            $completeSql = $this->sql;
-            foreach ($this->values as $key => $value) {
-                $value = is_string($value) ? "'" . addslashes($value) . "'" : $value;
-                
-                $completeSql = preg_replace('/(' . (is_int($key) ? '\?' : ':' . $key) . ')/i', $value, $completeSql, 1);
-            }
+        $sql = $this->statement;
 
-            //TODO smi2 works only with FORMAT JSON, so add it if SELECT statement
-            if (strtoupper(substr($completeSql, 0, 6)) == 'SELECT') {
-                $completeSql .= ' FORMAT JSON';
-            }
+        foreach ($this->values as $key => $value) {
+            $value = is_string($value) ? "'" . addslashes($value) . "'" : $value;
+            $sql = preg_replace('/(' . (is_int($key) ? '\?' : ':' . $key) . ')/i', $value, $sql, 1);
+        }
 
-            $smi2CHStatement = $this->getClient()->write($completeSql);
-//            var_dump($smi2CHStatement->getRequest()->response()->body());
-            $this->rows = $smi2CHStatement->rows();
+        $this->processViaSMI2($sql);
 
-//            var_dump($this->rows);
-
-            return true; //TODO fix it!
-//        } catch (\ClickHouseDB\QueryException $ex) {
-//            echo 'Exception... ' . $ex->getMessage();
-//            return false;
-//        }
+        return true;
     }
 
     /**
@@ -233,19 +225,36 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     }
 
     /**
-     * @return \ClickHouseDB\Client
-     */
-    protected function getClient()
-    {
-        return $this->smi2CHClient;
-    }
-
-    /**
      * @return mixed
      */
     public function getSql()
     {
-        return $this->sql;
+        return $this->statement;
+    }
+
+    /**
+     * Specific SMI2 ClickHouse lib statement execution
+     * If you want to use any other lib for working with CH -- just update this method
+     *
+     * @param string $sql
+     */
+    protected function processViaSMI2($sql)
+    {
+        //smi2 CH Driver works only with FORMAT JSON, so add suffix if it is SELECT statement
+        $sql = trim($sql);
+        if (strtoupper(substr($sql, 0, 6)) === 'SELECT') {
+            if (strtoupper(substr($sql, -11)) !== 'FORMAT JSON') {
+                $sql .= ' FORMAT JSON';
+            }
+        }
+
+        //catching all specific SMI2 lib exceptions
+        try {
+            $this->rows = $this->smi2CHClient->write($sql)->rows();
+        } catch (\Exception $ex) {
+            var_dump($ex);
+            exit;
+        }
     }
 
 }
