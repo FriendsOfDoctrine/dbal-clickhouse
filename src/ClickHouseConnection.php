@@ -19,7 +19,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
     /**
      * @var Smi2CHClient
      */
-    protected $client;
+    protected $smi2CHClient;
 
     /**
      * @var int
@@ -42,7 +42,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function __construct($username = 'default', $password = '', $host = 'localhost', $port = 8123, $database = 'default')
     {
-        $this->client = new Smi2CHClient([
+        $this->smi2CHClient = new Smi2CHClient([
             'host' => $host,
             'port' => $port,
             'username' => $username,
@@ -56,7 +56,11 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function prepare($prepareString)
     {
-        return new ClickHouseStatement($this->getSmi2CHClient(), $prepareString);
+        if (! $this->smi2CHClient) {
+            throw new \Exception('ClickHouse\Client was not initialized');
+        }
+
+        return new ClickHouseStatement($this->smi2CHClient, $prepareString);
     }
 
     /**
@@ -144,18 +148,6 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
     {
         throw new \Exception('You need to implement ClickHouseConnection::errorInfo()');
 //        return $this->errorInfo;
-    }
-
-    /**
-     * @return Smi2CHClient
-     * @throws \Exception
-     */
-    protected function getSmi2CHClient()
-    {
-        if (! $this->client)
-            throw new \Exception('ClickHouse\Client was not initialized');
-
-        return $this->client;
     }
 
 }
