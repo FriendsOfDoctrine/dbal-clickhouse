@@ -120,7 +120,6 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
 
     /**
      * {@inheritDoc}
-     * @todo other FetchModes
      */
     public function fetch($fetchMode = null)
     {
@@ -152,7 +151,6 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
 
     /**
      * {@inheritDoc}
-     * @todo regard fetchMode
      */
     public function fetchAll($fetchMode = null)
     {
@@ -246,11 +244,11 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     public function execute($params = null)
     {
-        if ( is_array($params) )
+        if ( is_array($params) ) {
             $this->values = array_replace($this->values, $params);//TODO array keys must be all strings or all integers?
+        }
 
         $sql = $this->statement;
-
         foreach ($this->values as $key => $value) {
             $value = is_string($value) ? "'" . addslashes($value) . "'" : $value;
             $sql = preg_replace('/(' . (is_int($key) ? '\?' : ':' . $key) . ')/i', $value, $sql, 1);

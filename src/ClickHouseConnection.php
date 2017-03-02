@@ -88,15 +88,13 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
     }
 
     /**
-     * @param string $statement
-     * @return int
+     * {@inheritDoc}
      */
     public function exec($statement)
     {
         $stmt = $this->prepare($statement);
-        if (false === $stmt->execute()) {
-            throw new \RuntimeException('Unable to execute query: ' . $statement);
-        }
+        $stmt->execute();
+
         return $stmt->rowCount();
     }
 
