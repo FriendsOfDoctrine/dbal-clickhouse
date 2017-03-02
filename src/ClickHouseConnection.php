@@ -101,7 +101,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function lastInsertId($name = null)
     {
-        throw new \Exception("Unable to get last insert id in ClickHouse");
+        throw new \LogicException('Unable to get last insert id in ClickHouse');
     }
 
     /**
@@ -109,7 +109,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function beginTransaction()
     {
-        throw new \Exception("Transactions are not allowed in ClickHouse");
+        throw new \LogicException('Transactions are not allowed in ClickHouse');
     }
 
     /**
@@ -125,7 +125,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function rollBack()
     {
-        throw new \Exception("Transactions are not allowed in ClickHouse");
+        throw new \LogicException('Transactions are not allowed in ClickHouse');
     }
 
     /**
