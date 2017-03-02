@@ -104,7 +104,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
             'datetime' => 'datetime',
 //            'enum' => 'simple_array', //TODO ???
 //            'array' => 'array', //TODO ???
-//            'tuple' => 'json_array' //TODO ???
         ];
     }
 
@@ -610,6 +609,8 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     {
         throw DBALException::notSupported(__METHOD__);
     }
+
+
 
     /**
      * {@inheritDoc}
