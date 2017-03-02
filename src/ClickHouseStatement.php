@@ -149,7 +149,6 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
 
     /**
      * {@inheritDoc}
-     * @todo test it!
      */
     public function fetchColumn($columnIndex = 0)
     {
@@ -246,7 +245,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
             }
         }
 
-        //TODO catch in Driver and conver into DBALExceptions all SMI2's exceptions (need to implement ExceptionConverterDriver)
+        //TODO catch in Driver and convert into DBALExceptions all SMI2's exceptions (need to implement ExceptionConverterDriver)
         $this->rows = $this->smi2CHClient->write($sql)->rows();
     }
 
