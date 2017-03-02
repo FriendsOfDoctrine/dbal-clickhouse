@@ -248,13 +248,8 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
             }
         }
 
-        //catching all specific SMI2 lib exceptions
-        try {
-            $this->rows = $this->smi2CHClient->write($sql)->rows();
-        } catch (\Exception $ex) {
-            var_dump($ex);
-            exit;
-        }
+        //TODO catch in Driver and conver into DBALExceptions all SMI2's exceptions (need to implement ExceptionConverterDriver)
+        $this->rows = $this->smi2CHClient->write($sql)->rows();
     }
 
 }
