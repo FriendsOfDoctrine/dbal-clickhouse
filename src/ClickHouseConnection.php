@@ -22,16 +22,6 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
     protected $smi2CHClient;
 
     /**
-     * @var int
-     */
-    protected $errorCode;
-
-    /**
-     * @var string
-     */
-    protected $errorInfo;
-
-    /**
      * Connection constructor
      * 
      * @param string $username      The username to use when connecting.
@@ -119,7 +109,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function commit()
     {
-        throw new \Exception("Transactions are not allowed in ClickHouse");
+        throw new \Exception('Transactions are not allowed in ClickHouse');
     }
 
     /**
@@ -135,8 +125,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function errorCode()
     {
-        throw new \Exception('You need to implement ClickHouseConnection::errorCode()');
-//        return $this->errorCode;
+        throw new \LogicException('You need to implement ClickHouseConnection::errorCode()');
     }
 
     /**
@@ -144,8 +133,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function errorInfo()
     {
-        throw new \Exception('You need to implement ClickHouseConnection::errorInfo()');
-//        return $this->errorInfo;
+        throw new \LogicException('You need to implement ClickHouseConnection::errorInfo()');
     }
 
 }
