@@ -346,271 +346,86 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     {
         return 'CAST(' . $date1 . ' AS Date) - CAST(' . $date2 . ' AS Date)';
     }
-    
-    
-    
-    
-    
 
     /**
-     * Returns the SQL to add the number of given seconds to a date.
-     *
-     * @param string  $date
-     * @param integer $seconds
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     * {@inheritDoc}
      */
     public function getDateAddSecondsExpression($date, $seconds)
     {
-        return $this->getDateArithmeticIntervalExpression($date, '+', $seconds, self::DATE_INTERVAL_UNIT_SECOND);
+        return $date . ' + ' . $seconds;
     }
 
     /**
-     * Returns the SQL to subtract the number of given seconds from a date.
-     *
-     * @param string  $date
-     * @param integer $seconds
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     * {@inheritDoc}
      */
     public function getDateSubSecondsExpression($date, $seconds)
     {
-        return $this->getDateArithmeticIntervalExpression($date, '-', $seconds, self::DATE_INTERVAL_UNIT_SECOND);
+        return $date . ' - ' . $seconds;
     }
 
     /**
-     * Returns the SQL to add the number of given minutes to a date.
-     *
-     * @param string  $date
-     * @param integer $minutes
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     * {@inheritDoc}
      */
     public function getDateAddMinutesExpression($date, $minutes)
     {
-        return $this->getDateArithmeticIntervalExpression($date, '+', $minutes, self::DATE_INTERVAL_UNIT_MINUTE);
+        return $date . ' + ' . $minutes * 60;
     }
 
     /**
-     * Returns the SQL to subtract the number of given minutes from a date.
-     *
-     * @param string  $date
-     * @param integer $minutes
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     * {@inheritDoc}
      */
     public function getDateSubMinutesExpression($date, $minutes)
     {
-        return $this->getDateArithmeticIntervalExpression($date, '-', $minutes, self::DATE_INTERVAL_UNIT_MINUTE);
+        return $date . ' - ' . $minutes * 60;
     }
 
     /**
-     * Returns the SQL to add the number of given hours to a date.
-     *
-     * @param string  $date
-     * @param integer $hours
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     * {@inheritDoc}
      */
     public function getDateAddHourExpression($date, $hours)
     {
-        return $this->getDateArithmeticIntervalExpression($date, '+', $hours, self::DATE_INTERVAL_UNIT_HOUR);
+        return $date . ' + ' . $hours * 60 * 60;
     }
 
     /**
-     * Returns the SQL to subtract the number of given hours to a date.
-     *
-     * @param string  $date
-     * @param integer $hours
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     * {@inheritDoc}
      */
     public function getDateSubHourExpression($date, $hours)
     {
-        return $this->getDateArithmeticIntervalExpression($date, '-', $hours, self::DATE_INTERVAL_UNIT_HOUR);
+        return $date . ' - ' . $hours * 60 * 60;
     }
 
     /**
-     * Returns the SQL to add the number of given days to a date.
-     *
-     * @param string  $date
-     * @param integer $days
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     * {@inheritDoc}
      */
     public function getDateAddDaysExpression($date, $days)
     {
-        return $this->getDateArithmeticIntervalExpression($date, '+', $days, self::DATE_INTERVAL_UNIT_DAY);
+        return $date . ' + ' . $days * 60 * 60 * 24;
     }
 
     /**
-     * Returns the SQL to subtract the number of given days to a date.
-     *
-     * @param string  $date
-     * @param integer $days
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     * {@inheritDoc}
      */
     public function getDateSubDaysExpression($date, $days)
     {
-        return $this->getDateArithmeticIntervalExpression($date, '-', $days, self::DATE_INTERVAL_UNIT_DAY);
+        return $date . ' - ' . $days * 60 * 60 * 24;
     }
 
     /**
-     * Returns the SQL to add the number of given weeks to a date.
-     *
-     * @param string  $date
-     * @param integer $weeks
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     * {@inheritDoc}
      */
     public function getDateAddWeeksExpression($date, $weeks)
     {
-        return $this->getDateArithmeticIntervalExpression($date, '+', $weeks, self::DATE_INTERVAL_UNIT_WEEK);
+        return $date . ' + ' . $weeks * 60 * 60 * 24 * 7;
     }
 
     /**
-     * Returns the SQL to subtract the number of given weeks from a date.
-     *
-     * @param string  $date
-     * @param integer $weeks
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
+     * {@inheritDoc}
      */
     public function getDateSubWeeksExpression($date, $weeks)
     {
-        return $this->getDateArithmeticIntervalExpression($date, '-', $weeks, self::DATE_INTERVAL_UNIT_WEEK);
+        return $date . ' - ' . $weeks * 60 * 60 * 24 * 7;
     }
-
-    /**
-     * Returns the SQL to add the number of given months to a date.
-     *
-     * @param string  $date
-     * @param integer $months
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
-     */
-    public function getDateAddMonthExpression($date, $months)
-    {
-        return $this->getDateArithmeticIntervalExpression($date, '+', $months, self::DATE_INTERVAL_UNIT_MONTH);
-    }
-
-    /**
-     * Returns the SQL to subtract the number of given months to a date.
-     *
-     * @param string  $date
-     * @param integer $months
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
-     */
-    public function getDateSubMonthExpression($date, $months)
-    {
-        return $this->getDateArithmeticIntervalExpression($date, '-', $months, self::DATE_INTERVAL_UNIT_MONTH);
-    }
-
-    /**
-     * Returns the SQL to add the number of given quarters to a date.
-     *
-     * @param string  $date
-     * @param integer $quarters
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
-     */
-    public function getDateAddQuartersExpression($date, $quarters)
-    {
-        return $this->getDateArithmeticIntervalExpression($date, '+', $quarters, self::DATE_INTERVAL_UNIT_QUARTER);
-    }
-
-    /**
-     * Returns the SQL to subtract the number of given quarters from a date.
-     *
-     * @param string  $date
-     * @param integer $quarters
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
-     */
-    public function getDateSubQuartersExpression($date, $quarters)
-    {
-        return $this->getDateArithmeticIntervalExpression($date, '-', $quarters, self::DATE_INTERVAL_UNIT_QUARTER);
-    }
-
-    /**
-     * Returns the SQL to add the number of given years to a date.
-     *
-     * @param string  $date
-     * @param integer $years
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
-     */
-    public function getDateAddYearsExpression($date, $years)
-    {
-        return $this->getDateArithmeticIntervalExpression($date, '+', $years, self::DATE_INTERVAL_UNIT_YEAR);
-    }
-
-    /**
-     * Returns the SQL to subtract the number of given years from a date.
-     *
-     * @param string  $date
-     * @param integer $years
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
-     */
-    public function getDateSubYearsExpression($date, $years)
-    {
-        return $this->getDateArithmeticIntervalExpression($date, '-', $years, self::DATE_INTERVAL_UNIT_YEAR);
-    }
-
-    /**
-     * Returns the SQL for a date arithmetic expression.
-     *
-     * @param string  $date     The column or literal representing a date to perform the arithmetic operation on.
-     * @param string  $operator The arithmetic operator (+ or -).
-     * @param integer $interval The interval that shall be calculated into the date.
-     * @param string  $unit     The unit of the interval that shall be calculated into the date.
-     *                          One of the DATE_INTERVAL_UNIT_* constants.
-     *
-     * @return string
-     *
-     * @throws \Doctrine\DBAL\DBALException If not supported on this platform.
-     */
-    protected function getDateArithmeticIntervalExpression($date, $operator, $interval, $unit)
-    {
-        throw DBALException::notSupported(__METHOD__);
-    }
-
-
 
     /**
      * {@inheritDoc}
