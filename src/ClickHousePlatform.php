@@ -9,9 +9,15 @@ namespace Mochalygin\DoctrineDBALClickHouse;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Schema\Identifier;
+
 use Doctrine\DBAL\Types;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\DateType;
+use Doctrine\DBAL\Types\DatetimeType;
+use Doctrine\DBAL\Types\IntegerType;
+use Doctrine\DBAL\Types\SmallIntType;
+use Doctrine\DBAL\Types\BigIntType;
+
 use Doctrine\DBAL\Schema\Constraint;
 use Doctrine\DBAL\Schema\Sequence;
 use Doctrine\DBAL\Schema\Table;
@@ -38,7 +44,7 @@ use Doctrine\DBAL\Event\SchemaAlterTableRenameColumnEventArgs;
  */
 class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
 {
-    
+
     /**
      * {@inheritDoc}
      */
@@ -79,12 +85,12 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
         if (! empty($columnDef['autoincrement']))
             throw new \Exception('Clickhouse do not support AUTO_INCREMENT fields');
 
-        return empty($columnDef['unsigned']) ? '' : 'U'; 
+        return empty($columnDef['unsigned']) ? '' : 'U';
     }
 
     /**
      * {@inheritDoc}
-     */    
+     */
     protected function initializeDoctrineTypeMappings()
     {
         $this->doctrineTypeMapping = [
@@ -109,17 +115,17 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
 
     /**
      * {@inheritDoc}
-     */   
+     */
     protected function getVarcharTypeDeclarationSQLSnippet($length, $fixed)
     {
-        return $fixed 
+        return $fixed
                 ? 'FixedString(' . $length . ')'
                 : 'String';
     }
 
     /**
      * {@inheritDoc}
-     */   
+     */
     protected function getBinaryTypeDeclarationSQLSnippet($length, $fixed)
     {
         return 'String';
@@ -127,7 +133,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
 
     /**
      * {@inheritDoc}
-     */   
+     */
     public function getClobTypeDeclarationSQL(array $field)
     {
         return 'String';
@@ -512,7 +518,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     protected function _getCreateTableSQL($tableName, array $columns, array $options = [])
     {
-        $engine = !empty($options['engine']) ? $options['engine'] : 'MergeTree'; //TODO is it good decision? 
+        $engine = !empty($options['engine']) ? $options['engine'] : 'MergeTree'; //TODO is it good decision? May be use ReplacingMergeTree as a default?
 
         if (isset($options['uniqueConstraints']) && ! empty($options['uniqueConstraints'])) {
             throw DBALException::notSupported('uniqueConstraints');
@@ -548,7 +554,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                     ]];
                 }
             } else {
-                if (isset($columns[$options['eventDateColumn']])) {
+                if ( isset($columns[$options['eventDateColumn']]) ) {
                     if ($columns[$options['eventDateColumn']]['type'] instanceof DateType) {
                         $eventDateColumnName = $options['eventDateColumn'];
                         $dateColumn = [$options['eventDateColumn'] => $columns[$options['eventDateColumn']]];
@@ -567,14 +573,14 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                 }
             }
             $columns = $dateColumn + $columns; // insert into very beginning
-            
+
             /**
              * Primary key section
              */
             if ( empty($options['primary']) ) {
                 throw new \Exception('You need specify PrimaryKey for MergeTree* tables');
             }
-        
+
         }
 
         $columnListSql = $this->getColumnDeclarationListSQL($columns);
@@ -582,7 +588,30 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
 
         if ( in_array($engine, ['MergeTree', 'CollapsingMergeTree', 'SummingMergeTree', 'AggregatingMergeTree', 'ReplacingMergeTree']) ) {
             $query .=  '(' . $eventDateColumnName . ', (' . implode(', ', array_unique(array_values($options['primary']))) . '), ' . $indexGranularity;
-            //TODO any special MergeTree* table parameters
+
+            /**
+             * any specific MergeTree* table parameters
+             */
+            if ('ReplacingMergeTree' == $engine) {
+                if (! empty($options['versionColumn'])) {
+                    if (! isset($columns[$options['versionColumn']]) ) {
+                        throw new \Exception('If you specify `versionColumn` for ReplacingMergeTree table -- you must add this column manually (any of UInt*, Date or DateTime types)');
+                    }
+
+                    if (
+                        ! $columns[$options['versionColumn']]['type'] instanceof IntegerType &&
+                        ! $columns[$options['versionColumn']]['type'] instanceof BigIntType &&
+                        ! $columns[$options['versionColumn']]['type'] instanceof SmallIntType &&
+                        ! $columns[$options['versionColumn']]['type'] instanceof DateType &&
+                        ! $columns[$options['versionColumn']]['type'] instanceof DateTimeType
+                    ) {
+                        throw new \Exception('For ReplacingMergeTree tables `versionColumn` must be any of UInt* family, or Date, or DateTime types. ' . get_class($columns[$options['versionColumn']]['type']) . ' given.');
+                    }
+
+                    $query .= ', ' . $columns[$options['versionColumn']]['name'];
+                }
+            }
+
             $query .= ')';
         }
 
@@ -597,7 +626,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     public function getCreateForeignKeySQL(ForeignKeyConstraint $foreignKey, $table)
     {
         throw DBALException::notSupported(__METHOD__);
-    }    
+    }
 
     /**
      * {@inheritDoc}
@@ -1036,7 +1065,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
         if (! isset($field['default'])) {
             return '';
         }
-            
+
         $default = " DEFAULT '" . $field['default'] . "'";
         if ( isset($field['type']) ) {
             if (in_array((string)$field['type'], ['Integer', 'BigInt', 'SmallInt', 'Float'])) {
