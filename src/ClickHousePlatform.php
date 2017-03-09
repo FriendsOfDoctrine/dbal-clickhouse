@@ -1043,8 +1043,8 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                 $default = ' DEFAULT ' . $field['default'];
             } else if (in_array((string)$field['type'], ['DateTime']) && $field['default'] == $this->getCurrentTimestampSQL()) {
                 $default = ' DEFAULT ' . $this->getCurrentTimestampSQL();
-            } else if ('Date' == (string)$field['type'] && $field['default'] == $this->getCurrentDateSQL()) {
-                $default = ' DEFAULT ' . $this->getCurrentDateSQL();
+            } else if ('Date' == (string)$field['type']) { // TODO check if string matches constant date like 'dddd-yy-mm' and quote it
+                $default = ' DEFAULT ' . $field['default'];
             }
         }
 
