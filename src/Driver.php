@@ -13,21 +13,44 @@ namespace Mochalygin\DoctrineDBALClickHouse;
  */
 class Driver implements \Doctrine\DBAL\Driver/*, \Doctrine\DBAL\Driver\ExceptionConverterDriver*/
 {
-    
-    
+
 //    public function convertException($message, \Doctrine\DBAL\Driver\DriverException $exception)
 //    {
-//        echo $exception->getMessage();
-//        exit;
+//        TODO: implement it!
 //    }
-    
+
     /**
      * {@inheritDoc}
      */
-    public function connect(array $params, $username = null, $password = null, array $driverOptions = []) 
+    public function connect(array $params, $user = null, $password = null, array $driverOptions = [])
     {
-        //TODO проверка на существование индексов в массиве
-        return new ClickHouseConnection($params['user'], $params['password'], $params['host'], $params['port'], $params['dbname']);
+        if ( is_null($user) ) {
+            if (! isset($params['user']))
+                throw new ClickHouseException('Connection parameter `user` is required');
+
+            $user = $params['user'];
+        }
+
+        if ( is_null($password) ) {
+            if (! isset($params['password']))
+                throw new ClickHouseException('Connection parameter `password` is required');
+
+            $password = $params['password'];
+        }
+
+        if (! isset($params['host'])) {
+            throw new ClickHouseException('Connection parameter `host` is required');
+        }
+
+        if (! isset($params['port'])) {
+            throw new ClickHouseException('Connection parameter `port` is required');
+        }
+
+        if (! isset($params['dbname'])) {
+            throw new ClickHouseException('Connection parameter `dbname` is required');
+        }
+
+        return new ClickHouseConnection($user, $password, $params['host'], $params['port'], $params['dbname']);
     }
 
     /**
