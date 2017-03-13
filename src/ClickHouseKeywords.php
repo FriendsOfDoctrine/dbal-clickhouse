@@ -258,6 +258,7 @@ class ClickHouseKeywords extends KeywordList
             'ENUM',
             'ARRAY',
             'TUPLE',
+            'ANY',
         ];
     }
 }
