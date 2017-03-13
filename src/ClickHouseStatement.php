@@ -68,13 +68,11 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
 
     /**
      * {@inheritDoc}
-     * @todo check it!
      */
     public function closeCursor()
     {
         $this->rows = null;
         $this->iterator = null;
-        $this->fetchMode = \PDO::FETCH_BOTH;
 
         return true;
     }
