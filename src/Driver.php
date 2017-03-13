@@ -82,6 +82,11 @@ class Driver implements \Doctrine\DBAL\Driver/*, \Doctrine\DBAL\Driver\Exception
      */
     public function getDatabase(\Doctrine\DBAL\Connection $conn)
     {
+        $params = $conn->getParams();
+        if ( isset($params['dbname']) ) {
+            return $params['dbname'];
+        }
+
         return $conn->fetchColumn('SELECT currentDatabase() as dbname');
     }
 }
