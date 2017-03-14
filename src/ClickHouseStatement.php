@@ -8,21 +8,22 @@ namespace Mochalygin\DoctrineDBALClickHouse;
 
 /**
  * Statement for ClickHouse database (http://clickhouse.yandex)
- * 
+ *
  * @author mochalygin <a@mochalygin.ru>
  */
 class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\Statement
 {
-    /** 
+
+    /**
      * @var \ClickHouseDB\Client
      */
     protected $smi2CHClient;
 
-    /** 
-     * @var string 
+    /**
+     * @var string
      */
     protected $statement;
-    
+
     /**
      * @var array|null
      */
@@ -30,10 +31,16 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
 
     /**
      * Query parameters for prepared statement (key => value)
-     * @var array 
+     * @var array
      */
     protected $values = [];
-    
+
+    /**
+     * Query parameters' types for prepared statement (key => value)
+     * @var array
+     */
+    protected $types = [];
+
     /**
      * @var \ArrayIterator|null
      */
@@ -55,14 +62,14 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     }
 
     /**
-     * {@inheritDoc} 
+     * {@inheritDoc}
      */
     public function getIterator()
     {
         if (! $this->iterator) {
             $this->iterator = new \ArrayIterator($this->rows);
         }
-        
+
         return $this->iterator;
     }
 
@@ -82,7 +89,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     public function columnCount()
     {
-        return $this->rows 
+        return $this->rows
                 ? count(array_slice($this->rows, 0, 1)[0])
                 : null;
     }
@@ -209,31 +216,31 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
 
     /**
      * {@inheritDoc}
-     * @todo regard $type
      */
     public function bindValue($param, $value, $type = null)
     {
         $this->values[$param] = $value;
+        $this->types[$param] = $type;
     }
 
     /**
      * {@inheritDoc}
-     * @todo regard $type and $length
      */
     public function bindParam($column, &$variable, $type = null, $length = null)
     {
         $this->values[$column] = &$variable;
+        $this->types[$column] = $type;
     }
 
     function errorCode()
     {
-        throw new \Exception('Implement it!');
+        throw new \Exception('Implement it!'); // TODO
         return (int)$this->getChStatement()->isError();
     }
 
     function errorInfo()
     {
-        throw new \Exception('Implement it!');
+        throw new \Exception('Implement it!'); // TODO
         return implode(PHP_EOL, $this->getChStatement()->info());
     }
 
@@ -247,9 +254,8 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
         }
 
         $sql = $this->statement;
-        foreach ($this->values as $key => $value) {
-            $value = is_string($value) ? "'" . addslashes($value) . "'" : $value;
-            $sql = preg_replace('/(' . (is_int($key) ? '\?' : ':' . $key) . ')/i', $value, $sql, 1);
+        foreach (array_keys($this->values) as $key) {
+            $sql = preg_replace('/(' . (is_int($key) ? '\?' : ':' . $key) . ')/i', $this->getTypedParam($key), $sql, 1);
         }
 
         $this->processViaSMI2($sql);
@@ -266,7 +272,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     }
 
     /**
-     * @return mixed
+     * @return string
      */
     public function getSql()
     {
@@ -291,6 +297,37 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
 
         //TODO catch in Driver and convert into DBALExceptions all SMI2's exceptions (need to implement ExceptionConverterDriver)
         $this->rows = $this->smi2CHClient->write($sql)->rows();
+    }
+
+    /**
+     * @param mixed
+     */
+    protected function getTypedParam($key)
+    {
+        $type = $this->types[$key];
+
+        // if param type was not setted - trying to get db-type by php-var-type
+        if ( is_null($type) ) {
+            if ( is_bool($this->values[$key]) ) {
+                $type = \PDO::PARAM_BOOL;
+            } else if (is_int($this->values[$key]) || is_float($this->values[$key])) {
+                $type = \PDO::PARAM_INT;
+            }
+        }
+
+        if (\PDO::PARAM_NULL === $type) {
+            throw new ClickHouseException('NULLs are not supported by ClickHouse');
+        }
+
+        if (\PDO::PARAM_INT === $type) {
+            return $this->values[$key];
+        }
+
+        if (\PDO::PARAM_BOOL === $type) {
+            return (int)(bool)$this->values[$key];
+        }
+
+        return "'" . addslashes($this->values[$key]) . "'";
     }
 
 }
