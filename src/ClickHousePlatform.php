@@ -536,7 +536,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     protected function _getCreateTableSQL($tableName, array $columns, array $options = [])
     {
-        $engine = !empty($options['engine']) ? $options['engine'] : 'MergeTree';
+        $engine = !empty($options['engine']) ? $options['engine'] : 'ReplacingMergeTree';
 
         if (isset($options['uniqueConstraints']) && ! empty($options['uniqueConstraints'])) {
             throw DBALException::notSupported('uniqueConstraints');
