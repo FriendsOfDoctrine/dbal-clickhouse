@@ -842,10 +842,10 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
 
     /**
      * {@inheritDoc}
-     * @todo check it! time with 1970 year prefix...
      */
     public function getCurrentTimeSQL()
     {
+        //TODO check it! time with 1970 year prefix...
         return 'toTime(now())';
     }
 
