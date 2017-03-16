@@ -11,7 +11,7 @@ use Doctrine\DBAL\DBALException;
 
 /**
  * Connection for ClickHouse database {@link https://clickhouse.yandex/}
- * 
+ *
  * @author mochalygin <a@mochalygin.ru>
  */
 class Connection extends \Doctrine\DBAL\Connection
@@ -44,9 +44,9 @@ class Connection extends \Doctrine\DBAL\Connection
     {
         throw DBALException::notSupported(__METHOD__);
     }
-    
+
     /**
-     * all methods below throw exceptions, becouse ClickHouse has not transactions
+     * all methods below throw exceptions, because ClickHouse has not transactions
      */
 
     /**
@@ -64,7 +64,7 @@ class Connection extends \Doctrine\DBAL\Connection
     {
         throw DBALException::notSupported(__METHOD__);
     }
-    
+
     /**
      * @throws \Exception
      */
