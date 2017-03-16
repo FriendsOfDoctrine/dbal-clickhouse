@@ -44,26 +44,6 @@ class Connection extends \Doctrine\DBAL\Connection
     {
         throw DBALException::notSupported(__METHOD__);
     }
-
-    /**
-     * {@inheritDoc}
-     * @todo тут немного говнокодца, метод сработает, поскольку Statement лежит в том же неймспейсе, но это очень и очень уродливый подход
-     */
-//    public function prepare($statement)
-//    {
-//        $this->connect();
-//
-//        try {
-//            $stmt = new Statement($statement, $this);
-//        } catch (\Exception $ex) {
-//            throw DBALException::driverExceptionDuringQuery($this->_driver, $ex, $statement);
-//        }
-//
-//        $stmt->setFetchMode($this->defaultFetchMode);
-//
-//        return $stmt;
-//    }
-
     
     /**
      * all methods below throw exceptions, becouse ClickHouse has not transactions
