@@ -94,22 +94,40 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     protected function initializeDoctrineTypeMappings()
     {
         $this->doctrineTypeMapping = [
-            'uint8' => 'smallint',
-            'uint16' => 'integer',
-            'uint32' => 'integer',
-            'uint64' => 'bigint',
             'int8' => 'smallint',
             'int16' => 'integer',
             'int32' => 'integer',
             'int64' => 'bigint',
+            'uint8' => 'smallint',
+            'uint16' => 'integer',
+            'uint32' => 'integer',
+            'uint64' => 'bigint',
             'float32' => 'decimal',
             'float64' => 'float',
-            'string' => 'string',//'text',
+
+            'string' => 'string',
             'fixedstring' => 'string',
             'date' => 'date',
             'datetime' => 'datetime',
-//            'enum' => 'simple_array', //TODO ???
-//            'array' => 'array', //TODO ???
+
+            'array(int8)' => 'array',
+            'array(int16)' => 'array',
+            'array(int32)' => 'array',
+            'array(int64)' => 'array',
+            'array(uint8)' => 'array',
+            'array(uint16)' => 'array',
+            'array(uint32)' => 'array',
+            'array(uint64)' => 'array',
+            'array(float32)' => 'array',
+            'array(float64)' => 'array',
+
+            'array(string)' => 'array',
+            'array(fixedstring)' => 'array',
+            'array(date)' => 'array',
+            'array(datetime)' => 'array',
+
+            'enum8' => 'string',
+            'enum16' => 'string',
         ];
     }
 
@@ -518,7 +536,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     protected function _getCreateTableSQL($tableName, array $columns, array $options = [])
     {
-        $engine = !empty($options['engine']) ? $options['engine'] : 'MergeTree'; //TODO is it good decision? May be use ReplacingMergeTree as a default?
+        $engine = !empty($options['engine']) ? $options['engine'] : 'MergeTree';
 
         if (isset($options['uniqueConstraints']) && ! empty($options['uniqueConstraints'])) {
             throw DBALException::notSupported('uniqueConstraints');
@@ -1078,6 +1096,28 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
         }
 
         return $default;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getDoctrineTypeMapping($dbType)
+    {
+        // FixedString
+        if (strpos(strtolower($dbType), 'fixedstring') === 0) {
+            $dbType = 'fixedstring';
+        }
+
+        //Enum8
+        if (strpos(strtolower($dbType), 'enum8') === 0) {
+            $dbType = 'enum8';
+        }
+
+        //Enum16
+        if (strpos(strtolower($dbType), 'enum16') === 0) {
+            $dbType = 'enum16';
+        }
+        return parent::getDoctrineTypeMapping($dbType);
     }
 
 }
