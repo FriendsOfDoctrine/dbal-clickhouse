@@ -48,6 +48,27 @@ $conn = $this->get('doctrine.dbal.clickhouse_connection');
 
 ## Usage
 
+### Create new table
+```php
+// short
+$fromSchema = $conn->getSchemaManager()->createSchema();
+$toSchema = clone $fromSchema;
+
+// create new table object
+$newTable = $toSchema->createTable('newTable');
+
+$newTable->addColumn('id', 'integer', ['unsigned' => true]);
+$newTable->addColumn('payload', 'string');
+
+$newTable->setPrimaryKey(['id']);
+
+// execute migration SQLs to create table in ClickHouse
+$sqlArray = $fromSchema->getMigrateToSql($toSchema, $conn->getDatabasePlatform());
+foreach ($sqlArray as $sql) {
+    $conn->exec($sql);
+}
+```
+
 ### Data Retrieval
 ```php
 echo $conn->fetchColumn('SELECT SUM(views) FROM articles');
