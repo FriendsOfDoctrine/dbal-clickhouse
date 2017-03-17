@@ -302,7 +302,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     protected function getTypedParam($key)
     {
-        $type = $this->types[$key];
+        $type = isset($this->types[$key]) ? $this->types[$key] : null;
 
         // if param type was not setted - trying to get db-type by php-var-type
         if ( is_null($type) ) {
