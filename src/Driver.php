@@ -11,13 +11,8 @@ namespace Mochalygin\DoctrineDBALClickHouse;
  *
  * @author mochalygin <a@mochalygin.ru>
  */
-class Driver implements \Doctrine\DBAL\Driver/*, \Doctrine\DBAL\Driver\ExceptionConverterDriver*/
+class Driver implements \Doctrine\DBAL\Driver
 {
-
-//    public function convertException($message, \Doctrine\DBAL\Driver\DriverException $exception)
-//    {
-//        TODO: implement it!
-//    }
 
     /**
      * {@inheritDoc}

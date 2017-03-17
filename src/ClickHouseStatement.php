@@ -234,14 +234,12 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
 
     function errorCode()
     {
-        throw new \Exception('Implement it!'); // TODO
-        return (int)$this->getChStatement()->isError();
+        throw new ClickHouseException('You need to implement ClickHouseStatement::' . __METHOD__ . '()');
     }
 
     function errorInfo()
     {
-        throw new \Exception('Implement it!'); // TODO
-        return implode(PHP_EOL, $this->getChStatement()->info());
+        throw new ClickHouseException('You need to implement ClickHouseStatement::' . __METHOD__ . '()');
     }
 
     /**
@@ -295,7 +293,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
             }
         }
 
-        //TODO catch in Driver and convert into DBALExceptions all SMI2's exceptions (need to implement ExceptionConverterDriver)
+        //TODO catch in Driver and convert into DBALExceptions all SMI2's exceptions
         $this->rows = $this->smi2CHClient->write($sql)->rows();
     }
 
