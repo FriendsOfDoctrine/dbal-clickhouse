@@ -96,6 +96,9 @@ $newTable->addOption('indexGranularity', 4096);
 ```php
 // 1
 $conn->exec("INSERT INTO new_table (id, payload) VALUES (1, 'dummyPayload1')");
+
+// 2
+$conn->insert('new_table', ['id' => 2, 'payload' => 'dummyPayload2']);
 ```
 
 ### Data Retrieval
