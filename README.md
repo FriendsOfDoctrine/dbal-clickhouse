@@ -101,6 +101,19 @@ $conn->exec("INSERT INTO new_table (id, payload) VALUES (1, 'dummyPayload1')");
 $conn->insert('new_table', ['id' => 2, 'payload' => 'dummyPayload2']);
 ```
 
+```php
+// 3 via QueryBuilder
+$qb = $conn->createQueryBuilder();
+
+$qb
+    ->insert('new_table')
+    ->setValue('id', ':id')
+    ->setValue('payload', ':payload')
+    ->setParameter('id', 3, \PDO::PARAM_INT) // need to explicitly set param type to `integer`, because default type is `string` and ClickHouse doesn't like types mismatchings
+    ->setParameter('payload', 'dummyPayload3');
+
+$qb->execute();
+```
 ### Data Retrieval
 ```php
 echo $conn->fetchColumn('SELECT SUM(views) FROM articles');
