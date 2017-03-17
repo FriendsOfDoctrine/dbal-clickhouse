@@ -50,12 +50,13 @@ $conn = $this->get('doctrine.dbal.clickhouse_connection');
 
 ### Create new table
 ```php
-// ***short***
+// ***quick start***
 $fromSchema = $conn->getSchemaManager()->createSchema();
 $toSchema = clone $fromSchema;
 
+
 // create new table object
-$newTable = $toSchema->createTable('new_table_name');
+$newTable = $toSchema->createTable('new_table');
 
 // add columns
 $newTable->addColumn('id', 'integer', ['unsigned' => true]);
@@ -63,6 +64,7 @@ $newTable->addColumn('payload', 'string');
 
 //set primary key
 $newTable->setPrimaryKey(['id']);
+
 
 // execute migration SQLs to create table in ClickHouse
 $sqlArray = $fromSchema->getMigrateToSql($toSchema, $conn->getDatabasePlatform());
@@ -72,7 +74,7 @@ foreach ($sqlArray as $sql) {
 ```
 
 ```php
-// ***additional parameters***
+// ***more options***
 
 //specify table engine
 $newTable->addOption('engine', 'MergeTree');
@@ -84,9 +86,16 @@ $newTable->addColumn('event_date', 'date', ['default' => 'toDate(now())']);
 $newTable->addOption('eventDateColumn', 'event_date');
 // *if not specified -- default Date column named EventDate will be added
 
+
 //specify index granularity
 $newTable->addOption('indexGranularity', 4096);
 // *if not specified -- default value 8192 will be used
+```
+
+### Data Insertion
+```php
+// 1
+$conn->exec("INSERT INTO new_table (id, payload) VALUES (1, 'dummyPayload1')");
 ```
 
 ### Data Retrieval
