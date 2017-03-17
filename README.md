@@ -57,9 +57,11 @@ $toSchema = clone $fromSchema;
 // create new table object
 $newTable = $toSchema->createTable('newTable');
 
+// add columns
 $newTable->addColumn('id', 'integer', ['unsigned' => true]);
 $newTable->addColumn('payload', 'string');
 
+//set primary key
 $newTable->setPrimaryKey(['id']);
 
 // execute migration SQLs to create table in ClickHouse
