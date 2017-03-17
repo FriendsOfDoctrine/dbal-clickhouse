@@ -92,7 +92,7 @@ $newTable->addOption('indexGranularity', 4096);
 // *if not specified -- default value 8192 will be used
 ```
 
-### Data Insertion
+### Insert
 ```php
 // 1
 $conn->exec("INSERT INTO new_table (id, payload) VALUES (1, 'dummyPayload1')");
@@ -101,6 +101,7 @@ $conn->exec("INSERT INTO new_table (id, payload) VALUES (1, 'dummyPayload1')");
 ```php
 // 2
 $conn->insert('new_table', ['id' => 2, 'payload' => 'dummyPayload2']);
+// INSERT INTO new_table (id, payload) VALUES (?, ?) [2, 'dummyPayload2']
 ```
 
 ```php
@@ -116,12 +117,12 @@ $qb
 
 $qb->execute();
 ```
-### Data Retrieval
+### Select
 ```php
 echo $conn->fetchColumn('SELECT SUM(views) FROM articles');
 ```
 
-### Dynamic Parameters and Prepared Statements
+### Select via Dynamic Parameters and Prepared Statements
 ```php
 $stmt = $conn->prepare('SELECT authorId, SUM(views) AS total_views FROM articles WHERE category_id = :categoryId AND publish_date = :publishDate GROUP BY authorId');
 
@@ -133,11 +134,9 @@ while ($row = $stmt->fetch()) {
     echo $row['authorId'] . ': ' . $row['total_views'] . PHP_EOL;
 }
 ```
-### Insert
-```php
-$conn->insert('articles', ['category_id' => 123, 'author_id' => 777, 'views' => 100500]);
-// INSERT INTO articles (category_id, author_id, views) VALUES (?, ?, ?) (123, 777, 100500)
-```
+
+### Update
+*ClickHouse has no classical updates. Will add ersatz-updates for ReplacingMergeTree and CollapcingMergeTree engines later*
 
 ### More information in Doctrine DBAL documentation:
 * [Data Retrieval And Manipulation](http://docs.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/data-retrieval-and-manipulation.html)
