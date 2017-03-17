@@ -50,12 +50,12 @@ $conn = $this->get('doctrine.dbal.clickhouse_connection');
 
 ### Create new table
 ```php
-// short
+// ***short***
 $fromSchema = $conn->getSchemaManager()->createSchema();
 $toSchema = clone $fromSchema;
 
 // create new table object
-$newTable = $toSchema->createTable('newTable');
+$newTable = $toSchema->createTable('new_table_name');
 
 // add columns
 $newTable->addColumn('id', 'integer', ['unsigned' => true]);
@@ -69,6 +69,24 @@ $sqlArray = $fromSchema->getMigrateToSql($toSchema, $conn->getDatabasePlatform()
 foreach ($sqlArray as $sql) {
     $conn->exec($sql);
 }
+```
+
+```php
+// ***additional parameters***
+
+//specify table engine
+$newTable->addOption('engine', 'MergeTree');
+// *if not specified -- default engine 'ReplacingMergeTree' will be used
+
+
+// add Date column for partitioning
+$newTable->addColumn('event_date', 'date', ['default' => 'toDate(now())']);
+$newTable->addOption('eventDateColumn', 'event_date');
+// *if not specified -- default Date column named EventDate will be added
+
+//specify index granularity
+$newTable->addOption('indexGranularity', 4096);
+// *if not specified -- default value 8192 will be used
 ```
 
 ### Data Retrieval
