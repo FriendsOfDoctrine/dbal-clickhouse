@@ -1,10 +1,10 @@
 {
     "name": "mochalygin/doctrine-dbal-clickhouse",
-    "version" : "0.1.2",
-    "description": "Doctrine DBAL layer for ClickHouse.yandex",
-    "keywords": ["doctrine", "dbal", "clickhouse"],
-    "homepage": "http://github.com/mochalygin/doctrine-dbal-clickhouse",
     "type": "library",
+    "version" : "0.1.2",
+    "description": "Doctrine DBAL driver for ClickHouse",
+    "keywords": ["doctrine", "dbal", "clickhouse", "driver"],
+    "homepage": "http://github.com/mochalygin/doctrine-dbal-clickhouse",
     "license": "MIT",
     "authors": [
         {
@@ -14,7 +14,8 @@
     ],
     "require": {
         "php": ">=5.4.0",
-        "smi2/phpClickHouse": "*"
+        "smi2/phpClickHouse": "^0.17",
+        "doctrine/dbal": ">=2.5"
     },
     "autoload": {
         "psr-0": { "Mochalygin\\DoctrineDBALClickHouse\\": "src/" }
