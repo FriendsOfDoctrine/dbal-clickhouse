@@ -18,6 +18,6 @@
         "doctrine/dbal": ">=2.5"
     },
     "autoload": {
-        "psr-0": { "Mochalygin\\DoctrineDBALClickHouse\\": "src/" }
+        "psr-4": { "Mochalygin\\DoctrineDBALClickHouse\\": "src/" }
     }
 }
