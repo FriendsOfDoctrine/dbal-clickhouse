@@ -22,9 +22,10 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function executeUpdate($query, array $params = array(), array $types = array())
     {
-        //ClickHouse has no UPDATE (CollapsingMergeTree???) and DELETE statement, so we may do only INSERT with this method
-        if (strtoupper(substr(trim($query), 0, 6) != 'INSERT')) {
-            throw new \Exception('DELETE and UPDATE are not allowed in ClickHouse');
+        //ClickHouse has no UPDATE and DELETE statements
+        $command = strtoupper(substr(trim($query), 0, 6));
+        if ('UPDATE' == $command || 'DELETE' == $command) {
+            throw new ClickHouseException('UPDATE and DELETE are not allowed in ClickHouse');
         }
 
         return parent::executeUpdate($query, $params, $types);

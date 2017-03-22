@@ -2,10 +2,11 @@
 
 Doctrine DBAL driver for ClickHouse -- an open-source column-oriented database management system by Yandex (https://clickhouse.yandex/)
 
-Doctrine and [smi2/phpclickhouse](https://packagist.org/packages/smi2/phpclickhouse) are required.
+## Installation
 
-*It is alpha-version!*
-
+```
+composer require mochalygin/doctrine-dbal-clickhouse
+```
 
 ## Initialization
 ### Custom PHP script
