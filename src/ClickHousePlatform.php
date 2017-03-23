@@ -7,35 +7,16 @@
 namespace Mochalygin\DoctrineDBALClickHouse;
 
 use Doctrine\DBAL\DBALException;
-use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\Schema\Identifier;
 
-use Doctrine\DBAL\Types;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\DateType;
-use Doctrine\DBAL\Types\DatetimeType;
 use Doctrine\DBAL\Types\IntegerType;
 use Doctrine\DBAL\Types\SmallIntType;
 use Doctrine\DBAL\Types\BigIntType;
 
-use Doctrine\DBAL\Schema\Constraint;
-use Doctrine\DBAL\Schema\Sequence;
-use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\TableDiff;
-use Doctrine\DBAL\Schema\Column;
-use Doctrine\DBAL\Schema\ColumnDiff;
-use Doctrine\DBAL\Events;
-use Doctrine\Common\EventManager;
-use Doctrine\DBAL\Event\SchemaCreateTableEventArgs;
-use Doctrine\DBAL\Event\SchemaCreateTableColumnEventArgs;
-use Doctrine\DBAL\Event\SchemaDropTableEventArgs;
-use Doctrine\DBAL\Event\SchemaAlterTableEventArgs;
-use Doctrine\DBAL\Event\SchemaAlterTableAddColumnEventArgs;
-use Doctrine\DBAL\Event\SchemaAlterTableRemoveColumnEventArgs;
-use Doctrine\DBAL\Event\SchemaAlterTableChangeColumnEventArgs;
-use Doctrine\DBAL\Event\SchemaAlterTableRenameColumnEventArgs;
 
 /**
  * Platform for ClickHouse database {@link https://clickhouse.yandex/}
