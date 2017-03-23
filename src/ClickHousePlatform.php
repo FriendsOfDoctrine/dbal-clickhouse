@@ -878,7 +878,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getListTablesSQL()
     {
-        return "SELECT name FROM system.tables WHERE database != 'system' AND engine != 'View'";
+        return "SELECT database, name FROM system.tables WHERE database != 'system' AND engine != 'View'";
     }
 
     /**

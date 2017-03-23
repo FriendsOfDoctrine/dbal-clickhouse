@@ -24,6 +24,10 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
      */
     protected function _getPortableTableDefinition($table)
     {
+        if ($this->_conn->getDatabase() !== $table['database']) {
+            return false;
+        }
+
         return $table['name'];
     }
 
