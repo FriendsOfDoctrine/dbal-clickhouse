@@ -1,7 +1,7 @@
 {
     "name": "mochalygin/doctrine-dbal-clickhouse",
     "type": "library",
-    "version" : "0.2.1",
+    "version" : "0.2.2",
     "description": "Doctrine DBAL driver for ClickHouse",
     "keywords": ["doctrine", "dbal", "clickhouse", "driver"],
     "homepage": "http://github.com/mochalygin/doctrine-dbal-clickhouse",
