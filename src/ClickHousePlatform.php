@@ -13,6 +13,7 @@ use Doctrine\DBAL\Types\DateType;
 use Doctrine\DBAL\Types\IntegerType;
 use Doctrine\DBAL\Types\SmallIntType;
 use Doctrine\DBAL\Types\BigIntType;
+use Doctrine\DBAL\Types\DateTimeType;
 
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
@@ -135,7 +136,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getClobTypeDeclarationSQL(array $field)
     {
-        return 'String';
+        return $field['arrayOf'] && $this->getDoctrineTypeMapping($field['arrayOf']) ? ('Array(' . $field['arrayOf'] . ')') : 'String';
     }
 
     /**
