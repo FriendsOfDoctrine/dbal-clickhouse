@@ -136,7 +136,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getClobTypeDeclarationSQL(array $field)
     {
-        return $field['arrayOf'] && $this->getDoctrineTypeMapping($field['arrayOf']) ? ('Array(' . $field['arrayOf'] . ')') : 'String';
+        return isset($field['arrayOf']) && $this->getDoctrineTypeMapping($field['arrayOf']) ? ('Array(' . $field['arrayOf'] . ')') : 'String';
     }
 
     /**
