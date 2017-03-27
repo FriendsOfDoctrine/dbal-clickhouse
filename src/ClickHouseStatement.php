@@ -325,7 +325,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
             return (int)(bool)$this->values[$key];
         }
 
-        return "'" . addslashes($this->values[$key]) . "'";
+        return is_array($this->values[$key]) ? json_encode($this->values[$key]) : ("'" . addslashes($this->values[$key]) . "'");
     }
 
 }
