@@ -305,8 +305,8 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
         $type = isset($this->types[$key]) ? $this->types[$key] : null;
 
         // if param type was not setted - trying to get db-type by php-var-type
-        if ( is_null($type) ) {
-            if ( is_bool($this->values[$key]) ) {
+        if (is_null($type)) {
+            if (is_bool($this->values[$key])) {
                 $type = \PDO::PARAM_BOOL;
             } else if (is_int($this->values[$key]) || is_float($this->values[$key])) {
                 $type = \PDO::PARAM_INT;
@@ -327,5 +327,4 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
 
         return is_array($this->values[$key]) ? json_encode($this->values[$key]) : ("'" . addslashes($this->values[$key]) . "'");
     }
-
 }
