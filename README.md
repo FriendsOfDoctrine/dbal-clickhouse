@@ -62,8 +62,6 @@ $newTable = $toSchema->createTable('new_table');
 // add columns
 $newTable->addColumn('id', 'integer', ['unsigned' => true]);
 $newTable->addColumn('payload', 'string');
-// add custom array specific option `arrayOf` to create column with ClickHouse type Array(`arrayOf`), ex. Array(UInt8)
-$newTable->addColumn('roles', 'array', ['customSchemaOptions' => ['arrayOf' => 'UInt8']]);
 
 //set primary key
 $newTable->setPrimaryKey(['id']);
