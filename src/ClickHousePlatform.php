@@ -538,14 +538,14 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
             /**
              * eventDateColumn section
              */
-            if (!empty($options['eventDateProviderColumn'])) {
+            if (! empty($options['eventDateProviderColumn']) ) {
                 $eventDateColumnName = 'EventDate';
                 $dateColumn = [$eventDateColumnName => [
                     'name' => $eventDateColumnName,
                     'type' => Type::getType('date'),
                     'default' => 'toDate(' . trim($options['eventDateProviderColumn']) . ')'
                 ]];
-            } elseif (empty($options['eventDateColumn'])) {
+            } elseif ( empty($options['eventDateColumn']) ) {
                 $dateColumns = array_filter($columns, function ($column) {
                     return $column['type'] instanceof DateType;
                 });
@@ -561,8 +561,8 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                     'default' => 'today()'
                 ]];
             } else {
-                if (isset($columns[$options['eventDateColumn']])) {
-                    if ($columns[$options['eventDateColumn']]['type'] instanceof DateType) {
+                if ( isset($columns[$options['eventDateColumn']]) ) {
+                    if ( $columns[$options['eventDateColumn']]['type'] instanceof DateType ) {
                         $eventDateColumnName = $options['eventDateColumn'];
                         $dateColumn = [$options['eventDateColumn'] => $columns[$options['eventDateColumn']]];
                         unset($columns[$options['eventDateColumn']]);
@@ -576,6 +576,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                         'type' => Type::getType('date'),
                         'default' => 'today()'
                     ]];
+
                 }
             }
             $columns = $dateColumn + $columns; // insert into very beginning
