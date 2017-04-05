@@ -90,8 +90,8 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     public function columnCount()
     {
         return $this->rows
-            ? count(array_slice($this->rows, 0, 1)[0])
-            : null;
+                ? count(array_slice($this->rows, 0, 1)[0])
+                : null;
     }
 
     /**
@@ -111,11 +111,11 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     {
         $mode = $fetchMode ?: $this->fetchMode;
         if (! in_array($mode, [
-            \PDO::FETCH_ASSOC,
-            \PDO::FETCH_NUM,
-            \PDO::FETCH_BOTH,
-            \PDO::FETCH_OBJ,
-            \PDO::FETCH_KEY_PAIR,
+                    \PDO::FETCH_ASSOC,
+                    \PDO::FETCH_NUM,
+                    \PDO::FETCH_BOTH,
+                    \PDO::FETCH_OBJ,
+                    \PDO::FETCH_KEY_PAIR,
         ])) {
             $mode = \PDO::FETCH_BOTH;
         }
@@ -161,37 +161,37 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     {
         if (\PDO::FETCH_NUM == $this->assumeFetchMode($fetchMode)) {
             return  array_map(
-                function ($row) {return array_values($row);},
-                $this->rows
-            );
+                        function ($row) {return array_values($row);},
+                        $this->rows
+                    );
         }
 
         if (\PDO::FETCH_BOTH == $this->assumeFetchMode($fetchMode)) {
             return  array_map(
-                function ($row) {return array_values($row) + $row;},
-                $this->rows
-            );
+                        function ($row) {return array_values($row) + $row;},
+                        $this->rows
+                    );
         }
 
         if (\PDO::FETCH_OBJ == $this->assumeFetchMode($fetchMode)) {
             return  array_map(
-                function ($row) {return (object)$row;},
-                $this->rows
-            );
+                        function ($row) {return (object)$row;},
+                        $this->rows
+                    );
         }
 
         if (\PDO::FETCH_KEY_PAIR == $this->assumeFetchMode($fetchMode)) {
             return  array_map(
-                function ($row) {
-                    if (count($row) < 2) {
-                        throw new \Exception('To fetch in \PDO::FETCH_KEY_PAIR mode, result set must contain at least 2 columns');
-                    }
+                        function ($row) {
+                            if (count($row) < 2) {
+                                throw new \Exception('To fetch in \PDO::FETCH_KEY_PAIR mode, result set must contain at least 2 columns');
+                            }
 
-                    return [array_shift($row) => array_shift($row)];
+                            return [array_shift($row) => array_shift($row)];
 
-                },
-                $this->rows
-            );
+                        },
+                        $this->rows
+                    );
         }
 
 
