@@ -90,8 +90,8 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     public function columnCount()
     {
         return $this->rows
-                ? count(array_slice($this->rows, 0, 1)[0])
-                : null;
+            ? count(array_slice($this->rows, 0, 1)[0])
+            : null;
     }
 
     /**
@@ -111,11 +111,11 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     {
         $mode = $fetchMode ?: $this->fetchMode;
         if (! in_array($mode, [
-                    \PDO::FETCH_ASSOC,
-                    \PDO::FETCH_NUM,
-                    \PDO::FETCH_BOTH,
-                    \PDO::FETCH_OBJ,
-                    \PDO::FETCH_KEY_PAIR,
+            \PDO::FETCH_ASSOC,
+            \PDO::FETCH_NUM,
+            \PDO::FETCH_BOTH,
+            \PDO::FETCH_OBJ,
+            \PDO::FETCH_KEY_PAIR,
         ])) {
             $mode = \PDO::FETCH_BOTH;
         }
@@ -161,37 +161,37 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     {
         if (\PDO::FETCH_NUM == $this->assumeFetchMode($fetchMode)) {
             return  array_map(
-                        function ($row) {return array_values($row);},
-                        $this->rows
-                    );
+                function ($row) {return array_values($row);},
+                $this->rows
+            );
         }
 
         if (\PDO::FETCH_BOTH == $this->assumeFetchMode($fetchMode)) {
             return  array_map(
-                        function ($row) {return array_values($row) + $row;},
-                        $this->rows
-                    );
+                function ($row) {return array_values($row) + $row;},
+                $this->rows
+            );
         }
 
         if (\PDO::FETCH_OBJ == $this->assumeFetchMode($fetchMode)) {
             return  array_map(
-                        function ($row) {return (object)$row;},
-                        $this->rows
-                    );
+                function ($row) {return (object)$row;},
+                $this->rows
+            );
         }
 
         if (\PDO::FETCH_KEY_PAIR == $this->assumeFetchMode($fetchMode)) {
             return  array_map(
-                        function ($row) {
-                            if (count($row) < 2) {
-                                throw new \Exception('To fetch in \PDO::FETCH_KEY_PAIR mode, result set must contain at least 2 columns');
-                            }
+                function ($row) {
+                    if (count($row) < 2) {
+                        throw new \Exception('To fetch in \PDO::FETCH_KEY_PAIR mode, result set must contain at least 2 columns');
+                    }
 
-                            return [array_shift($row) => array_shift($row)];
+                    return [array_shift($row) => array_shift($row)];
 
-                        },
-                        $this->rows
-                    );
+                },
+                $this->rows
+            );
         }
 
 
@@ -305,8 +305,8 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
         $type = isset($this->types[$key]) ? $this->types[$key] : null;
 
         // if param type was not setted - trying to get db-type by php-var-type
-        if (is_null($type)) {
-            if (is_bool($this->values[$key])) {
+        if ( is_null($type) ) {
+            if ( is_bool($this->values[$key]) ) {
                 $type = \PDO::PARAM_BOOL;
             } else if (is_int($this->values[$key]) || is_float($this->values[$key])) {
                 $type = \PDO::PARAM_INT;
@@ -325,6 +325,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
             return (int)(bool)$this->values[$key];
         }
 
-        return is_array($this->values[$key]) ? json_encode($this->values[$key]) : ("'" . addslashes($this->values[$key]) . "'");
+        return "'" . addslashes($this->values[$key]) . "'";
     }
+
 }

@@ -538,23 +538,30 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
             /**
              * eventDateColumn section
              */
-            if ( empty($options['eventDateColumn']) ) {
-                $dateColumns = array_filter($columns, function($column) {
+            if (!empty($options['eventDateProviderColumn'])) {
+                $eventDateColumnName = 'EventDate';
+                $dateColumn = [$eventDateColumnName => [
+                    'name' => $eventDateColumnName,
+                    'type' => Type::getType('date'),
+                    'default' => 'toDate(' . trim($options['eventDateProviderColumn']) . ')'
+                ]];
+            } elseif (empty($options['eventDateColumn'])) {
+                $dateColumns = array_filter($columns, function ($column) {
                     return $column['type'] instanceof DateType;
                 });
 
                 if ($dateColumns) {
                     throw new \Exception('Table `' . $tableName . '` has DateType columns: `' . implode('`, `', array_keys($dateColumns)) . '`, but no one of them is setted as `eventDateColumn` with $table->addOption("eventDateColumn", "%eventDateColumnName%")');
-                } else {
-                    $eventDateColumnName = 'EventDate';
-                    $dateColumn = [$eventDateColumnName => [
-                        'name' => $eventDateColumnName,
-                        'type' => Type::getType('date'),
-                        'default' => 'today()'
-                    ]];
                 }
+
+                $eventDateColumnName = 'EventDate';
+                $dateColumn = [$eventDateColumnName => [
+                    'name' => $eventDateColumnName,
+                    'type' => Type::getType('date'),
+                    'default' => 'today()'
+                ]];
             } else {
-                if ( isset($columns[$options['eventDateColumn']]) ) {
+                if (isset($columns[$options['eventDateColumn']])) {
                     if ($columns[$options['eventDateColumn']]['type'] instanceof DateType) {
                         $eventDateColumnName = $options['eventDateColumn'];
                         $dateColumn = [$options['eventDateColumn'] => $columns[$options['eventDateColumn']]];
@@ -569,7 +576,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                         'type' => Type::getType('date'),
                         'default' => 'today()'
                     ]];
-
                 }
             }
             $columns = $dateColumn + $columns; // insert into very beginning
