@@ -564,7 +564,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                 ) {
                     $dateColumnParams['default'] = 'toDate(' . $options['eventDateProviderColumn'] . ')';
                 } else {
-                    throw new \Exception('Column `' . $options['eventDateProviderColumn'] . '` with type `'.$columns[$options['eventDateProviderColumn']]['type']->getName().'` defined in `eventDateProviderColumn` option not has valid DBAL Type');
+                    throw new \Exception('Column `' . $options['eventDateProviderColumn'] . '` with type `'.$columns[$options['eventDateProviderColumn']]['type']->getName().'`, defined in `eventDateProviderColumn` option, not has valid DBAL Type');
                 }
             }
             if ( empty($options['eventDateColumn']) ) {
