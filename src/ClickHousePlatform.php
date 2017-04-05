@@ -555,7 +555,10 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                 if (
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof DateType ||
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof DateTimeType ||
-                    $columns[$options['eventDateProviderColumn']]['type'] instanceof StringType ||
+                    (
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof StringType &&
+                        null === $columns[$options['eventDateProviderColumn']]['length']
+                    ) ||
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof TextType ||
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof IntegerType ||
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof SmallIntType ||
