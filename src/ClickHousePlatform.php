@@ -562,7 +562,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof DecimalType ||
                     (
                         $columns[$options['eventDateProviderColumn']]['type'] instanceof StringType &&
-                        null === $columns[$options['eventDateProviderColumn']]['length']
+                        ! $columns[$options['eventDateProviderColumn']]['fixed']
                     )
                 ) {
                     $dateColumnParams['default'] = 'toDate(' . $options['eventDateProviderColumn'] . ')';

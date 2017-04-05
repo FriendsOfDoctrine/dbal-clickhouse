@@ -62,6 +62,8 @@ $newTable = $toSchema->createTable('new_table');
 // add columns
 $newTable->addColumn('id', 'integer', ['unsigned' => true]);
 $newTable->addColumn('payload', 'string');
+$newTable->addColumn('hash', 'string', ['length' => 32, 'fixed' => true]);
+// *option 'fixed' determine if the specified length of a string column should be fixed and has type FixedString
 
 //set primary key
 $newTable->setPrimaryKey(['id']);
