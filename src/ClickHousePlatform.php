@@ -549,7 +549,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
             if (! empty($options['eventDateProviderColumn']) ) {
                 $options['eventDateProviderColumn'] = trim($options['eventDateProviderColumn']);
                 if (! isset($columns[$options['eventDateProviderColumn']]) ) {
-                    throw new \Exception('Table `' . $tableName . '` not has column with name: `' . $options['eventDateProviderColumn']);
+                    throw new \Exception('Table `' . $tableName . '` has not column with name: `' . $options['eventDateProviderColumn']);
                 }
 
                 if (
@@ -558,6 +558,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof TextType ||
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof IntegerType ||
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof SmallIntType ||
+                    $columns[$options['eventDateProviderColumn']]['type'] instanceof BigIntType ||
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof FloatType ||
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof DecimalType ||
                     (
@@ -565,9 +566,16 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                         ! $columns[$options['eventDateProviderColumn']]['fixed']
                     )
                 ) {
-                    $dateColumnParams['default'] = 'toDate(' . $options['eventDateProviderColumn'] . ')';
+                    $dateColumnParams['default'] =
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof IntegerType ||
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof SmallIntType ||
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof BigIntType ||
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof FloatType ||
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof DecimalType ?
+                            ('toDate(toDateTime(' . $options['eventDateProviderColumn'] . '))') :
+                            ('toDate(' . $options['eventDateProviderColumn'] . ')');
                 } else {
-                    throw new \Exception('Column `' . $options['eventDateProviderColumn'] . '` with type `'.$columns[$options['eventDateProviderColumn']]['type']->getName().'`, defined in `eventDateProviderColumn` option, not has valid DBAL Type');
+                    throw new \Exception('Column `' . $options['eventDateProviderColumn'] . '` with type `'.$columns[$options['eventDateProviderColumn']]['type']->getName().'`, defined in `eventDateProviderColumn` option, has not valid DBAL Type');
                 }
             }
             if ( empty($options['eventDateColumn']) ) {

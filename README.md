@@ -63,7 +63,7 @@ $newTable = $toSchema->createTable('new_table');
 $newTable->addColumn('id', 'integer', ['unsigned' => true]);
 $newTable->addColumn('payload', 'string');
 $newTable->addColumn('hash', 'string', ['length' => 32, 'fixed' => true]);
-// *option 'fixed' determine if the specified length of a string column should be fixed and has type FixedString
+// *option 'fixed' sets the fixed length of a string column as specified; if specified, the type of the column is FixedString
 
 //set primary key
 $newTable->setPrimaryKey(['id']);
@@ -89,7 +89,7 @@ $newTable->addColumn('event_date', 'date', ['default' => 'toDate(now())']);
 $newTable->addOption('eventDateColumn', 'event_date');
 // *if not specified -- default Date column named EventDate will be added
 $newTable->addOption('eventDateProviderColumn', 'updated_at');
-// *if specified -- default Date column named EventDate will be added with default value toDate(updated_at)
+// *if specified -- event date column will be added with default value toDate(updated_at)
 
 
 //specify index granularity
