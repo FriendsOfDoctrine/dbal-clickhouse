@@ -286,7 +286,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getSubstringExpression($value, $from, $length = null)
     {
-        if ( isnull($length) ) {
+        if ( null === $length ) {
             throw new \InvalidArgumentException("'length' argument must be a constant");
         }
 
@@ -555,15 +555,15 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                 if (
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof DateType ||
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof DateTimeType ||
-                    (
-                        $columns[$options['eventDateProviderColumn']]['type'] instanceof StringType &&
-                        null === $columns[$options['eventDateProviderColumn']]['length']
-                    ) ||
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof TextType ||
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof IntegerType ||
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof SmallIntType ||
                     $columns[$options['eventDateProviderColumn']]['type'] instanceof FloatType ||
-                    $columns[$options['eventDateProviderColumn']]['type'] instanceof DecimalType
+                    $columns[$options['eventDateProviderColumn']]['type'] instanceof DecimalType ||
+                    (
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof StringType &&
+                        null === $columns[$options['eventDateProviderColumn']]['length']
+                    )
                 ) {
                     $dateColumnParams['default'] = 'toDate(' . $options['eventDateProviderColumn'] . ')';
                 } else {
