@@ -571,18 +571,18 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                 }
             }
             if ( empty($options['eventDateColumn']) ) {
-                $dateColumns = array_filter($columns, function ($column) {
+                $dateColumns = array_filter($columns, function($column) {
                     return $column['type'] instanceof DateType;
                 });
 
-                if ( $dateColumns ) {
+                if ($dateColumns) {
                     throw new \Exception('Table `' . $tableName . '` has DateType columns: `' . implode('`, `', array_keys($dateColumns)) . '`, but no one of them is setted as `eventDateColumn` with $table->addOption("eventDateColumn", "%eventDateColumnName%")');
                 }
 
                 $eventDateColumnName = 'EventDate';
             } else {
                 if ( isset($columns[$options['eventDateColumn']]) ) {
-                    if ( $columns[$options['eventDateColumn']]['type'] instanceof DateType ) {
+                    if ($columns[$options['eventDateColumn']]['type'] instanceof DateType) {
                         $eventDateColumnName = $options['eventDateColumn'];
                         unset($columns[$options['eventDateColumn']]);
                     } else {
