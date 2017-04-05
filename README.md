@@ -89,7 +89,7 @@ $newTable->addColumn('event_date', 'date', ['default' => 'toDate(now())']);
 $newTable->addOption('eventDateColumn', 'event_date');
 // *if not specified -- default Date column named EventDate will be added
 $newTable->addOption('eventDateProviderColumn', 'updated_at');
-// *if specified -- event date column will be added with default value toDate(updated_at)
+// *if specified -- event date column will be added with default value toDate(updated_at); if provider column type is numeric, then event date column will be added with default value toDate(toDateTime(updated_at))
 
 
 //specify index granularity
