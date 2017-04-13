@@ -23,7 +23,7 @@ $connectionParams = [
 $conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, new \Doctrine\DBAL\Configuration());
 ```
 
-### Symfony 2/3
+### Symfony
 configure...
 ```yml
 # app/config/config.yml
