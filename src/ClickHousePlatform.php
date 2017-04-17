@@ -1,31 +1,33 @@
 <?php
-
-/**
- * Doctrine DBAL library for ClickHouse -- an open-source column-oriented DBMS for OLAP (https://clickhouse.yandex)
+/*
+ * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
+ * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
+ *
+ * (c) FriendsOfDoctrine <https://github.com/FriendsOfDoctrine/>.
+ *
+ * For the full copyright and license inflormation, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Mochalygin\DoctrineDBALClickHouse;
 
 use Doctrine\DBAL\DBALException;
-
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\DateType;
 use Doctrine\DBAL\Types\IntegerType;
 use Doctrine\DBAL\Types\SmallIntType;
 use Doctrine\DBAL\Types\BigIntType;
-
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\TableDiff;
 
 /**
- * Platform for ClickHouse database {@link https://clickhouse.yandex/}
+ * Provides the behavior, features and SQL dialect of the ClickHouse database platform.
  *
- * @author mochalygin <a@mochalygin.ru>
+ * @author Mochalygin <a@mochalygin.ru>
  */
 class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
 {
-
     /**
      * {@inheritDoc}
      */

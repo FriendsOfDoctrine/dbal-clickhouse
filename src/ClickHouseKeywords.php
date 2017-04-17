@@ -1,6 +1,12 @@
 <?php
-/**
- * Doctrine DBAL library for ClickHouse -- an open-source column-oriented DBMS for OLAP (https://clickhouse.yandex)
+/*
+ * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
+ * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
+ *
+ * (c) FriendsOfDoctrine <https://github.com/FriendsOfDoctrine/>.
+ *
+ * For the full copyright and license inflormation, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Mochalygin\DoctrineDBALClickHouse;
@@ -8,7 +14,7 @@ namespace Mochalygin\DoctrineDBALClickHouse;
 use Doctrine\DBAL\Platforms\Keywords\KeywordList;
 
 /**
- * Reserved keywords for ClickHouse database {@link https://clickhouse.yandex/}
+ * ClickHouse Keywordlist
  *
  * @author Mochalygin <a@mochalygin.ru>
  */
@@ -240,9 +246,7 @@ class ClickHouseKeywords extends KeywordList
             'XOR',
             'YEAR_MONTH',
             'ZEROFILL',
-            
-            
-            
+
             'FIXEDSTRING',
             'STRING',
             'MINUS',

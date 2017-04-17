@@ -1,19 +1,23 @@
 <?php
-
-/**
- * Doctrine DBAL library for ClickHouse -- an open-source column-oriented DBMS for OLAP (https://clickhouse.yandex)
+/*
+ * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
+ * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
+ *
+ * (c) FriendsOfDoctrine <https://github.com/FriendsOfDoctrine/>.
+ *
+ * For the full copyright and license inflormation, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
 namespace Mochalygin\DoctrineDBALClickHouse;
 
 /**
- * DBAL Driver for ClickHouse database {@link https://clickhouse.yandex/}
+ * ClickHouse Driver
  *
- * @author mochalygin <a@mochalygin.ru>
+ * @author Mochalygin <a@mochalygin.ru>
  */
 class Driver implements \Doctrine\DBAL\Driver
 {
-
     /**
      * {@inheritDoc}
      */
