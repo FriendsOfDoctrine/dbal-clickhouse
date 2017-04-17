@@ -1,4 +1,4 @@
-# Doctrine FODDBALClickHouse
+# Doctrine FODDBALClickHouse Driver
 
 Doctrine DBAL driver for ClickHouse -- an open-source column-oriented database management system by Yandex (https://clickhouse.yandex/)
 
