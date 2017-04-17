@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Mochalygin\DoctrineDBALClickHouse;
+namespace FOD\DBALClickHouse;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Types\Type;
@@ -1055,7 +1055,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     protected function getReservedKeywordsClass()
     {
-        return 'Mochalygin\DoctrineDBALClickHouse\ClickHouseKeywords';
+        return 'FOD\DBALClickHouse\ClickHouseKeywords';
     }
 
     /**

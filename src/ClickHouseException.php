@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Mochalygin\DoctrineDBALClickHouse;
+namespace FOD\DBALClickHouse;
 
 /**
  * Specific Exception for ClickHouse
