@@ -12,11 +12,18 @@
 namespace FOD\DBALClickHouse;
 
 use Doctrine\DBAL\DBALException;
+
+use Doctrine\DBAL\Types\DecimalType;
+use Doctrine\DBAL\Types\FloatType;
+use Doctrine\DBAL\Types\StringType;
+use Doctrine\DBAL\Types\TextType;
 use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Types\DateType;
 use Doctrine\DBAL\Types\IntegerType;
 use Doctrine\DBAL\Types\SmallIntType;
 use Doctrine\DBAL\Types\BigIntType;
+use Doctrine\DBAL\Types\DateTimeType;
+
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\TableDiff;
@@ -283,7 +290,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getSubstringExpression($value, $from, $length = null)
     {
-        if ( isnull($length) ) {
+        if ( null === $length ) {
             throw new \InvalidArgumentException("'length' argument must be a constant");
         }
 
@@ -539,6 +546,42 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
             /**
              * eventDateColumn section
              */
+            $dateColumnParams = [
+                'type' => Type::getType('date'),
+                'default' => 'today()',
+            ];
+            if (! empty($options['eventDateProviderColumn']) ) {
+                $options['eventDateProviderColumn'] = trim($options['eventDateProviderColumn']);
+                if (! isset($columns[$options['eventDateProviderColumn']]) ) {
+                    throw new \Exception('Table `' . $tableName . '` has not column with name: `' . $options['eventDateProviderColumn']);
+                }
+
+                if (
+                    $columns[$options['eventDateProviderColumn']]['type'] instanceof DateType ||
+                    $columns[$options['eventDateProviderColumn']]['type'] instanceof DateTimeType ||
+                    $columns[$options['eventDateProviderColumn']]['type'] instanceof TextType ||
+                    $columns[$options['eventDateProviderColumn']]['type'] instanceof IntegerType ||
+                    $columns[$options['eventDateProviderColumn']]['type'] instanceof SmallIntType ||
+                    $columns[$options['eventDateProviderColumn']]['type'] instanceof BigIntType ||
+                    $columns[$options['eventDateProviderColumn']]['type'] instanceof FloatType ||
+                    $columns[$options['eventDateProviderColumn']]['type'] instanceof DecimalType ||
+                    (
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof StringType &&
+                        ! $columns[$options['eventDateProviderColumn']]['fixed']
+                    )
+                ) {
+                    $dateColumnParams['default'] =
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof IntegerType ||
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof SmallIntType ||
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof BigIntType ||
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof FloatType ||
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof DecimalType ?
+                            ('toDate(toDateTime(' . $options['eventDateProviderColumn'] . '))') :
+                            ('toDate(' . $options['eventDateProviderColumn'] . ')');
+                } else {
+                    throw new \Exception('Column `' . $options['eventDateProviderColumn'] . '` with type `'.$columns[$options['eventDateProviderColumn']]['type']->getName().'`, defined in `eventDateProviderColumn` option, has not valid DBAL Type');
+                }
+            }
             if ( empty($options['eventDateColumn']) ) {
                 $dateColumns = array_filter($columns, function($column) {
                     return $column['type'] instanceof DateType;
@@ -546,34 +589,23 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
 
                 if ($dateColumns) {
                     throw new \Exception('Table `' . $tableName . '` has DateType columns: `' . implode('`, `', array_keys($dateColumns)) . '`, but no one of them is setted as `eventDateColumn` with $table->addOption("eventDateColumn", "%eventDateColumnName%")');
-                } else {
-                    $eventDateColumnName = 'EventDate';
-                    $dateColumn = [$eventDateColumnName => [
-                        'name' => $eventDateColumnName,
-                        'type' => Type::getType('date'),
-                        'default' => 'today()'
-                    ]];
                 }
+
+                $eventDateColumnName = 'EventDate';
             } else {
                 if ( isset($columns[$options['eventDateColumn']]) ) {
                     if ($columns[$options['eventDateColumn']]['type'] instanceof DateType) {
                         $eventDateColumnName = $options['eventDateColumn'];
-                        $dateColumn = [$options['eventDateColumn'] => $columns[$options['eventDateColumn']]];
                         unset($columns[$options['eventDateColumn']]);
                     } else {
                         throw new \Exception('In table `' . $tableName . '` you have set field `' . $options['eventDateColumn'] . '` (' . get_class($columns[$options['eventDateColumn']]['type']) . ') as `eventDateColumn`, but it is not instance of DateType');
                     }
                 } else {
                     $eventDateColumnName = $options['eventDateColumn'];
-                    $dateColumn = [$eventDateColumnName => [
-                        'name' => $eventDateColumnName,
-                        'type' => Type::getType('date'),
-                        'default' => 'today()'
-                    ]];
-
                 }
             }
-            $columns = $dateColumn + $columns; // insert into very beginning
+            $dateColumnParams['name'] = $eventDateColumnName;
+            $columns = [$eventDateColumnName => $dateColumnParams] + $columns; // insert into very beginning
 
             /**
              * Primary key section

@@ -62,6 +62,8 @@ $newTable = $toSchema->createTable('new_table');
 // add columns
 $newTable->addColumn('id', 'integer', ['unsigned' => true]);
 $newTable->addColumn('payload', 'string');
+$newTable->addColumn('hash', 'string', ['length' => 32, 'fixed' => true]);
+// *option 'fixed' sets the fixed length of a string column as specified; if specified, the type of the column is FixedString
 
 //set primary key
 $newTable->setPrimaryKey(['id']);
@@ -86,6 +88,10 @@ $newTable->addOption('engine', 'MergeTree');
 $newTable->addColumn('event_date', 'date', ['default' => 'toDate(now())']);
 $newTable->addOption('eventDateColumn', 'event_date');
 // *if not specified -- default Date column named EventDate will be added
+$newTable->addOption('eventDateProviderColumn', 'updated_at');
+// *if specified -- event date column will be added with default value toDate(updated_at); 
+//    if the type of the provider column is `string`, the valid format of provider column values must be either `YYYY-MM-DD` or `YYYY-MM-DD hh:mm:ss`
+//    if the type of provider column is neither `string`, nor `date`, nor `datetime`, provider column values must contain a valid UNIX Timestamp
 
 
 //specify index granularity
