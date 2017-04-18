@@ -1,28 +1,32 @@
 <?php
-
-/**
- * Doctrine DBAL library for ClickHouse -- an open-source column-oriented DBMS for OLAP (https://clickhouse.yandex)
+/*
+ * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
+ * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
+ *
+ * (c) FriendsOfDoctrine <https://github.com/FriendsOfDoctrine/>.
+ *
+ * For the full copyright and license inflormation, please view the LICENSE
+ * file that was distributed with this source code.
  */
 
-namespace Mochalygin\DoctrineDBALClickHouse;
+namespace FOD\DBALClickHouse;
 
 use Doctrine\Common\EventManager;
 use Doctrine\DBAL\DBALException;
 
 /**
- * Connection for ClickHouse database {@link https://clickhouse.yandex/}
+ * ClickHouse Connection
  *
- * @author mochalygin <a@mochalygin.ru>
+ * @author Mochalygin <a@mochalygin.ru>
  */
 class Connection extends \Doctrine\DBAL\Connection
 {
-
     /**
      * {@inheritDoc}
      */
     public function executeUpdate($query, array $params = array(), array $types = array())
     {
-        //ClickHouse has no UPDATE and DELETE statements
+        // ClickHouse has no UPDATE or DELETE statements
         $command = strtoupper(substr(trim($query), 0, 6));
         if ('UPDATE' == $command || 'DELETE' == $command) {
             throw new ClickHouseException('UPDATE and DELETE are not allowed in ClickHouse');

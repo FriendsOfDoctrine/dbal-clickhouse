@@ -1,11 +1,11 @@
-# doctrine-dbal-clickhouse
+# Doctrine DBAL ClickHouse Driver
 
 Doctrine DBAL driver for ClickHouse -- an open-source column-oriented database management system by Yandex (https://clickhouse.yandex/)
 
 ## Installation
 
 ```
-composer require mochalygin/doctrine-dbal-clickhouse
+composer require friendsofdoctrine/dbal-clickhouse
 ```
 
 ## Initialization
@@ -17,13 +17,13 @@ $connectionParams = [
     'user' => 'default',
     'password' => '',
     'dbname' => 'default',
-    'driverClass' => 'Mochalygin\DoctrineDBALClickHouse\Driver',
-    'wrapperClass' => 'Mochalygin\DoctrineDBALClickHouse\Connection'
+    'driverClass' => 'FOD\DBALClickHouse\Driver',
+    'wrapperClass' => 'FOD\DBALClickHouse\Connection'
 ];
 $conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, new \Doctrine\DBAL\Configuration());
 ```
 
-### Symfony 2/3
+### Symfony
 configure...
 ```yml
 # app/config/config.yml
@@ -36,8 +36,8 @@ doctrine:
                 user:     default
                 password: ""
                 dbname:   default
-                driver_class: Mochalygin\DoctrineDBALClickHouse\Driver
-                wrapper_class: Mochalygin\DoctrineDBALClickHouse\Connection
+                driver_class: FOD\DBALClickHouse\Driver
+                wrapper_class: FOD\DBALClickHouse\Connection
             #mysql:
             #   ...
 ```

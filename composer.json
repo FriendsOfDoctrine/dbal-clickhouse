@@ -1,10 +1,10 @@
 {
-    "name": "mochalygin/doctrine-dbal-clickhouse",
+    "name": "friendsofdoctrine/dbal-clickhouse",
     "type": "library",
-    "version" : "0.2.1",
+    "version" : "1.0.0",
     "description": "Doctrine DBAL driver for ClickHouse",
     "keywords": ["doctrine", "dbal", "clickhouse", "driver"],
-    "homepage": "http://github.com/mochalygin/doctrine-dbal-clickhouse",
+    "homepage": "http://github.com/friendsofdoctrine/dbal-clickhouse",
     "license": "MIT",
     "authors": [
         {
@@ -18,6 +18,6 @@
         "doctrine/dbal": ">=2.5"
     },
     "autoload": {
-        "psr-4": { "Mochalygin\\DoctrineDBALClickHouse\\": "src/" }
+        "psr-4": { "FOD\\DBALClickHouse\\": "src/" }
     }
 }
