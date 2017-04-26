@@ -49,7 +49,7 @@ class Driver implements \Doctrine\DBAL\Driver
             throw new ClickHouseException('Connection parameter `dbname` is required');
         }
 
-        return new ClickHouseConnection($user, $password, $params['host'], $params['port'], $params['dbname']);
+        return new ClickHouseConnection($user, $password, $params['host'], $params['port'], $params['dbname'], $this->getDatabasePlatform());
     }
 
     /**

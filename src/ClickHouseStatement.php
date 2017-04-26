@@ -11,6 +11,8 @@
 
 namespace FOD\DBALClickHouse;
 
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+
 /**
  * ClickHouse Statement
  *
@@ -27,6 +29,11 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      * @var string
      */
     protected $statement;
+
+    /**
+     * @var AbstractPlatform
+     */
+    protected $platform;
 
     /**
      * @var array|null
@@ -59,10 +66,11 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      * @param \ClickHouseDB\Client $client
      * @param string $statement
      */
-    public function __construct(\ClickHouseDB\Client $client, $statement)
+    public function __construct(\ClickHouseDB\Client $client, $statement, AbstractPlatform $platform)
     {
         $this->smi2CHClient = $client;
         $this->statement = $statement;
+        $this->platform = $platform;
     }
 
     /**
@@ -314,6 +322,26 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
                 $type = \PDO::PARAM_BOOL;
             } else if (is_int($this->values[$key]) || is_float($this->values[$key])) {
                 $type = \PDO::PARAM_INT;
+            } else if ( is_array($this->values[$key]) ) {
+
+                /*
+                 * ClickHouse Arrays
+                 */
+                $values = $this->values[$key];
+                if ( is_int(current($values)) || is_float(current($values)) ) {
+                    array_map(
+                        function ($value) {
+                            if (!is_int($value) && !is_float($value)) {
+                                throw new ClickHouseException('Array values must all be int/float or string, mixes not allowed');
+                            }
+                        },
+                        $values
+                    );
+                } else {
+                    $values = array_map([$this->platform, 'quoteStringLiteral'], $values);
+                }
+
+                return '[' . implode(', ', $values) . ']';
             }
         }
 
@@ -329,7 +357,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
             return (int)(bool)$this->values[$key];
         }
 
-        return "'" . addslashes($this->values[$key]) . "'";
+        return $this->platform->quoteStringLiteral($this->values[$key]);
     }
 
 }

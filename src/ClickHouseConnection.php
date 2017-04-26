@@ -13,6 +13,7 @@ namespace FOD\DBALClickHouse;
 
 use Doctrine\DBAL\ConnectionException;
 use ClickHouseDB\Client as Smi2CHClient;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
  * ClickHouse implementation for the Connection interface.
@@ -27,6 +28,11 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
     protected $smi2CHClient;
 
     /**
+     * @var AbstractPlatform
+     */
+    protected $platform;
+
+    /**
      * Connection constructor
      *
      * @param string $username      The username to use when connecting.
@@ -35,7 +41,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      * @param int $port
      * @param string $database
      */
-    public function __construct($username = 'default', $password = '', $host = 'localhost', $port = 8123, $database = 'default')
+    public function __construct($username = 'default', $password = '', $host = 'localhost', $port = 8123, $database = 'default', AbstractPlatform $platform = null)
     {
         $this->smi2CHClient = new Smi2CHClient([
             'host' => $host,
@@ -44,6 +50,8 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
             'password' => $password,
             'settings' => ['database' => $database]
         ]);
+
+        $this->platform = $platform;
     }
 
     /**
@@ -55,7 +63,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
             throw new \Exception('ClickHouse\Client was not initialized');
         }
 
-        return new ClickHouseStatement($this->smi2CHClient, $prepareString);
+        return new ClickHouseStatement($this->smi2CHClient, $prepareString, $this->platform);
     }
 
     /**
@@ -79,7 +87,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
             return $input;
         }
 
-        return '\'' . addslashes($input) . '\'';
+        return $this->platform->quoteStringLiteral($input);
     }
 
     /**

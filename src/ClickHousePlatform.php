@@ -1077,14 +1077,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getStringLiteralQuoteCharacter()
-    {
-        return '`';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
     protected function getReservedKeywordsClass()
     {
         return 'FOD\DBALClickHouse\ClickHouseKeywords';
@@ -1133,6 +1125,16 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
             $dbType = 'enum16';
         }
         return parent::getDoctrineTypeMapping($dbType);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function quoteStringLiteral($str)
+    {
+        $c = $this->getStringLiteralQuoteCharacter();
+
+        return $c . addslashes($str) . $c; // TODO is this enough secure?
     }
 
 }
