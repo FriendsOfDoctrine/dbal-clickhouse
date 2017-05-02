@@ -885,7 +885,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getListTableColumnsSQL($table, $database = null)
     {
-        return 'DESCRIBE TABLE ' . ($database ? $this->quoteStringLiteral($database) . '.' : '') . $this->quoteStringLiteral($table) . ' FORMAT JSON';
+        return 'DESCRIBE TABLE ' . ($database ? $this->quoteSingleIdentifier($database) . '.' : '') . $this->quoteSingleIdentifier($table) . ' FORMAT JSON';
     }
 
     /**
@@ -909,7 +909,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getCreateViewSQL($name, $sql)
     {
-        return 'CREATE VIEW ' . $this->quoteStringLiteral($name) . ' AS ' . $sql;
+        return 'CREATE VIEW ' . $this->quoteIdentifier($name) . ' AS ' . $sql;
     }
 
     /**
@@ -917,7 +917,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getDropViewSQL($name)
     {
-        return 'DROP TABLE ' . $this->quoteStringLiteral($name);
+        return 'DROP TABLE ' . $this->quoteIdentifier($name);
     }
 
     /**
@@ -925,7 +925,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getCreateDatabaseSQL($database)
     {
-        return 'CREATE DATABASE ' . $this->quoteStringLiteral($database);
+        return 'CREATE DATABASE ' . $this->quoteIdentifier($database);
     }
 
     /**
@@ -1134,7 +1134,17 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     {
         $c = $this->getStringLiteralQuoteCharacter();
 
-        return $c . addslashes($str) . $c; // TODO is this enough secure?
+        return $c . addslashes($str) . $c; // TODO is addslashes() enough secure?
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function quoteSingleIdentifier($str)
+    {
+        $c = $this->getIdentifierQuoteCharacter();
+
+        return $c . addslashes($str) . $c;
     }
 
 }
