@@ -21,17 +21,27 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
  */
 abstract class ArrayIntType extends Type
 {
+
+    const TYPES = [
+        'array(int8)' => 'FOD\DBALClickHouse\Types\ArrayInt8Type',
+        'array(int16)' => 'FOD\DBALClickHouse\Types\ArrayInt16Type',
+        'array(int32)' => 'FOD\DBALClickHouse\Types\ArrayInt32Type',
+        'array(int64)' => 'FOD\DBALClickHouse\Types\ArrayInt64Type'
+    ];
+
     /**
      * Register Array types to the type map.
      * 
      * @return void
      */
-    public static function registerArrayTypes()
+    public static function registerArrayTypes(AbstractPlatform $platform)
     {
-        self::addType('array(int8)', 'FOD\DBALClickHouse\Types\ArrayInt8Type');
-        self::addType('array(int16)', 'FOD\DBALClickHouse\Types\ArrayInt16Type');
-        self::addType('array(int32)', 'FOD\DBALClickHouse\Types\ArrayInt32Type');
-        self::addType('array(int64)', 'FOD\DBALClickHouse\Types\ArrayInt64Type');
+        foreach (self::TYPES as $typeName => $className) {
+            self::addType($typeName, $className);
+            foreach (Type::getType($typeName)->getMappedDatabaseTypes($platform) as $dbType) {
+                $platform->registerDoctrineTypeMapping($dbType, $typeName);
+            }
+        }
     }
 
     /**
@@ -51,11 +61,21 @@ abstract class ArrayIntType extends Type
     }
 
     /**
+     * {@inheritDoc}
+     */
+    public function getMappedDatabaseTypes(AbstractPlatform $platform)
+    {
+        return [
+            'array(int' . $this->getBitness() . ')',
+            'array(uint' . $this->getBitness() . ')'
+        ];
+    }
+
+    /**
      * @return int Bitness of integers in Array (Array(Int{bitness}))
      */
     protected function getBitness()
     {
         return static::BITNESS;
     }
-
 }
