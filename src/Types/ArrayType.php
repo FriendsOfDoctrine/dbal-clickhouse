@@ -33,10 +33,9 @@ abstract class ArrayType extends Type
         'array(uint64)' => 'FOD\DBALClickHouse\Types\ArrayUInt64Type',
         'array(float32)' => 'FOD\DBALClickHouse\Types\ArrayFloat32Type',
         'array(float64)' => 'FOD\DBALClickHouse\Types\ArrayFloat64Type',
-
-//        'array(string)' => 'FOD\DBALClickHouse\Types\ArrayStringType',
-//        'array(datetime)' => 'FOD\DBALClickHouse\Types\ArrayDateTimeType',
-//        'array(date)' => 'FOD\DBALClickHouse\Types\ArrayDateType'
+        'array(string)' => 'FOD\DBALClickHouse\Types\ArrayStringType',
+        'array(datetime)' => 'FOD\DBALClickHouse\Types\ArrayDateTimeType',
+        'array(date)' => 'FOD\DBALClickHouse\Types\ArrayDateType'
     ];
 
     /**

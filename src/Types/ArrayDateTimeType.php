@@ -14,18 +14,18 @@ namespace FOD\DBALClickHouse\Types;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
- * Array(Date) Type class
+ * Array(DateTime) Type class
  *
  * @author Mochalygin <a@mochalygin.ru>
  */
-class ArrayDateType extends ArrayType
+class ArrayDateTimeType extends ArrayType
 {
     /**
      * {@inheritDoc}
      */
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        return 'Array(Date)';
+        return 'Array(DateTime)';
     }
 
     /**
@@ -33,6 +33,6 @@ class ArrayDateType extends ArrayType
      */
     public function getName()
     {
-        return 'array(date)';
+        return 'array(datetime)';
     }
 }
