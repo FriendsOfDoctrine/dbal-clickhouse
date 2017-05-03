@@ -112,7 +112,6 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
             'array(float64)' => 'array',
 
             'array(string)' => 'array',
-            'array(fixedstring)' => 'array',
             'array(date)' => 'array',
             'array(datetime)' => 'array',
 

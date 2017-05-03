@@ -11,24 +11,21 @@
 
 namespace FOD\DBALClickHouse\Types;
 
-use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
- * Array(Int*) Types basic class
+ * Array(Float*) Types basic class
  *
  * @author Mochalygin <a@mochalygin.ru>
  */
-abstract class ArrayIntType extends ArrayNumType
+abstract class ArrayFloatType extends ArrayNumType
 {
-    const UNSIGNED = false;
-
     /**
      * {@inheritDoc}
      */
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        return 'Array(' . (static::UNSIGNED ? 'U' : '') . 'Int' . $this->getBitness() . ')';
+        return 'Array(Float' . $this->getBitness() . ')';
     }
 
     /**
@@ -36,6 +33,6 @@ abstract class ArrayIntType extends ArrayNumType
      */
     public function getName()
     {
-        return 'array(' . (static::UNSIGNED ? 'u' : '') . 'int' . $this->getBitness() . ')';
+        return 'array(float' . $this->getBitness() . ')';
     }
 }
