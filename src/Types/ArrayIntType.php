@@ -26,8 +26,14 @@ abstract class ArrayIntType extends Type
         'array(int8)' => 'FOD\DBALClickHouse\Types\ArrayInt8Type',
         'array(int16)' => 'FOD\DBALClickHouse\Types\ArrayInt16Type',
         'array(int32)' => 'FOD\DBALClickHouse\Types\ArrayInt32Type',
-        'array(int64)' => 'FOD\DBALClickHouse\Types\ArrayInt64Type'
+        'array(int64)' => 'FOD\DBALClickHouse\Types\ArrayInt64Type',
+        'array(uint8)' => 'FOD\DBALClickHouse\Types\ArrayUInt8Type',
+        'array(uint16)' => 'FOD\DBALClickHouse\Types\ArrayUInt16Type',
+        'array(uint32)' => 'FOD\DBALClickHouse\Types\ArrayUInt32Type',
+        'array(uint64)' => 'FOD\DBALClickHouse\Types\ArrayUInt64Type'
     ];
+
+    const UNSIGNED = false;
 
     /**
      * Register Array types to the type map.
@@ -49,7 +55,7 @@ abstract class ArrayIntType extends Type
      */
     public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
     {
-        return 'Array(' . (!empty($fieldDeclaration['unsigned']) ? 'U' : '') . 'Int' . $this->getBitness() . ')';
+        return 'Array(' . (static::UNSIGNED ? 'U' : '') . 'Int' . $this->getBitness() . ')';
     }
 
     /**
@@ -57,7 +63,7 @@ abstract class ArrayIntType extends Type
      */
     public function getName()
     {
-        return 'array(int' . $this->getBitness() . ')';
+        return 'array(' . (static::UNSIGNED ? 'u' : '') . 'int' . $this->getBitness() . ')';
     }
 
     /**
@@ -66,8 +72,7 @@ abstract class ArrayIntType extends Type
     public function getMappedDatabaseTypes(AbstractPlatform $platform)
     {
         return [
-            'array(int' . $this->getBitness() . ')',
-            'array(uint' . $this->getBitness() . ')'
+            $this->getName()
         ];
     }
 
