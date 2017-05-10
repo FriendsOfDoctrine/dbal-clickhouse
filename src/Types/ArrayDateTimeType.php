@@ -35,4 +35,38 @@ class ArrayDateTimeType extends ArrayType
     {
         return 'array(datetime)';
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function convertToPHPValue($value, AbstractPlatform $platform)
+    {
+        $datetimes = [];
+        foreach ($value as $stringDatetime) {
+            $datetimes[] = \DateTime::createFromFormat($platform->getDateTimeFormatString(), $stringDatetime);
+        }
+
+        return $datetimes;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    {
+        $strings = [];
+        foreach ($value as $datetime) {
+            $strings[] = "'" . $datetime->format($platform->getDateTimeFormatString()) . "'";
+        }
+
+        return '[' . implode(', ', $strings) . ']';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getBindingType()
+    {
+        return \PDO::PARAM_INT;
+    }
 }
