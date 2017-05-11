@@ -122,7 +122,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function commit()
     {
-        throw new \Exception('Transactions are not allowed in ClickHouse');
+        throw new \LogicException('Transactions are not allowed in ClickHouse');
     }
 
     /**

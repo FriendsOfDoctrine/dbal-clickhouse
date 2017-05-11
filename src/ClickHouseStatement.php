@@ -218,9 +218,9 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
         if ($elem = $this->fetch()) {
             if (array_key_exists($columnIndex, $elem)) {
                 return $elem[$columnIndex];
-            } else {
-                return array_values($elem)[0];
             }
+
+            return array_values($elem)[0];
         }
 
         return false;
