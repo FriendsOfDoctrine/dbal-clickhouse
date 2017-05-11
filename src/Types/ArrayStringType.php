@@ -35,4 +35,28 @@ class ArrayStringType extends ArrayType
     {
         return 'array(string)';
     }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    {
+
+        $str = array_map(
+            function ($value) use ($platform) {
+                return $platform->quoteStringLiteral($value);
+            },
+            $value
+        );
+
+        return '[' . implode(', ', $str) . ']';
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getBindingType()
+    {
+        return \PDO::PARAM_INT;
+    }
 }
