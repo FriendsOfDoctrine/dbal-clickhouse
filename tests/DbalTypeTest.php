@@ -149,4 +149,11 @@ class DbalTypeTest extends TestCase
         $this->connection->insert('test_dbal_type_table', ['typeBlob' => $val], ['typeBlob' => Type::BLOB]);
         $this->assertEquals($val, $this->connection->fetchColumn('SELECT typeBlob FROM test_dbal_type_table'));
     }
+
+    public function testTypeGUID()
+    {
+        $val = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
+        $this->connection->insert('test_dbal_type_table', ['typeGUID' => $val], ['typeGUID' => Type::GUID]);
+        $this->assertEquals($val, $this->connection->fetchColumn('SELECT typeGUID FROM test_dbal_type_table'));
+    }
 }
