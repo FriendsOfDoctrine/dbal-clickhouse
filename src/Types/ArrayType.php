@@ -46,9 +46,11 @@ abstract class ArrayType extends Type
     public static function registerArrayTypes(AbstractPlatform $platform)
     {
         foreach (self::ARRAY_TYPES as $typeName => $className) {
-            self::addType($typeName, $className);
-            foreach (Type::getType($typeName)->getMappedDatabaseTypes($platform) as $dbType) {
-                $platform->registerDoctrineTypeMapping($dbType, $typeName);
+            if(!self::hasType($typeName)){
+                self::addType($typeName, $className);
+                foreach (Type::getType($typeName)->getMappedDatabaseTypes($platform) as $dbType) {
+                    $platform->registerDoctrineTypeMapping($dbType, $typeName);
+                }
             }
         }
     }
