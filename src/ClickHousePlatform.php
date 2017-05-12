@@ -526,6 +526,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     protected function _getCreateTableSQL($tableName, array $columns, array $options = [])
     {
         $engine = !empty($options['engine']) ? $options['engine'] : 'ReplacingMergeTree';
+        $engineOptions = '';
 
         if (isset($options['uniqueConstraints']) && ! empty($options['uniqueConstraints'])) {
             throw DBALException::notSupported('uniqueConstraints');
@@ -535,11 +536,10 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
             throw DBALException::notSupported('uniqueConstraints');
         }
 
-
         /**
          * MergeTree* specific section
          */
-        if ( in_array($engine, ['MergeTree', 'CollapsingMergeTree', 'SummingMergeTree', 'AggregatingMergeTree', 'ReplacingMergeTree']) ) {
+        if ( in_array($engine, ['MergeTree', 'CollapsingMergeTree', 'SummingMergeTree', 'AggregatingMergeTree', 'ReplacingMergeTree'], true) ) {
             $indexGranularity = !empty($options['indexGranularity']) ? $options['indexGranularity'] : 8192;
 
             /**
@@ -613,18 +613,12 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                 throw new \Exception('You need specify PrimaryKey for MergeTree* tables');
             }
 
-        }
-
-        $columnListSql = $this->getColumnDeclarationListSQL($columns);
-        $query = 'CREATE TABLE ' . $tableName . ' (' . $columnListSql . ') ENGINE = ' . $engine;
-
-        if ( in_array($engine, ['MergeTree', 'CollapsingMergeTree', 'SummingMergeTree', 'AggregatingMergeTree', 'ReplacingMergeTree']) ) {
-            $query .=  '(' . $eventDateColumnName . ', (' . implode(', ', array_unique(array_values($options['primary']))) . '), ' . $indexGranularity;
+            $engineOptions = '(' . $eventDateColumnName . ', (' . implode(', ', array_unique(array_values($options['primary']))) . '), ' . $indexGranularity;
 
             /**
              * any specific MergeTree* table parameters
              */
-            if ('ReplacingMergeTree' == $engine) {
+            if ('ReplacingMergeTree' === $engine) {
                 if (! empty($options['versionColumn'])) {
                     if (! isset($columns[$options['versionColumn']]) ) {
                         throw new \Exception('If you specify `versionColumn` for ReplacingMergeTree table -- you must add this column manually (any of UInt*, Date or DateTime types)');
@@ -640,12 +634,15 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                         throw new \Exception('For ReplacingMergeTree tables `versionColumn` must be any of UInt* family, or Date, or DateTime types. ' . get_class($columns[$options['versionColumn']]['type']) . ' given.');
                     }
 
-                    $query .= ', ' . $columns[$options['versionColumn']]['name'];
+                    $engineOptions .= ', ' . $columns[$options['versionColumn']]['name'];
                 }
             }
 
-            $query .= ')';
+            $engineOptions .= ')';
         }
+
+        $columnListSql = $this->getColumnDeclarationListSQL($columns);
+        $query = 'CREATE TABLE ' . $tableName . ' (' . $columnListSql . ') ENGINE = ' . $engine . $engineOptions;
 
         $sql[] = $query;
 
