@@ -778,7 +778,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getDecimalTypeDeclarationSQL(array $columnDef)
     {
-        return 'Float64';
+        return 'String';
     }
 
     /**
