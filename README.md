@@ -46,52 +46,6 @@ doctrine:
 $conn = $this->get('doctrine.dbal.clickhouse_connection');
 ```
 
-### Additional types
-
-If you want to use [Array(T) type](https://clickhouse.yandex/reference_en.html#Array(T)), register additional DBAL types in your code:
-```php
-ArrayType::registerArrayTypes($conn->getDatabasePlatform());
-```
-or register them in Symfony configuration file:
-```yml
-# app/config/config.yml
-doctrine:
-    dbal:
-        connections:
-        ...
-        types:
-            array(int8): FOD\DBALClickHouse\Types\ArrayInt8Type
-            array(int16): FOD\DBALClickHouse\Types\ArrayInt16Type
-            array(int32): FOD\DBALClickHouse\Types\ArrayInt32Type
-            array(int64): FOD\DBALClickHouse\Types\ArrayInt64Type
-            array(uint8): FOD\DBALClickHouse\Types\ArrayUInt8Type
-            array(uint16): FOD\DBALClickHouse\Types\ArrayUInt16Type
-            array(uint32): FOD\DBALClickHouse\Types\ArrayUInt32Type
-            array(uint64): FOD\DBALClickHouse\Types\ArrayUInt64Type
-            array(float32): FOD\DBALClickHouse\Types\ArrayFloat32Type
-            array(float64): FOD\DBALClickHouse\Types\ArrayFloat64Type
-            array(string): FOD\DBALClickHouse\Types\ArrayStringType
-            array(datetime): FOD\DBALClickHouse\Types\ArrayDateTimeType
-            array(date): FOD\DBALClickHouse\Types\ArrayDateType
-```
-
-Additional type `BigIntType` helps you to store bigint values as [Int64/UInt64](https://clickhouse.yandex/reference_en.html#UInt8,%20UInt16,%20UInt32,%20UInt64,%20Int8,%20Int16,%20Int32,%20Int64) value type in ClickHouse.
-You can override DBAL type in your code:
-```php
-Type::overrideType(Type::BIGINT, 'FOD\DBALClickHouse\Types\BigIntType');
-```
-or use custom mapping types in Symfony configuration:
-```yml
-# app/config/config.yml
-doctrine:
-    dbal:
-        types:
-            custom_bigint:  FOD\DBALClickHouse\Types\BigIntType
-            ...
-        mapping_types:
-            bigint: custom_bigint
-```
-
 ## Usage
 
 ### Create new table
@@ -187,8 +141,52 @@ while ($row = $stmt->fetch()) {
 }
 ```
 
-### Update
-*ClickHouse has no classical updates. Will add ersatz-updates for ReplacingMergeTree and CollapcingMergeTree engines later*
+### Additional types
+
+If you want to use [Array(T) type](https://clickhouse.yandex/reference_en.html#Array(T)), register additional DBAL types in your code:
+```php
+// register all custom DBAL Array types
+ArrayType::registerArrayTypes($conn->getDatabasePlatform());
+// register one custom DBAL Array(Int8) type
+Type::addType('array(int8)', 'FOD\DBALClickHouse\Types\ArrayInt8Type');
+```
+or register them in Symfony configuration file:
+```yml
+# app/config/config.yml
+doctrine:
+    dbal:
+        connections:
+        ...
+        types:
+            array(int8): FOD\DBALClickHouse\Types\ArrayInt8Type
+            array(int16): FOD\DBALClickHouse\Types\ArrayInt16Type
+            array(int32): FOD\DBALClickHouse\Types\ArrayInt32Type
+            array(int64): FOD\DBALClickHouse\Types\ArrayInt64Type
+            array(uint8): FOD\DBALClickHouse\Types\ArrayUInt8Type
+            array(uint16): FOD\DBALClickHouse\Types\ArrayUInt16Type
+            array(uint32): FOD\DBALClickHouse\Types\ArrayUInt32Type
+            array(uint64): FOD\DBALClickHouse\Types\ArrayUInt64Type
+            array(float32): FOD\DBALClickHouse\Types\ArrayFloat32Type
+            array(float64): FOD\DBALClickHouse\Types\ArrayFloat64Type
+            array(string): FOD\DBALClickHouse\Types\ArrayStringType
+            array(datetime): FOD\DBALClickHouse\Types\ArrayDateTimeType
+            array(date): FOD\DBALClickHouse\Types\ArrayDateType
+```
+
+Additional type `BigIntType` helps you to store bigint values as [Int64/UInt64](https://clickhouse.yandex/reference_en.html#UInt8,%20UInt16,%20UInt32,%20UInt64,%20Int8,%20Int16,%20Int32,%20Int64) value type in ClickHouse.
+You can override DBAL type in your code:
+```php
+Type::overrideType(Type::BIGINT, 'FOD\DBALClickHouse\Types\BigIntType');
+```
+or use custom mapping types in Symfony configuration:
+```yml
+# app/config/config.yml
+doctrine:
+    dbal:
+        types:
+            bigint:  FOD\DBALClickHouse\Types\BigIntType
+            ...
+```
 
 ### More information in Doctrine DBAL documentation:
 * [Data Retrieval And Manipulation](http://docs.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/data-retrieval-and-manipulation.html)
