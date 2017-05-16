@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8"?>
+<phpunit bootstrap="vendor/autoload.php" colors="true">
+    <testsuites>
+        <testsuite name="ClickHouse">
+            <directory>tests</directory>
+        </testsuite>
+    </testsuites>
+    <php>
+        <const name="phpunit_ch_host" value="localhost"/>
+        <const name="phpunit_ch_port" value="8123"/>
+        <const name="phpunit_ch_user" value="default"/>
+        <const name="phpunit_ch_password" value=""/>
+        <const name="phpunit_ch_dbname" value="default"/>
+        <const name="phpunit_ch_driver_class" value="FOD\DBALClickHouse\Driver"/>
+        <const name="phpunit_ch_wrapper_class" value="FOD\DBALClickHouse\Connection"/>
+    </php>
+</phpunit>

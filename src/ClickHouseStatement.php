@@ -141,21 +141,26 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     public function fetch($fetchMode = null)
     {
         $data = $this->getIterator()->current();
+
+        if (null === $data) {
+            return false;
+        }
+
         $this->getIterator()->next();
 
-        if (\PDO::FETCH_NUM == $this->assumeFetchMode($fetchMode)) {
+        if (\PDO::FETCH_NUM === $this->assumeFetchMode($fetchMode)) {
             return array_values($data);
         }
 
-        if (\PDO::FETCH_BOTH == $this->assumeFetchMode($fetchMode)) {
+        if (\PDO::FETCH_BOTH === $this->assumeFetchMode($fetchMode)) {
             return array_values($data) + $data;
         }
 
-        if (\PDO::FETCH_OBJ == $this->assumeFetchMode($fetchMode)) {
+        if (\PDO::FETCH_OBJ === $this->assumeFetchMode($fetchMode)) {
             return (object)$data;
         }
 
-        if (\PDO::FETCH_KEY_PAIR == $this->assumeFetchMode($fetchMode)) {
+        if (\PDO::FETCH_KEY_PAIR === $this->assumeFetchMode($fetchMode)) {
             if (count($data) < 2) {
                 throw new \Exception('To fetch in \PDO::FETCH_KEY_PAIR mode, result set must contain at least 2 columns');
             }
@@ -171,28 +176,28 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     public function fetchAll($fetchMode = null)
     {
-        if (\PDO::FETCH_NUM == $this->assumeFetchMode($fetchMode)) {
+        if (\PDO::FETCH_NUM === $this->assumeFetchMode($fetchMode)) {
             return  array_map(
                         function ($row) {return array_values($row);},
                         $this->rows
                     );
         }
 
-        if (\PDO::FETCH_BOTH == $this->assumeFetchMode($fetchMode)) {
+        if (\PDO::FETCH_BOTH === $this->assumeFetchMode($fetchMode)) {
             return  array_map(
                         function ($row) {return array_values($row) + $row;},
                         $this->rows
                     );
         }
 
-        if (\PDO::FETCH_OBJ == $this->assumeFetchMode($fetchMode)) {
+        if (\PDO::FETCH_OBJ === $this->assumeFetchMode($fetchMode)) {
             return  array_map(
                         function ($row) {return (object)$row;},
                         $this->rows
                     );
         }
 
-        if (\PDO::FETCH_KEY_PAIR == $this->assumeFetchMode($fetchMode)) {
+        if (\PDO::FETCH_KEY_PAIR === $this->assumeFetchMode($fetchMode)) {
             return  array_map(
                         function ($row) {
                             if (count($row) < 2) {
@@ -215,12 +220,9 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     public function fetchColumn($columnIndex = 0)
     {
-        if ($elem = $this->fetch()) {
-            if (array_key_exists($columnIndex, $elem)) {
-                return $elem[$columnIndex];
-            } else {
-                return array_values($elem)[0];
-            }
+        if ($elem = $this->fetch(\PDO::FETCH_NUM)) {
+
+            return isset($elem[$columnIndex]) ? $elem[$columnIndex] : $elem[0];
         }
 
         return false;
