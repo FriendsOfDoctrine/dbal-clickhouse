@@ -572,9 +572,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
                     $dateColumnParams['default'] =
                         $columns[$options['eventDateProviderColumn']]['type'] instanceof IntegerType ||
                         $columns[$options['eventDateProviderColumn']]['type'] instanceof SmallIntType ||
-                        $columns[$options['eventDateProviderColumn']]['type'] instanceof BigIntType ||
-                        $columns[$options['eventDateProviderColumn']]['type'] instanceof FloatType ||
-                        $columns[$options['eventDateProviderColumn']]['type'] instanceof DecimalType ?
+                        $columns[$options['eventDateProviderColumn']]['type'] instanceof FloatType ?
                             ('toDate(toDateTime(' . $options['eventDateProviderColumn'] . '))') :
                             ('toDate(' . $options['eventDateProviderColumn'] . ')');
                 } else {
@@ -1094,7 +1092,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
 
         $default = " DEFAULT '" . $field['default'] . "'";
         if ( isset($field['type']) ) {
-            if (in_array((string)$field['type'], ['Integer', 'BigInt', 'SmallInt', 'Float'])) {
+            if (in_array((string)$field['type'], ['Integer', 'SmallInt', 'Float']) || ('BigInt' === $field['type'] && \PDO::PARAM_INT === Type::getType('BigInt')->getBindingType())) {
                 $default = ' DEFAULT ' . $field['default'];
             } else if (in_array((string)$field['type'], ['DateTime']) && $field['default'] == $this->getCurrentTimestampSQL()) {
                 $default = ' DEFAULT ' . $this->getCurrentTimestampSQL();

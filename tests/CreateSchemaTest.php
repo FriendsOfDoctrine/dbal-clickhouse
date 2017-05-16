@@ -54,7 +54,7 @@ class CreateSchemaTest extends TestCase
         $newTable->setPrimaryKey(['id']);
 
         $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
-        $this->assertEquals("CREATE TABLE test_table (EventDate Date DEFAULT today(), id UInt32, payload String, oneVal Float64, twoVal Float64, flag UInt8, mask Int16, hash FixedString(32)) ENGINE = ReplacingMergeTree(EventDate, (id), 8192)", implode(';', $migrationSQLs));
+        $this->assertEquals("CREATE TABLE test_table (EventDate Date DEFAULT today(), id UInt32, payload String, oneVal Float64, twoVal String, flag UInt8, mask Int16, hash FixedString(32)) ENGINE = ReplacingMergeTree(EventDate, (id), 8192)", implode(';', $migrationSQLs));
         foreach ($migrationSQLs as $sql) {
             $this->connection->exec($sql);
         }

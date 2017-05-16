@@ -26,6 +26,8 @@ class DbalTypeTest extends TestCase
     /** @var  Connection */
     protected $connection;
 
+    protected $schemaSQLs = [];
+
     public function setUp()
     {
         $this->connection = CreateConnectionTest::createConnection();
@@ -56,7 +58,9 @@ class DbalTypeTest extends TestCase
         $newTable->addColumn('typeGUID', Type::GUID);
         $newTable->addOption('engine', 'Memory');
 
-        foreach ($fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()) as $sql) {
+        $this->schemaSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+
+        foreach ($this->schemaSQLs as $sql) {
             $this->connection->exec($sql);
         }
     }
@@ -64,6 +68,11 @@ class DbalTypeTest extends TestCase
     public function tearDown()
     {
         $this->connection->exec('DROP TABLE test_dbal_type_table');
+    }
+
+    public function testCreateSchema()
+    {
+        $this->assertEquals('CREATE TABLE test_dbal_type_table (typeArray String, typeSimpleArray String, typeJsonArray String, typeBigInt String, typeBoolean UInt8, typeDateTime DateTime, typeDateTimeTZ DateTime, typeDate Date, typeTime String, typeDecimal String, typeInteger Int32, typeObject String, typeSmallInt Int16, typeString String, typeText String, typeBinary String, typeBlob String, typeFloat Float64, typeGUID FixedString(36)) ENGINE = Memory', implode(';', $this->schemaSQLs));
     }
 
     public function testTypeArray()
@@ -87,7 +96,30 @@ class DbalTypeTest extends TestCase
     public function testTypeBigInt()
     {
         $this->connection->insert('test_dbal_type_table', ['typeBigInt' => 123123123123], ['typeBigInt' => Type::BIGINT]);
-        $this->assertEquals(123123123123, $this->connection->fetchColumn('SELECT typeBigInt FROM test_dbal_type_table'));
+        $this->assertEquals('123123123123', $this->connection->fetchColumn('SELECT typeBigInt FROM test_dbal_type_table'));
+    }
+
+    public function testTypeBigIntReload()
+    {
+        Type::overrideType(Type::BIGINT, 'FOD\DBALClickHouse\Types\BigIntType');
+        $this->connection = CreateConnectionTest::createConnection();
+
+        $fromSchema = $this->connection->getSchemaManager()->createSchema();
+        $toSchema = clone $fromSchema;
+
+        $newTable = $toSchema->createTable('test_dbal_type_bigint_table');
+
+        $newTable->addColumn('typeBigInt', Type::BIGINT);
+        $newTable->addOption('engine', 'Memory');
+
+        foreach ($fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()) as $sql) {
+            $this->connection->exec($sql);
+            $this->assertEquals('CREATE TABLE test_dbal_type_bigint_table (typeBigInt Int64) ENGINE = Memory', $sql);
+        }
+        $this->connection->insert('test_dbal_type_bigint_table', ['typeBigInt' => 123123123123], ['typeBigInt' => Type::BIGINT]);
+        $this->assertEquals(123123123123, $this->connection->fetchColumn('SELECT typeBigInt FROM test_dbal_type_bigint_table'));
+
+        $this->connection->exec('DROP TABLE test_dbal_type_bigint_table');
     }
 
     public function testTypeBoolean()
@@ -122,16 +154,8 @@ class DbalTypeTest extends TestCase
 
     public function testTypeDecimalFail()
     {
-        // :TODO Wtf?
-        $this->expectException(DBALException::class);
-        $this->connection->insert('test_dbal_type_table', ['typeDecimal' => '142.15'], ['typeDecimal' => Type::DECIMAL]);
-        $this->assertEquals(142.15, $this->connection->fetchColumn('SELECT typeDecimal FROM test_dbal_type_table'));
-    }
-
-    public function testTypeDecimal()
-    {
-        $this->connection->insert('test_dbal_type_table', ['typeDecimal' => 142.15]);
-        $this->assertEquals(142.15, $this->connection->fetchColumn('SELECT typeDecimal FROM test_dbal_type_table'));
+        $this->connection->insert('test_dbal_type_table', ['typeDecimal' => 142.15], ['typeDecimal' => Type::DECIMAL]);
+        $this->assertEquals('142.15', $this->connection->fetchColumn('SELECT typeDecimal FROM test_dbal_type_table'));
     }
 
     public function testTypeInteger()
