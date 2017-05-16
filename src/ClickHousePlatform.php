@@ -56,7 +56,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getBigIntTypeDeclarationSQL(array $columnDef)
     {
-        return $this->_getCommonIntegerTypeDeclarationSQL($columnDef) . 'Int64';
+        return 'String';
     }
 
     /**
