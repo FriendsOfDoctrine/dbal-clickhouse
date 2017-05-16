@@ -141,6 +141,11 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     public function fetch($fetchMode = null)
     {
         $data = $this->getIterator()->current();
+
+        if (null === $data) {
+            return false;
+        }
+
         $this->getIterator()->next();
 
         if (\PDO::FETCH_NUM === $this->assumeFetchMode($fetchMode)) {
@@ -215,8 +220,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     public function fetchColumn($columnIndex = 0)
     {
-        if ($elem = $this->fetch()) {
-            $elem = array_values($elem);
+        if ($elem = $this->fetch(\PDO::FETCH_NUM)) {
 
             return isset($elem[$columnIndex]) ? $elem[$columnIndex] : $elem[0];
         }
