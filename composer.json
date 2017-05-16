@@ -1,7 +1,7 @@
 {
     "name": "friendsofdoctrine/dbal-clickhouse",
     "type": "library",
-    "version" : "1.0.0",
+    "version" : "1.1.0",
     "description": "Doctrine DBAL driver for ClickHouse",
     "keywords": ["doctrine", "dbal", "clickhouse", "driver"],
     "homepage": "http://github.com/friendsofdoctrine/dbal-clickhouse",
