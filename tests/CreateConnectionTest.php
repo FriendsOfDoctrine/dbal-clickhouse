@@ -18,7 +18,6 @@ use PHPUnit\Framework\TestCase;
 /**
  * ClickHouse DBAL test class. Tests of create connection with ClickHouse
  *
- * @package FOD\DBALClickHouse\Tests
  * @author Nikolay Mitrofanov <mitrofanovnk@gmail.com>
  */
 class CreateConnectionTest extends TestCase

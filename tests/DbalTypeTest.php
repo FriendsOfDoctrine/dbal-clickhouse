@@ -19,7 +19,6 @@ use PHPUnit\Framework\TestCase;
 /**
  * ClickHouse DBAL test class. Testing work with DBAL types
  *
- * @package FOD\DBALClickHouse\Tests
  * @author Nikolay Mitrofanov <mitrofanovnk@gmail.com>
  */
 class DbalTypeTest extends TestCase
@@ -42,7 +41,9 @@ class DbalTypeTest extends TestCase
         $newTable->addColumn('typeBigInt', Type::BIGINT);
         $newTable->addColumn('typeBoolean', Type::BOOLEAN);
         $newTable->addColumn('typeDateTime', Type::DATETIME);
+        $newTable->addColumn('typeDateTimeTZ', Type::DATETIMETZ);
         $newTable->addColumn('typeDate', Type::DATE);
+        $newTable->addColumn('typeTime', Type::TIME);
         $newTable->addColumn('typeDecimal', Type::DECIMAL);
         $newTable->addColumn('typeInteger', Type::INTEGER);
         $newTable->addColumn('typeObject', Type::OBJECT);
@@ -55,9 +56,9 @@ class DbalTypeTest extends TestCase
         $newTable->addColumn('typeGUID', Type::GUID);
         $newTable->addOption('engine', 'Memory');
 
-        $generatedSQL = implode(';', $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()));
-
-        $this->connection->exec($generatedSQL);
+        foreach ($fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()) as $sql) {
+            $this->connection->exec($sql);
+        }
     }
 
     public function tearDown()
@@ -101,10 +102,22 @@ class DbalTypeTest extends TestCase
         $this->assertEquals('2000-05-05 00:00:00', $this->connection->fetchColumn('SELECT typeDateTime FROM test_dbal_type_table'));
     }
 
+    public function testTypeDatetimeTZ()
+    {
+        $this->connection->insert('test_dbal_type_table', ['typeDateTimeTZ' => new \DateTime('2000-05-05')], ['typeDateTimeTZ' => Type::DATETIMETZ]);
+        $this->assertEquals('2000-05-05 00:00:00', $this->connection->fetchColumn('SELECT typeDateTimeTZ FROM test_dbal_type_table'));
+    }
+
     public function testTypeDate()
     {
         $this->connection->insert('test_dbal_type_table', ['typeDate' => new \DateTime('2000-05-05')], ['typeDate' => Type::DATE]);
         $this->assertEquals('2000-05-05', $this->connection->fetchColumn('SELECT typeDate FROM test_dbal_type_table'));
+    }
+
+    public function testTypeTime()
+    {
+        $this->connection->insert('test_dbal_type_table', ['typeTime' => new \DateTime('13:41:18')], ['typeTime' => Type::TIME]);
+        $this->assertEquals('13:41:18', $this->connection->fetchColumn('SELECT typeTime FROM test_dbal_type_table'));
     }
 
     public function testTypeDecimalFail()

@@ -17,7 +17,6 @@ use PHPUnit\Framework\TestCase;
 /**
  * ClickHouse DBAL test class. Testing Insert operations in ClickHouse
  *
- * @package FOD\DBALClickHouse\Tests
  * @author Nikolay Mitrofanov <mitrofanovnk@gmail.com>
  */
 class InsertTest extends TestCase
@@ -39,8 +38,9 @@ class InsertTest extends TestCase
         $newTable->addOption('engine', 'Memory');
         $newTable->setPrimaryKey(['id']);
 
-        $generatedSQL = implode(';', $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()));
-        $this->connection->exec($generatedSQL);
+        foreach ($fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()) as $sql) {
+            $this->connection->exec($sql);
+        }
     }
 
     public function tearDown()

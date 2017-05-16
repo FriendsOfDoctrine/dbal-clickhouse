@@ -19,7 +19,6 @@ use PHPUnit\Framework\TestCase;
 /**
  * ClickHouse DBAL test class. Testing work with public methods of FOD\DBALClickHouse\Connection class
  *
- * @package FOD\DBALClickHouse\Tests
  * @author Nikolay Mitrofanov <mitrofanovnk@gmail.com>
  */
 class ConnectionTest extends TestCase

@@ -937,7 +937,12 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     public function getDateTimeTzTypeDeclarationSQL(array $fieldDeclaration)
     {
-        throw DBALException::notSupported(__METHOD__);
+        return 'DateTime';
+    }
+
+    public function getTimeTypeDeclarationSQL(array $fieldDeclaration)
+    {
+        return 'String';
     }
 
     /**

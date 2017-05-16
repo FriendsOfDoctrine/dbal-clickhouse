@@ -20,7 +20,6 @@ use PHPUnit\Framework\TestCase;
 /**
  * ClickHouse DBAL test class. Testing public methods of class FOD\DBALClickHouse\Driver
  *
- * @package FOD\DBALClickHouse\Tests
  * @author Nikolay Mitrofanov <mitrofanovnk@gmail.com>
  */
 class DriverTest extends TestCase

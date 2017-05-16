@@ -18,7 +18,6 @@ use PHPUnit\Framework\TestCase;
 /**
  * ClickHouse DBAL test class. Testing work with array (insert, select)
  *
- * @package FOD\DBALClickHouse\Tests
  * @author Nikolay Mitrofanov <mitrofanovnk@gmail.com>
  */
 class ArraysTest extends TestCase
@@ -30,11 +29,6 @@ class ArraysTest extends TestCase
     {
         $this->connection = CreateConnectionTest::createConnection();
         ArrayType::registerArrayTypes($this->connection->getDatabasePlatform());
-        try {
-            $this->connection->exec('DROP TABLE test_array_table');
-        } catch (\Exception $exception) {
-
-        }
     }
 
     public function tearDown()
@@ -147,8 +141,8 @@ class ArraysTest extends TestCase
         $newTable->addColumn('arr', $arrayType);
         $newTable->addOption('engine', 'Memory');
 
-        $generatedSQL = implode(';', $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()));
-
-        $this->connection->exec($generatedSQL);
+        foreach ($fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()) as $sql) {
+            $this->connection->exec($sql);
+        }
     }
 }

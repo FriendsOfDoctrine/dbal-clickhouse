@@ -17,7 +17,6 @@ use PHPUnit\Framework\TestCase;
 /**
  * ClickHouse DBAL test class. Testing Select operations in ClickHouse
  *
- * @package FOD\DBALClickHouse\Tests
  * @author Nikolay Mitrofanov <mitrofanovnk@gmail.com>
  */
 class SelectTest extends TestCase
@@ -40,8 +39,9 @@ class SelectTest extends TestCase
         $newTable->addOption('engine', 'Memory');
         $newTable->setPrimaryKey(['id']);
 
-        $generatedSQL = implode(';', $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()));
-        $this->connection->exec($generatedSQL);
+        foreach ($fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()) as $sql) {
+            $this->connection->exec($sql);
+        }
 
         $this->connection->exec("INSERT INTO test_select_table(id, payload, hits) VALUES (1, 'v1', 101), (2, 'v2', 202), (3, 'v3', 303), (4, 'v4', 404), (5, 'v4', 505)");
     }
