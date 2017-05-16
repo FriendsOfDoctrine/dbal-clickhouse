@@ -204,3 +204,4 @@ class SelectTest extends TestCase
         ], $stmt->fetchAll());
     }
 }
+
