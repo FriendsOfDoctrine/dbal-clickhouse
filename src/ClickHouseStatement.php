@@ -138,7 +138,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     /**
      * {@inheritDoc}
      */
-    public function fetch($fetchMode = null)
+    public function fetch($fetchMode = null, $cursorOrientation = \PDO::FETCH_ORI_NEXT, $cursorOffset = 0)
     {
         $data = $this->getIterator()->current();
 
@@ -174,7 +174,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     /**
      * {@inheritDoc}
      */
-    public function fetchAll($fetchMode = null)
+    public function fetchAll($fetchMode = null, $fetchArgument = null, $ctorArgs = null)
     {
         if (\PDO::FETCH_NUM === $this->assumeFetchMode($fetchMode)) {
             return  array_map(
