@@ -15,7 +15,7 @@
     "require": {
         "php": ">=5.4.0",
         "smi2/phpClickHouse": "^0.17",
-        "doctrine/dbal": ">=2.5"
+        "doctrine/dbal": ">=2.6"
     },
     "autoload": {
         "psr-4": { "FOD\\DBALClickHouse\\": "src/" }
