@@ -6,14 +6,18 @@ php:
   - 7.1
   - nightly
 
+services:
+  - docker
 before_install:
-  - sudo apt-key adv --keyserver keyserver.ubuntu.com --recv E0C56BD4
-  - sudo apt-add-repository "deb http://repo.yandex.ru/clickhouse/trusty stable main"
-  - sudo apt-get update -qq
-  - sudo apt-get install clickhouse-server-common clickhouse-client -y
+  - docker run -d -p 127.0.0.1:9000:9000 --name test-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server
+  - docker run -d --entrypoint "/bin/sh" --name test-clickhouse-client --link test-clickhouse-server:clickhouse-server yandex/clickhouse-client -c 'while :; do sleep 1; done'
+  - docker ps -a
+  - echo -e '#!/bin/bash\n\ndocker exec test-clickhouse-client clickhouse-client "$@"' | sudo tee /usr/local/bin/clickhouse-client > /dev/null
+  - sudo chmod +x /usr/local/bin/clickhouse-client
+  - sed -i 's/localhost/clickhouse-server/' ./phpunit.xml.dist
+  - echo '127.0.0.1 clickhouse-server' | sudo tee /etc/hosts > /dev/null
 
 before_script:
-  - sudo service clickhouse-server start
   - composer install
 
 script:
