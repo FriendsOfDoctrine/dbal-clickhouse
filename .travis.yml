@@ -9,11 +9,8 @@ php:
 services:
   - docker
 before_install:
-  - docker run -d -p 127.0.0.1:9000:9000 --name test-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server
-  - docker run -d --entrypoint "/bin/sh" --name test-clickhouse-client --link test-clickhouse-server:clickhouse-server yandex/clickhouse-client -c 'while :; do sleep 1; done'
+  - docker run -d -p 127.0.0.1:8123:8123 --name test-clickhouse-server --ulimit nofile=262144:262144 yandex/clickhouse-server
   - docker ps -a
-  - echo -e '#!/bin/bash\n\ndocker exec test-clickhouse-client clickhouse-client "$@"' | sudo tee /usr/local/bin/clickhouse-client > /dev/null
-  - sudo chmod +x /usr/local/bin/clickhouse-client
   - sed -i 's/localhost/clickhouse-server/' ./phpunit.xml.dist
   - echo '127.0.0.1 clickhouse-server' | sudo tee /etc/hosts > /dev/null
 
