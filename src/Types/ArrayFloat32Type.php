@@ -19,4 +19,10 @@ namespace FOD\DBALClickHouse\Types;
 class ArrayFloat32Type extends ArrayFloatType
 {
     const BITNESS = 32;
+
+    /** {@inheritdoc} */
+    protected function getBitness(): int
+    {
+        return self::BITNESS;
+    }
 }

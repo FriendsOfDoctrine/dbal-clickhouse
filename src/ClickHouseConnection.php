@@ -35,14 +35,21 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
     /**
      * Connection constructor
      *
-     * @param string $username      The username to use when connecting.
-     * @param string $password      The password to use when connecting.
+     * @param string $username The username to use when connecting.
+     * @param string $password The password to use when connecting.
      * @param string $host
      * @param int $port
      * @param string $database
+     * @param AbstractPlatform $platform
      */
-    public function __construct($username = 'default', $password = '', $host = 'localhost', $port = 8123, $database = 'default', AbstractPlatform $platform = null)
-    {
+    public function __construct(
+        $username = 'default',
+        $password = '',
+        $host = 'localhost',
+        $port = 8123,
+        $database = 'default',
+        AbstractPlatform $platform
+    ) {
         $this->smi2CHClient = new Smi2CHClient([
             'host' => $host,
             'port' => $port,
@@ -59,7 +66,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function prepare($prepareString)
     {
-        if (! $this->smi2CHClient) {
+        if (!$this->smi2CHClient) {
             throw new \Exception('ClickHouse\Client was not initialized');
         }
 
@@ -71,7 +78,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function query()
     {
-        $args = func_get_args();
+        $args = \func_get_args();
         $stmt = $this->prepare($args[0]);
         $stmt->execute();
 
@@ -83,7 +90,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function quote($input, $type = \PDO::PARAM_STR)
     {
-        if (\PDO::PARAM_INT == $type) {
+        if (\PDO::PARAM_INT === $type) {
             return $input;
         }
 
@@ -148,5 +155,4 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
     {
         throw new \LogicException('You need to implement ClickHouseConnection::errorInfo()');
     }
-
 }

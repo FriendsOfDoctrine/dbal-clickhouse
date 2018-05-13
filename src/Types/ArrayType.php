@@ -21,26 +21,25 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
  */
 abstract class ArrayType extends Type
 {
-
     const ARRAY_TYPES = [
-        'array(int8)' => 'FOD\DBALClickHouse\Types\ArrayInt8Type',
-        'array(int16)' => 'FOD\DBALClickHouse\Types\ArrayInt16Type',
-        'array(int32)' => 'FOD\DBALClickHouse\Types\ArrayInt32Type',
-        'array(int64)' => 'FOD\DBALClickHouse\Types\ArrayInt64Type',
-        'array(uint8)' => 'FOD\DBALClickHouse\Types\ArrayUInt8Type',
-        'array(uint16)' => 'FOD\DBALClickHouse\Types\ArrayUInt16Type',
-        'array(uint32)' => 'FOD\DBALClickHouse\Types\ArrayUInt32Type',
-        'array(uint64)' => 'FOD\DBALClickHouse\Types\ArrayUInt64Type',
-        'array(float32)' => 'FOD\DBALClickHouse\Types\ArrayFloat32Type',
-        'array(float64)' => 'FOD\DBALClickHouse\Types\ArrayFloat64Type',
-        'array(string)' => 'FOD\DBALClickHouse\Types\ArrayStringType',
-        'array(datetime)' => 'FOD\DBALClickHouse\Types\ArrayDateTimeType',
-        'array(date)' => 'FOD\DBALClickHouse\Types\ArrayDateType'
+        'array(int8)' => ArrayInt8Type::class,
+        'array(int16)' => ArrayInt16Type::class,
+        'array(int32)' => ArrayInt32Type::class,
+        'array(int64)' => ArrayInt64Type::class,
+        'array(uint8)' => ArrayUInt8Type::class,
+        'array(uint16)' => ArrayUInt16Type::class,
+        'array(uint32)' => ArrayUInt32Type::class,
+        'array(uint64)' => ArrayUInt64Type::class,
+        'array(float32)' => ArrayFloat32Type::class,
+        'array(float64)' => ArrayFloat64Type::class,
+        'array(string)' => ArrayStringType::class,
+        'array(datetime)' => ArrayDateTimeType::class,
+        'array(date)' => ArrayDateType::class,
     ];
 
     /**
      * Register Array types to the type map.
-     * 
+     *
      * @return void
      */
     public static function registerArrayTypes(AbstractPlatform $platform)

@@ -41,7 +41,6 @@ class ArrayStringType extends ArrayType
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
-
         $str = array_map(
             function ($value) use ($platform) {
                 return $platform->quoteStringLiteral($value);

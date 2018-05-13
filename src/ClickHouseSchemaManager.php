@@ -24,12 +24,13 @@ use Doctrine\DBAL\Schema\View;
 class ClickHouseSchemaManager extends AbstractSchemaManager
 {
     /**
-     * {@inheritdoc}
+     * @param array $table
+     * @return string|null
      */
     protected function _getPortableTableDefinition($table)
     {
         if ($this->_conn->getDatabase() !== $table['database']) {
-            return false;
+            return null;
         }
 
         return $table['name'];
@@ -40,7 +41,8 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
      */
     protected function _getPortableViewDefinition($view)
     {
-        $statement = $this->_conn->fetchColumn('SHOW CREATE TABLE ' . $view['name'] . ' FORMAT JSON');
+        $statement = $this->_conn->fetchColumn('SHOW CREATE TABLE ' . $view['name']);
+
         return new View($view['name'], $statement);
     }
 
@@ -62,7 +64,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
         $dbType = $tableColumn['type'];
         $length = null;
         $fixed = false;
-        if (substr(strtolower($tableColumn['type']), 0, 11) == 'fixedstring') {
+        if (0 === stripos(trim($tableColumn['type']), 'fixedstring')) {
             // get length from FixedString definition
             $length = preg_replace('~.*\(([0-9]*)\).*~', '$1', $tableColumn['type']);
             $dbType = 'fixedstring';
@@ -70,15 +72,13 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
         }
 
         $unsigned = false;
-        if (substr(strtolower($tableColumn['type']), 0, 4) === 'uint') {
+        if (0 === stripos(trim($tableColumn['type']), 'uint')) {
             $unsigned = true;
         }
 
-        if (! isset($tableColumn['name'])) {
+        if (!isset($tableColumn['name'])) {
             $tableColumn['name'] = '';
         }
-
-        $type = $this->_platform->getDoctrineTypeMapping($dbType);
 
         $default = null;
         //TODO process not only DEFAULT type, but ALIAS and MATERIALIZED too
@@ -86,22 +86,22 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
             $default = $tableColumn['default_expression'];
         }
 
-        $options = array(
-            'length'        => $length,
-            'notnull'       => true,
-            'default'       => $default,
-            'primary'       => false,
-            'fixed'         => $fixed,
-            'unsigned'      => $unsigned,
+        $options = [
+            'length' => $length,
+            'notnull' => true,
+            'default' => $default,
+            'primary' => false,
+            'fixed' => $fixed,
+            'unsigned' => $unsigned,
             'autoincrement' => false,
-            'comment'       => null,
-        );
+            'comment' => null,
+        ];
 
-        return  new Column(
-                        $tableColumn['name'],
-                        Type::getType($this->_platform->getDoctrineTypeMapping($dbType)),
-                        $options
-                );
+        return new Column(
+            $tableColumn['name'],
+            Type::getType($this->_platform->getDoctrineTypeMapping($dbType)),
+            $options
+        );
     }
 
     /**
@@ -111,5 +111,4 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
     {
         return $database['name'];
     }
-
 }

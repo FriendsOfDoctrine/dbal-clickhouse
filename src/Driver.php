@@ -23,33 +23,36 @@ class Driver implements \Doctrine\DBAL\Driver
      */
     public function connect(array $params, $user = null, $password = null, array $driverOptions = [])
     {
-        if ( is_null($user) ) {
-            if (! isset($params['user']))
+        if (null === $user) {
+            if (!isset($params['user'])) {
                 throw new ClickHouseException('Connection parameter `user` is required');
+            }
 
             $user = $params['user'];
         }
 
-        if ( is_null($password) ) {
-            if (! isset($params['password']))
+        if (null === $password) {
+            if (!isset($params['password'])) {
                 throw new ClickHouseException('Connection parameter `password` is required');
+            }
 
             $password = $params['password'];
         }
 
-        if (! isset($params['host'])) {
+        if (!isset($params['host'])) {
             throw new ClickHouseException('Connection parameter `host` is required');
         }
 
-        if (! isset($params['port'])) {
+        if (!isset($params['port'])) {
             throw new ClickHouseException('Connection parameter `port` is required');
         }
 
-        if (! isset($params['dbname'])) {
+        if (!isset($params['dbname'])) {
             throw new ClickHouseException('Connection parameter `dbname` is required');
         }
 
-        return new ClickHouseConnection($user, $password, $params['host'], $params['port'], $params['dbname'], $this->getDatabasePlatform());
+        return new ClickHouseConnection($user, $password, $params['host'], $params['port'], $params['dbname'],
+            $this->getDatabasePlatform());
     }
 
     /**
@@ -82,7 +85,7 @@ class Driver implements \Doctrine\DBAL\Driver
     public function getDatabase(\Doctrine\DBAL\Connection $conn)
     {
         $params = $conn->getParams();
-        if ( isset($params['dbname']) ) {
+        if (isset($params['dbname'])) {
             return $params['dbname'];
         }
 

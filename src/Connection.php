@@ -24,20 +24,21 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * {@inheritDoc}
      */
-    public function executeUpdate($query, array $params = array(), array $types = array())
+    public function executeUpdate($query, array $params = [], array $types = [])
     {
         // ClickHouse has no UPDATE or DELETE statements
         $command = strtoupper(substr(trim($query), 0, 6));
-        if ('UPDATE' == $command || 'DELETE' == $command) {
+        if ('UPDATE' === $command || 'DELETE' === $command) {
             throw new ClickHouseException('UPDATE and DELETE are not allowed in ClickHouse');
         }
 
         return parent::executeUpdate($query, $params, $types);
     }
+
     /**
      * @throws \Exception
      */
-    public function delete($tableExpression, array $identifier, array $types = array())
+    public function delete($tableExpression, array $identifier, array $types = [])
     {
         throw DBALException::notSupported(__METHOD__);
     }
@@ -45,7 +46,7 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * @throws \Exception
      */
-    public function update($tableExpression, array $data, array $identifier, array $types = array())
+    public function update($tableExpression, array $data, array $identifier, array $types = [])
     {
         throw DBALException::notSupported(__METHOD__);
     }

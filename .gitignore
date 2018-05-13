@@ -2,3 +2,6 @@
 composer.lock
 vendor/
 phpunit.xml
+Vagrantfile
+puphpet/
+.vagrant/
