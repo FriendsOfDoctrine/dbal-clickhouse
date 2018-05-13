@@ -1,7 +1,6 @@
 {
     "name": "friendsofdoctrine/dbal-clickhouse",
     "type": "library",
-    "version" : "1.2.0",
     "description": "Doctrine DBAL driver for ClickHouse",
     "keywords": ["doctrine", "dbal", "clickhouse", "driver"],
     "homepage": "http://github.com/friendsofdoctrine/dbal-clickhouse",
@@ -15,7 +14,7 @@
     "require": {
         "php": "^7.1",
         "smi2/phpClickHouse": "^0.18",
-        "doctrine/dbal": ">=2.6"
+        "doctrine/dbal": "^2.6"
     },
     "autoload": {
         "psr-4": { "FOD\\DBALClickHouse\\": "src/" }
