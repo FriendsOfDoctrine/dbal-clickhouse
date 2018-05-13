@@ -19,4 +19,10 @@ namespace FOD\DBALClickHouse\Types;
 class ArrayInt16Type extends ArrayIntType
 {
     const BITNESS = 16;
+
+    /** {@inheritdoc} */
+    protected function getBitness(): int
+    {
+        return self::BITNESS;
+    }
 }

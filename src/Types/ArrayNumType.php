@@ -21,8 +21,5 @@ abstract class ArrayNumType extends ArrayType
     /**
      * @return int Bitness of integers or floats in Array (Array(Int{bitness}) or Array(Float{bitness}))
      */
-    protected function getBitness()
-    {
-        return static::BITNESS;
-    }
+    abstract protected function getBitness(): int;
 }

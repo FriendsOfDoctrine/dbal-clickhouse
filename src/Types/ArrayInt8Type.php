@@ -19,4 +19,10 @@ namespace FOD\DBALClickHouse\Types;
 class ArrayInt8Type extends ArrayIntType
 {
     const BITNESS = 8;
+
+    /** {@inheritdoc} */
+    protected function getBitness(): int
+    {
+        return self::BITNESS;
+    }
 }
