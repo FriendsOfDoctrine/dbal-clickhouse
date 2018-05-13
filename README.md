@@ -1,4 +1,8 @@
-[![Build Status](https://travis-ci.org/FriendsOfDoctrine/dbal-clickhouse.svg?branch=travisCI)](https://travis-ci.org/FriendsOfDoctrine/dbal-clickhouse)
+[![Build Status](https://travis-ci.org/FriendsOfDoctrine/dbal-clickhouse.svg?branch=master)](https://travis-ci.org/FriendsOfDoctrine/dbal-clickhouse)
+[![Total Downloads](https://poser.pugx.org/friendsofdoctrine/dbal-clickhouse/d/total.svg)](https://packagist.org/packages/friendsofdoctrine/dbal-clickhouse)
+[![Latest Stable Version](https://poser.pugx.org/friendsofdoctrine/dbal-clickhouse/v/stable.svg)](https://packagist.org/packages/friendsofdoctrine/dbal-clickhouse)
+[![License](https://poser.pugx.org/friendsofdoctrine/dbal-clickhouse/license.svg)](https://packagist.org/packages/friendsofdoctrine/dbal-clickhouse)
+
 # Doctrine DBAL ClickHouse Driver
 
 Doctrine DBAL driver for ClickHouse -- an open-source column-oriented database management system by Yandex (https://clickhouse.yandex/)
