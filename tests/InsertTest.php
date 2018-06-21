@@ -80,4 +80,18 @@ class InsertTest extends TestCase
 
         $this->assertEquals([['payload' => 'v5'], ['payload' => 'v6']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (5, 6) ORDER BY id"));
     }
+
+    public function testStatementInsertWithoutKeyName()
+    {
+        $statement = $this->connection->prepare('INSERT INTO test_insert_table(id, payload) VALUES (?, ?), (?, ?)');
+        $statement->execute([7, 'v?7', 8, 'v8']);
+        $this->assertEquals([['payload' => 'v?7'], ['payload' => 'v8']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (7, 8) ORDER BY id"));
+    }
+
+    public function testStatementInsertWithKeyName()
+    {
+        $statement = $this->connection->prepare('INSERT INTO test_insert_table(id, payload) VALUES (:v0, :v1), (:v2, :v3)');
+        $statement->execute(['v0' => 9, 'v1' => 'v?9', 'v2' => 10, 'v3' => 'v10']);
+        $this->assertEquals([['payload' => 'v?9'], ['payload' => 'v10']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (9, 10) ORDER BY id"));
+    }
 }

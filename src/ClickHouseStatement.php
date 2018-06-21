@@ -264,18 +264,31 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     public function execute($params = null)
     {
+        $hasZeroIndex = false;
         if (\is_array($params)) {
             $this->values = array_replace($this->values, $params);//TODO array keys must be all strings or all integers?
+            $hasZeroIndex = array_key_exists(0, $params);
         }
 
         $sql = $this->statement;
-        foreach (array_keys($this->values) as $key) {
-            $sql = preg_replace(
-                '/(' . (\is_int($key) ? '\?' : ':' . $key) . ')/i',
-                $this->getTypedParam($key),
-                $sql,
-                1
-            );
+
+        if ($hasZeroIndex) {
+            $statementParts = explode('?', $sql);
+            array_walk($statementParts, function (&$part, $key) {
+                if (array_key_exists($key, $this->values)) {
+                    $part .= $this->getTypedParam($key);
+                }
+            });
+            $sql = implode('', $statementParts);
+        } else {
+            foreach (array_keys($this->values) as $key) {
+                $sql = preg_replace(
+                    '/(' . (\is_int($key) ? '\?' : ':' . $key) . ')/i',
+                    $this->getTypedParam($key),
+                    $sql,
+                    1
+                );
+            }
         }
 
         $this->processViaSMI2($sql);
