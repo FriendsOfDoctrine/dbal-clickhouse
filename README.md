@@ -6,6 +6,7 @@
 # Doctrine DBAL ClickHouse Driver
 
 Doctrine DBAL driver for ClickHouse -- an open-source column-oriented database management system by Yandex (https://clickhouse.yandex/)
+Driver is suitable for Symfony or any other framework using Doctrine.
 
 ## Installation
 
