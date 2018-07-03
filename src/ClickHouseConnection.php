@@ -13,6 +13,7 @@ namespace FOD\DBALClickHouse;
 
 use Doctrine\DBAL\ConnectionException;
 use ClickHouseDB\Client as Smi2CHClient;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
@@ -88,9 +89,9 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
     /**
      * {@inheritDoc}
      */
-    public function quote($input, $type = \PDO::PARAM_STR)
+    public function quote($input, $type = ParameterType::STRING)
     {
-        if (\PDO::PARAM_INT === $type) {
+        if (ParameterType::INTEGER === $type) {
             return $input;
         }
 

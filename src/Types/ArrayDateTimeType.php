@@ -11,6 +11,7 @@
 
 namespace FOD\DBALClickHouse\Types;
 
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
@@ -67,6 +68,6 @@ class ArrayDateTimeType extends ArrayType
      */
     public function getBindingType()
     {
-        return \PDO::PARAM_INT;
+        return ParameterType::INTEGER;
     }
 }

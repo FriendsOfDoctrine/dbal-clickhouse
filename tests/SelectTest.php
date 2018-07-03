@@ -11,6 +11,7 @@
 
 namespace FOD\DBALClickHouse\Tests;
 
+use Doctrine\DBAL\FetchMode;
 use FOD\DBALClickHouse\Connection;
 use PHPUnit\Framework\TestCase;
 
@@ -65,7 +66,7 @@ class SelectTest extends TestCase
     {
         $results = [];
         $stmt = $this->connection->query('SELECT id, hits FROM test_select_table WHERE id IN (3, 4)');
-        while ($result = $stmt->fetch(\PDO::FETCH_ASSOC)) {
+        while ($result = $stmt->fetch(FetchMode::ASSOCIATIVE)) {
             $results[] = $result;
         }
         $this->assertEquals([['id' => 3, 'hits' => 303], ['id' => 4, 'hits' => 404]], $results);
@@ -74,14 +75,14 @@ class SelectTest extends TestCase
     public function testFetchNumSelect()
     {
         $stmt = $this->connection->query('SELECT MAX(hits) FROM test_select_table');
-        $result = $stmt->fetch(\PDO::FETCH_ASSOC);
+        $result = $stmt->fetch(FetchMode::ASSOCIATIVE);
         $this->assertEquals(['MAX(hits)' => 505], $result);
     }
 
     public function testFetchObjSelect()
     {
         $stmt = $this->connection->query('SELECT MAX(hits) as maxHits FROM test_select_table');
-        $result = $stmt->fetch(\PDO::FETCH_OBJ);
+        $result = $stmt->fetch(FetchMode::STANDARD_OBJECT);
         $this->assertEquals((object)['maxHits' => 505], $result);
     }
 
@@ -111,7 +112,7 @@ class SelectTest extends TestCase
     public function testFetchAllNumSelect()
     {
         $stmt = $this->connection->query("SELECT AVG(hits) FROM test_select_table");
-        $result = $stmt->fetchAll(\PDO::FETCH_NUM);
+        $result = $stmt->fetchAll(FetchMode::NUMERIC);
 
         $this->assertEquals([[303]], $result);
     }
@@ -119,7 +120,7 @@ class SelectTest extends TestCase
     public function testFetchAllObjSelect()
     {
         $stmt = $this->connection->query("SELECT * FROM test_select_table WHERE id IN (2, 4)");
-        $result = $stmt->fetchAll(\PDO::FETCH_OBJ);
+        $result = $stmt->fetchAll(FetchMode::STANDARD_OBJECT);
 
         $this->assertEquals([(object)[
             'id' => 2,

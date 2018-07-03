@@ -13,6 +13,7 @@ namespace FOD\DBALClickHouse;
 
 use Doctrine\DBAL\DBALException;
 
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Types\BlobType;
 use Doctrine\DBAL\Types\DecimalType;
 use Doctrine\DBAL\Types\FloatType;
@@ -28,6 +29,7 @@ use Doctrine\DBAL\Types\DateTimeType;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Platforms\TrimMode;
 
 /**
  * Provides the behavior, features and SQL dialect of the ClickHouse database platform.
@@ -233,7 +235,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getTrimExpression($str, $pos = self::TRIM_UNSPECIFIED, $char = false)
+    public function getTrimExpression($str, $pos = TrimMode::UNSPECIFIED, $char = false)
     {
         throw DBALException::notSupported(__METHOD__);
     }
@@ -1032,12 +1034,12 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     protected function doModifyLimitQuery($query, $limit, $offset)
     {
-        if (is_null($limit)) {
+        if (null === $limit) {
             return $query;
         }
 
         $query .= ' LIMIT ';
-        if (!is_null($offset)) {
+        if (null !== $offset) {
             $query .= $offset . ', ';
         }
 
@@ -1097,7 +1099,7 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
      */
     protected function getReservedKeywordsClass()
     {
-        return 'FOD\DBALClickHouse\ClickHouseKeywords';
+        return ClickHouseKeywords::class;
     }
 
     /**
@@ -1110,19 +1112,16 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
         }
 
         $default = " DEFAULT '" . $field['default'] . "'";
-        if (isset($field['type'])) {
-            if (in_array((string)$field['type'], [
+        if ($fieldType = (string)($field['type'] ?? null)) {
+            if (\in_array($fieldType, [
                     'Integer',
                     'SmallInt',
                     'Float'
-                ]) || ('BigInt' === $field['type'] && \PDO::PARAM_INT === Type::getType('BigInt')->getBindingType())) {
+                ]) || ('BigInt' === $fieldType && ParameterType::INTEGER === Type::getType('BigInt')->getBindingType())) {
                 $default = ' DEFAULT ' . $field['default'];
-            } elseif (in_array(
-                    (string)$field['type'],
-                    ['DateTime']
-                ) && $field['default'] === $this->getCurrentTimestampSQL()) {
+            } elseif ('DateTime' === $fieldType && $field['default'] === $this->getCurrentTimestampSQL()) {
                 $default = ' DEFAULT ' . $this->getCurrentTimestampSQL();
-            } elseif ('Date' === (string)$field['type']) { // TODO check if string matches constant date like 'dddd-yy-mm' and quote it
+            } elseif ('Date' === $fieldType) { // TODO check if string matches constant date like 'dddd-yy-mm' and quote it
                 $default = ' DEFAULT ' . $field['default'];
             }
         }
@@ -1136,17 +1135,17 @@ class ClickHousePlatform extends \Doctrine\DBAL\Platforms\AbstractPlatform
     public function getDoctrineTypeMapping($dbType)
     {
         // FixedString
-        if (strpos(strtolower($dbType), 'fixedstring') === 0) {
+        if (stripos($dbType, 'fixedstring') === 0) {
             $dbType = 'fixedstring';
         }
 
         //Enum8
-        if (strpos(strtolower($dbType), 'enum8') === 0) {
+        if (stripos($dbType, 'enum8') === 0) {
             $dbType = 'enum8';
         }
 
         //Enum16
-        if (strpos(strtolower($dbType), 'enum16') === 0) {
+        if (stripos($dbType, 'enum16') === 0) {
             $dbType = 'enum16';
         }
         return parent::getDoctrineTypeMapping($dbType);

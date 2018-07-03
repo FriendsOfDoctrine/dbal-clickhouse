@@ -11,6 +11,8 @@
 
 namespace FOD\DBALClickHouse;
 
+use Doctrine\DBAL\FetchMode;
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
@@ -60,7 +62,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     /**
      * @var integer
      */
-    private $fetchMode = \PDO::FETCH_BOTH;
+    private $fetchMode = FetchMode::MIXED;
 
     /**
      * @param \ClickHouseDB\Client $client
@@ -125,13 +127,12 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     {
         $mode = $fetchMode ?: $this->fetchMode;
         if (!\in_array($mode, [
-            \PDO::FETCH_ASSOC,
-            \PDO::FETCH_NUM,
-            \PDO::FETCH_BOTH,
-            \PDO::FETCH_OBJ,
+            FetchMode::ASSOCIATIVE,
+            FetchMode::NUMERIC,
+            FetchMode::STANDARD_OBJECT,
             \PDO::FETCH_KEY_PAIR,
         ], true)) {
-            $mode = \PDO::FETCH_BOTH;
+            $mode = FetchMode::MIXED;
         }
 
         return $mode;
@@ -150,15 +151,15 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
 
         $this->getIterator()->next();
 
-        if (\PDO::FETCH_NUM === $this->assumeFetchMode($fetchMode)) {
+        if (FetchMode::NUMERIC === $this->assumeFetchMode($fetchMode)) {
             return array_values($data);
         }
 
-        if (\PDO::FETCH_BOTH === $this->assumeFetchMode($fetchMode)) {
+        if (FetchMode::MIXED === $this->assumeFetchMode($fetchMode)) {
             return array_values($data) + $data;
         }
 
-        if (\PDO::FETCH_OBJ === $this->assumeFetchMode($fetchMode)) {
+        if (FetchMode::STANDARD_OBJECT === $this->assumeFetchMode($fetchMode)) {
             return (object)$data;
         }
 
@@ -178,14 +179,14 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     public function fetchAll($fetchMode = null, $fetchArgument = null, $ctorArgs = null)
     {
-        if (\PDO::FETCH_NUM === $this->assumeFetchMode($fetchMode)) {
+        if (FetchMode::NUMERIC === $this->assumeFetchMode($fetchMode)) {
             return array_map(
                 'array_values',
                 $this->rows
             );
         }
 
-        if (\PDO::FETCH_BOTH === $this->assumeFetchMode($fetchMode)) {
+        if (FetchMode::MIXED === $this->assumeFetchMode($fetchMode)) {
             return array_map(
                 function ($row) {
                     return array_values($row) + $row;
@@ -194,7 +195,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
             );
         }
 
-        if (\PDO::FETCH_OBJ === $this->assumeFetchMode($fetchMode)) {
+        if (FetchMode::STANDARD_OBJECT === $this->assumeFetchMode($fetchMode)) {
             return array_map(
                 function ($row) {
                     return (object)$row;
@@ -224,7 +225,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
      */
     public function fetchColumn($columnIndex = 0)
     {
-        if ($elem = $this->fetch(\PDO::FETCH_NUM)) {
+        if ($elem = $this->fetch(FetchMode::NUMERIC)) {
             return $elem[$columnIndex] ?? $elem[0];
         }
 
@@ -342,10 +343,10 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
         // if param type was not setted - trying to get db-type by php-var-type
         if (null === $type) {
             if (\is_bool($this->values[$key])) {
-                $type = \PDO::PARAM_BOOL;
+                $type = ParameterType::BOOLEAN;
             } else {
                 if (\is_int($this->values[$key]) || \is_float($this->values[$key])) {
-                    $type = \PDO::PARAM_INT;
+                    $type = ParameterType::INTEGER;
                 } else {
                     if (\is_array($this->values[$key])) {
 
@@ -372,15 +373,15 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
             }
         }
 
-        if (\PDO::PARAM_NULL === $type) {
+        if (ParameterType::NULL === $type) {
             throw new ClickHouseException('NULLs are not supported by ClickHouse');
         }
 
-        if (\PDO::PARAM_INT === $type) {
+        if (ParameterType::INTEGER === $type) {
             return $this->values[$key];
         }
 
-        if (\PDO::PARAM_BOOL === $type) {
+        if (ParameterType::BOOLEAN === $type) {
             return (int)(bool)$this->values[$key];
         }
 

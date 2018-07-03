@@ -11,6 +11,7 @@
 
 namespace FOD\DBALClickHouse\Types;
 
+use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
@@ -25,7 +26,7 @@ class BigIntType extends \Doctrine\DBAL\Types\BigIntType
      */
     public function getBindingType()
     {
-        return \PDO::PARAM_INT;
+        return ParameterType::INTEGER;
     }
 
     /**
