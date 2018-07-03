@@ -103,7 +103,7 @@ class ClickHouseStatement implements \IteratorAggregate, \Doctrine\DBAL\Driver\S
     public function columnCount()
     {
         return $this->rows
-            ? \count(\array_slice($this->rows, 0, 1)[0])
+            ? \count(current($this->rows))
             : 0;
     }
 

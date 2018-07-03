@@ -203,5 +203,13 @@ class SelectTest extends TestCase
             ]
         ], $stmt->fetchAll());
     }
+
+    public function testColumnCount()
+    {
+        $stmt = $this->connection->prepare('SELECT * FROM test_select_table');
+        $stmt->execute();
+
+        $this->assertEquals(3, $stmt->columnCount());
+    }
 }
 
