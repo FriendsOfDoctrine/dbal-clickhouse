@@ -25,7 +25,14 @@ $connectionParams = [
     'password' => '',
     'dbname' => 'default',
     'driverClass' => 'FOD\DBALClickHouse\Driver',
-    'wrapperClass' => 'FOD\DBALClickHouse\Connection'
+    'wrapperClass' => 'FOD\DBALClickHouse\Connection',
+    'driverOptions' => [
+        'extremes' => false,
+        'readonly' => true,
+        'max_execution_time' => 30,
+        'enable_http_compression' => 0,
+        'https' => false,
+    ],
 ];
 $conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, new \Doctrine\DBAL\Configuration());
 ```

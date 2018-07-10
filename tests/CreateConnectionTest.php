@@ -48,6 +48,13 @@ class CreateConnectionTest extends TestCase
                 'dbname' => phpunit_ch_dbname,
                 'driverClass' => phpunit_ch_driver_class,
                 'wrapperClass' => phpunit_ch_wrapper_class,
+                'driverOptions' => [
+                    'extremes'                => false,
+                    'readonly'                => true,
+                    'max_execution_time'      => 30,
+                    'enable_http_compression' => 0,
+                    'https'                   => false
+                ],
             ];
         }
         return \Doctrine\DBAL\DriverManager::getConnection($params, new \Doctrine\DBAL\Configuration());

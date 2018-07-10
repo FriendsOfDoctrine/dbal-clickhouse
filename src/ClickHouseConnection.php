@@ -11,7 +11,6 @@
 
 namespace FOD\DBALClickHouse;
 
-use Doctrine\DBAL\ConnectionException;
 use ClickHouseDB\Client as Smi2CHClient;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
@@ -36,27 +35,25 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
     /**
      * Connection constructor
      *
+     * @param array $params
      * @param string $username The username to use when connecting.
      * @param string $password The password to use when connecting.
-     * @param string $host
-     * @param int $port
-     * @param string $database
      * @param AbstractPlatform $platform
      */
     public function __construct(
-        $username = 'default',
-        $password = '',
-        $host = 'localhost',
-        $port = 8123,
-        $database = 'default',
+        array $params,
+        $username,
+        $password,
         AbstractPlatform $platform
     ) {
         $this->smi2CHClient = new Smi2CHClient([
-            'host' => $host,
-            'port' => $port,
+            'host' => $params['host'] ?? 'localhost',
+            'port' => $params['port'] ?? 8123,
             'username' => $username,
             'password' => $password,
-            'settings' => ['database' => $database]
+            'settings' => array_merge([
+                'database' => $params['dbname'] ?? 'default',
+            ], $params['driverOptions'] ?? []),
         ]);
 
         $this->platform = $platform;
