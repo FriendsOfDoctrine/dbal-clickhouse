@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -16,15 +19,13 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
  * BigInt Type
- *
- * @author Mochalygin <a@mochalygin.ru>
  */
 class BigIntType extends \Doctrine\DBAL\Types\BigIntType
 {
     /**
      * {@inheritdoc}
      */
-    public function getBindingType()
+    public function getBindingType() : int
     {
         return ParameterType::INTEGER;
     }
@@ -34,13 +35,13 @@ class BigIntType extends \Doctrine\DBAL\Types\BigIntType
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
-        return (int)$value;
+        return (int) $value;
     }
 
     /**
      * {@inheritdoc}
      */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
     {
         return (empty($fieldDeclaration['unsigned']) ? '' : 'U') . 'Int64';
     }

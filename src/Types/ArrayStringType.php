@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -16,15 +19,13 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
  * Array(String) Type class
- *
- * @author Mochalygin <a@mochalygin.ru>
  */
-class ArrayStringType extends ArrayType
+class ArrayStringType extends AbstractArrayType
 {
     /**
      * {@inheritDoc}
      */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
     {
         return 'Array(String)';
     }
@@ -32,7 +33,7 @@ class ArrayStringType extends ArrayType
     /**
      * {@inheritDoc}
      */
-    public function getName()
+    public function getName() : string
     {
         return 'array(string)';
     }
@@ -42,20 +43,21 @@ class ArrayStringType extends ArrayType
      */
     public function convertToDatabaseValue($value, AbstractPlatform $platform)
     {
-        $str = array_map(
-            function ($value) use ($platform) {
-                return $platform->quoteStringLiteral($value);
-            },
-            $value
-        );
-
-        return '[' . implode(', ', $str) . ']';
+        return '[' . implode(
+            ', ',
+            array_map(
+                function (string $value) use ($platform) {
+                        return $platform->quoteStringLiteral($value);
+                },
+                (array) $value
+            )
+        ) . ']';
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getBindingType()
+    public function getBindingType() : int
     {
         return ParameterType::INTEGER;
     }

@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -11,22 +14,19 @@
 
 namespace FOD\DBALClickHouse\Types;
 
-use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
  * Array(Int*) Types basic class
- *
- * @author Mochalygin <a@mochalygin.ru>
  */
-abstract class ArrayIntType extends ArrayNumType
+abstract class AbstractArrayIntType extends AbstractArrayNumType
 {
-    const UNSIGNED = false;
+    public const UNSIGNED = false;
 
     /**
      * {@inheritDoc}
      */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
     {
         return 'Array(' . (static::UNSIGNED ? 'U' : '') . 'Int' . $this->getBitness() . ')';
     }
@@ -34,7 +34,7 @@ abstract class ArrayIntType extends ArrayNumType
     /**
      * {@inheritDoc}
      */
-    public function getName()
+    public function getName() : string
     {
         return 'array(' . (static::UNSIGNED ? 'u' : '') . 'int' . $this->getBitness() . ')';
     }

@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -13,10 +16,8 @@ namespace FOD\DBALClickHouse\Types;
 
 /**
  * Array(UInt16) Type
- *
- * @author Mochalygin <a@mochalygin.ru>
  */
 class ArrayUInt16Type extends ArrayInt16Type
 {
-    const UNSIGNED = true;
+    public const UNSIGNED = true;
 }

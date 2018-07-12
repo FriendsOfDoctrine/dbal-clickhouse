@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -15,15 +18,13 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
  * Array(Float*) Types basic class
- *
- * @author Mochalygin <a@mochalygin.ru>
  */
-abstract class ArrayFloatType extends ArrayNumType
+abstract class AbstractArrayFloatType extends AbstractArrayNumType
 {
     /**
      * {@inheritDoc}
      */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform)
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
     {
         return 'Array(Float' . $this->getBitness() . ')';
     }
@@ -31,7 +32,7 @@ abstract class ArrayFloatType extends ArrayNumType
     /**
      * {@inheritDoc}
      */
-    public function getName()
+    public function getName() : string
     {
         return 'array(float' . $this->getBitness() . ')';
     }

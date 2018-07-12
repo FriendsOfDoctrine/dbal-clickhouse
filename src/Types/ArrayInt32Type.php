@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -13,15 +16,13 @@ namespace FOD\DBALClickHouse\Types;
 
 /**
  * Array(Int32) Type
- *
- * @author Mochalygin <a@mochalygin.ru>
  */
-class ArrayInt32Type extends ArrayIntType
+class ArrayInt32Type extends AbstractArrayIntType
 {
-    const BITNESS = 32;
+    public const BITNESS = 32;
 
     /** {@inheritdoc} */
-    protected function getBitness(): int
+    protected function getBitness() : int
     {
         return self::BITNESS;
     }

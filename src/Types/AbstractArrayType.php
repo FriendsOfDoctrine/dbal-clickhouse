@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -11,17 +14,16 @@
 
 namespace FOD\DBALClickHouse\Types;
 
-use Doctrine\DBAL\Types\Type;
+use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\Type;
 
 /**
  * Array(*) Types basic class
- *
- * @author Mochalygin <a@mochalygin.ru>
  */
-abstract class ArrayType extends Type
+abstract class AbstractArrayType extends Type
 {
-    const ARRAY_TYPES = [
+    public const ARRAY_TYPES = [
         'array(int8)' => ArrayInt8Type::class,
         'array(int16)' => ArrayInt16Type::class,
         'array(int32)' => ArrayInt32Type::class,
@@ -40,16 +42,18 @@ abstract class ArrayType extends Type
     /**
      * Register Array types to the type map.
      *
-     * @return void
+     * @throws DBALException
      */
-    public static function registerArrayTypes(AbstractPlatform $platform)
+    public static function registerArrayTypes(AbstractPlatform $platform) : void
     {
         foreach (self::ARRAY_TYPES as $typeName => $className) {
-            if (!self::hasType($typeName)) {
-                self::addType($typeName, $className);
-                foreach (Type::getType($typeName)->getMappedDatabaseTypes($platform) as $dbType) {
-                    $platform->registerDoctrineTypeMapping($dbType, $typeName);
-                }
+            if (self::hasType($typeName)) {
+                continue;
+            }
+
+            self::addType($typeName, $className);
+            foreach (Type::getType($typeName)->getMappedDatabaseTypes($platform) as $dbType) {
+                $platform->registerDoctrineTypeMapping($dbType, $typeName);
             }
         }
     }
@@ -57,10 +61,8 @@ abstract class ArrayType extends Type
     /**
      * {@inheritDoc}
      */
-    public function getMappedDatabaseTypes(AbstractPlatform $platform)
+    public function getMappedDatabaseTypes(AbstractPlatform $platform) : array
     {
-        return [
-            $this->getName()
-        ];
+        return [$this->getName()];
     }
 }

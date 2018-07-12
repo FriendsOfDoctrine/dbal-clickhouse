@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -13,13 +16,11 @@ namespace FOD\DBALClickHouse\Types;
 
 /**
  * Array(Numeric) Types basic class
- *
- * @author Mochalygin <a@mochalygin.ru>
  */
-abstract class ArrayNumType extends ArrayType
+abstract class AbstractArrayNumType extends AbstractArrayType
 {
     /**
      * @return int Bitness of integers or floats in Array (Array(Int{bitness}) or Array(Float{bitness}))
      */
-    abstract protected function getBitness(): int;
+    abstract protected function getBitness() : int;
 }
