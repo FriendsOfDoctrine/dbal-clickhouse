@@ -12,7 +12,7 @@
 namespace FOD\DBALClickHouse\Tests;
 
 use FOD\DBALClickHouse\Connection;
-use FOD\DBALClickHouse\Types\ArrayType;
+use FOD\DBALClickHouse\Types\AbstractArrayType;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -28,7 +28,7 @@ class ArraysTest extends TestCase
     public function setUp()
     {
         $this->connection = CreateConnectionTest::createConnection();
-        ArrayType::registerArrayTypes($this->connection->getDatabasePlatform());
+        AbstractArrayType::registerArrayTypes($this->connection->getDatabasePlatform());
     }
 
     public function tearDown()
