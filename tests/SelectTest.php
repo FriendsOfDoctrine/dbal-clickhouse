@@ -12,6 +12,7 @@
 namespace FOD\DBALClickHouse\Tests;
 
 use Doctrine\DBAL\FetchMode;
+use Doctrine\DBAL\Platforms\TrimMode;
 use FOD\DBALClickHouse\Connection;
 use PHPUnit\Framework\TestCase;
 
@@ -44,7 +45,7 @@ class SelectTest extends TestCase
             $this->connection->exec($sql);
         }
 
-        $this->connection->exec("INSERT INTO test_select_table(id, payload, hits) VALUES (1, 'v1', 101), (2, 'v2', 202), (3, 'v3', 303), (4, 'v4', 404), (5, 'v4', 505)");
+        $this->connection->exec("INSERT INTO test_select_table(id, payload, hits) VALUES (1, 'v1', 101), (2, 'v2', 202), (3, 'v3', 303), (4, 'v4', 404), (5, 'v4', 505), (6, '  t1   ', 606), (7, 'aat2aaa', 707)");
     }
 
     public function tearDown()
@@ -76,14 +77,14 @@ class SelectTest extends TestCase
     {
         $stmt = $this->connection->query('SELECT MAX(hits) FROM test_select_table');
         $result = $stmt->fetch(FetchMode::ASSOCIATIVE);
-        $this->assertEquals(['MAX(hits)' => 505], $result);
+        $this->assertEquals(['MAX(hits)' => 707], $result);
     }
 
     public function testFetchObjSelect()
     {
         $stmt = $this->connection->query('SELECT MAX(hits) as maxHits FROM test_select_table');
         $result = $stmt->fetch(FetchMode::STANDARD_OBJECT);
-        $this->assertEquals((object)['maxHits' => 505], $result);
+        $this->assertEquals((object)['maxHits' => 707], $result);
     }
 
     public function testFetchKeyPairSelect()
@@ -98,15 +99,18 @@ class SelectTest extends TestCase
         $stmt = $this->connection->query("SELECT * FROM test_select_table WHERE id IN (1, 3)");
         $result = $stmt->fetchAll();
 
-        $this->assertEquals([[
-            'id' => 1,
-            'payload' => 'v1',
-            'hits' => 101,
-        ], [
-            'id' => 3,
-            'payload' => 'v3',
-            'hits' => 303,
-        ]], $result);
+        $this->assertEquals([
+            [
+                'id' => 1,
+                'payload' => 'v1',
+                'hits' => 101,
+            ],
+            [
+                'id' => 3,
+                'payload' => 'v3',
+                'hits' => 303,
+            ]
+        ], $result);
     }
 
     public function testFetchAllNumSelect()
@@ -114,7 +118,7 @@ class SelectTest extends TestCase
         $stmt = $this->connection->query("SELECT AVG(hits) FROM test_select_table");
         $result = $stmt->fetchAll(FetchMode::NUMERIC);
 
-        $this->assertEquals([[303]], $result);
+        $this->assertEquals([[404]], $result);
     }
 
     public function testFetchAllObjSelect()
@@ -122,15 +126,18 @@ class SelectTest extends TestCase
         $stmt = $this->connection->query("SELECT * FROM test_select_table WHERE id IN (2, 4)");
         $result = $stmt->fetchAll(FetchMode::STANDARD_OBJECT);
 
-        $this->assertEquals([(object)[
-            'id' => 2,
-            'payload' => 'v2',
-            'hits' => 202,
-        ], (object)[
-            'id' => 4,
-            'payload' => 'v4',
-            'hits' => 404,
-        ]], $result);
+        $this->assertEquals([
+            (object)[
+                'id' => 2,
+                'payload' => 'v2',
+                'hits' => 202,
+            ],
+            (object)[
+                'id' => 4,
+                'payload' => 'v4',
+                'hits' => 404,
+            ]
+        ], $result);
     }
 
     public function testFetchAllKeyPairSelect()
@@ -138,11 +145,14 @@ class SelectTest extends TestCase
         $stmt = $this->connection->query("SELECT payload, hits FROM test_select_table WHERE id IN (2, 4) ORDER BY id");
         $result = $stmt->fetchAll(\PDO::FETCH_KEY_PAIR);
 
-        $this->assertEquals([[
-            'v2' => 202,
-        ], [
-            'v4' => 404,
-        ]], $result);
+        $this->assertEquals([
+            [
+                'v2' => 202,
+            ],
+            [
+                'v4' => 404,
+            ]
+        ], $result);
     }
 
     public function testFetchColumnValidOffsetSelect()
@@ -163,8 +173,7 @@ class SelectTest extends TestCase
         while ($result = $stmt->fetchColumn(2)) {
             $results[] = $result;
         }
-
-        $this->assertEquals(['v2', 'v3', 'v4', 'v4'], $results);
+        $this->assertEquals(['v2', 'v3', 'v4', 'v4', '  t1   ', 'aat2aaa'], $results);
     }
 
     public function testQueryBuilderSelect()
@@ -181,13 +190,16 @@ class SelectTest extends TestCase
             ->execute()
             ->fetchAll();
 
-        $this->assertEquals([[
-            'payload' => 'v3',
-            'uniques' => '1',
-        ], [
-            'payload' => 'v4',
-            'uniques' => '2',
-        ]], $result);
+        $this->assertEquals([
+            [
+                'payload' => '  t1   ',
+                'uniques' => '1',
+            ],
+            [
+                'payload' => 'aat2aaa',
+                'uniques' => '1',
+            ]
+        ], $result);
     }
 
     public function testDynamicParametersSelect()
@@ -201,6 +213,14 @@ class SelectTest extends TestCase
             [
                 'payload' => 'v4',
                 'avg_hits' => 454.5,
+            ],
+            [
+                'payload' => '  t1   ',
+                'avg_hits' => 606,
+            ],
+            [
+                'payload' => 'aat2aaa',
+                'avg_hits' => 707,
             ]
         ], $stmt->fetchAll());
     }
@@ -211,6 +231,58 @@ class SelectTest extends TestCase
         $stmt->execute();
 
         $this->assertEquals(3, $stmt->columnCount());
+    }
+
+    public function testTrim()
+    {
+        $stmt = $this->connection->prepare(
+            sprintf(
+                'SELECT %s FROM test_select_table WHERE id = 6',
+                $this->connection->getDatabasePlatform()->getTrimExpression('payload')
+            )
+        );
+        $stmt->execute();
+
+        $this->assertEquals('t1', $stmt->fetchColumn());
+    }
+
+    public function testTrimLeft()
+    {
+        $stmt = $this->connection->prepare(
+            sprintf(
+                'SELECT %s FROM test_select_table WHERE id = 6',
+                $this->connection->getDatabasePlatform()->getTrimExpression('payload', TrimMode::LEADING)
+            )
+        );
+        $stmt->execute();
+
+        $this->assertEquals('t1   ', $stmt->fetchColumn());
+    }
+
+    public function testTrimRight()
+    {
+        $stmt = $this->connection->prepare(
+            sprintf(
+                'SELECT %s FROM test_select_table WHERE id = 6',
+                $this->connection->getDatabasePlatform()->getTrimExpression('payload', TrimMode::TRAILING)
+            )
+        );
+        $stmt->execute();
+
+        $this->assertEquals('  t1', $stmt->fetchColumn());
+    }
+
+    public function testTrimChar()
+    {
+        $stmt = $this->connection->prepare(
+            sprintf(
+                'SELECT %s FROM test_select_table WHERE id = 7',
+                $this->connection->getDatabasePlatform()->getTrimExpression('payload', TrimMode::UNSPECIFIED, 'a')
+            )
+        );
+        $stmt->execute();
+
+        $this->assertEquals('t2', $stmt->fetchColumn());
     }
 }
 

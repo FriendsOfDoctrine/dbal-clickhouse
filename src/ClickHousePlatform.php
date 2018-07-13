@@ -35,7 +35,6 @@ use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\TableDiff;
 
-
 /**
  * Provides the behavior, features and SQL dialect of the ClickHouse database platform.
  */
@@ -243,25 +242,36 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getTrimExpression($str, $pos = TrimMode::UNSPECIFIED, $char = false)
+    public function getTrimExpression($str, $pos = TrimMode::UNSPECIFIED, $char = false) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        if (! $char) {
+            switch ($pos) {
+                case TrimMode::LEADING:
+                    return $this->getLtrimExpression($str);
+                case TrimMode::TRAILING:
+                    return $this->getRtrimExpression($str);
+                default:
+                    return sprintf("replaceRegexpAll(%s, '(^\\\s+|\\\s+$)', '')", $str);
+            }
+        }
+
+        return sprintf("replaceRegexpAll(%s, '(^%s+|%s+$)', '')", $str, $char, $char);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getRtrimExpression($str)
+    public function getRtrimExpression($str) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        return sprintf("replaceRegexpAll(%s, '(\\\s+$)', '')", $str);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getLtrimExpression($str)
+    public function getLtrimExpression($str) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        return sprintf("replaceRegexpAll(%s, '(^\\\s+)', '')", $str);
     }
 
     /**
@@ -1133,16 +1143,16 @@ class ClickHousePlatform extends AbstractPlatform
         }
 
         $default = " DEFAULT '" . $field['default'] . "'";
-        if ($fieldType = (string)($field['type'] ?? null)) {
+        if ($fieldType = (string) ($field['type'] ?? null)) {
             if (\in_array($fieldType, [
                     'Integer',
                     'SmallInt',
-                    'Float'
-                ]) || ('BigInt' === $fieldType && ParameterType::INTEGER === Type::getType('BigInt')->getBindingType())) {
+                    'Float',
+                ]) || ($fieldType === 'BigInt' && Type::getType('BigInt')->getBindingType() === ParameterType::INTEGER)) {
                 $default = ' DEFAULT ' . $field['default'];
-            } elseif ('DateTime' === $fieldType && $field['default'] === $this->getCurrentTimestampSQL()) {
+            } elseif ($fieldType === 'DateTime' && $field['default'] === $this->getCurrentTimestampSQL()) {
                 $default = ' DEFAULT ' . $this->getCurrentTimestampSQL();
-            } elseif ('Date' === $fieldType) { // TODO check if string matches constant date like 'dddd-yy-mm' and quote it
+            } elseif ($fieldType === 'Date') { // TODO check if string matches constant date like 'dddd-yy-mm' and quote it
                 $default = ' DEFAULT ' . $field['default'];
             }
         }
