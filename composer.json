@@ -13,6 +13,8 @@
     ],
     "require": {
         "php": "^7.1",
+        "ext-PDO": "*",
+        "ext-pcre": "*",
         "smi2/phpClickHouse": "^1.0",
         "doctrine/dbal": "^2.7"
     },

@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -12,38 +15,30 @@
 namespace FOD\DBALClickHouse;
 
 use ClickHouseDB\Client as Smi2CHClient;
+use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
  * ClickHouse implementation for the Connection interface.
- *
- * @author Mochalygin <a@mochalygin.ru>
  */
-class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
+class ClickHouseConnection implements Connection
 {
-    /**
-     * @var Smi2CHClient
-     */
+    /** @var Smi2CHClient */
     protected $smi2CHClient;
 
-    /**
-     * @var AbstractPlatform
-     */
+    /** @var AbstractPlatform */
     protected $platform;
 
     /**
      * Connection constructor
      *
-     * @param array $params
-     * @param string $username The username to use when connecting.
-     * @param string $password The password to use when connecting.
-     * @param AbstractPlatform $platform
+     * @param array $params Array with connection params.
      */
     public function __construct(
         array $params,
-        $username,
-        $password,
+        string $username,
+        string $password,
         AbstractPlatform $platform
     ) {
         $this->smi2CHClient = new Smi2CHClient([
@@ -64,10 +59,6 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function prepare($prepareString)
     {
-        if (!$this->smi2CHClient) {
-            throw new \Exception('ClickHouse\Client was not initialized');
-        }
-
         return new ClickHouseStatement($this->smi2CHClient, $prepareString, $this->platform);
     }
 
@@ -88,7 +79,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
      */
     public function quote($input, $type = ParameterType::STRING)
     {
-        if (ParameterType::INTEGER === $type) {
+        if ($type === ParameterType::INTEGER) {
             return $input;
         }
 
@@ -98,7 +89,7 @@ class ClickHouseConnection implements \Doctrine\DBAL\Driver\Connection
     /**
      * {@inheritDoc}
      */
-    public function exec($statement)
+    public function exec($statement) : int
     {
         $stmt = $this->prepare($statement);
         $stmt->execute();

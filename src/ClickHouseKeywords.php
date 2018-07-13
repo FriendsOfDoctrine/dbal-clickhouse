@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -15,15 +18,13 @@ use Doctrine\DBAL\Platforms\Keywords\KeywordList;
 
 /**
  * ClickHouse Keywordlist
- *
- * @author Mochalygin <a@mochalygin.ru>
  */
 class ClickHouseKeywords extends KeywordList
 {
     /**
      * {@inheritdoc}
      */
-    public function getName()
+    public function getName() : string
     {
         return 'ClickHouse';
     }
@@ -31,7 +32,7 @@ class ClickHouseKeywords extends KeywordList
     /**
      * {@inheritdoc}
      */
-    protected function getKeywords()
+    protected function getKeywords() : array
     {
         //TODO actualize it!
         return [

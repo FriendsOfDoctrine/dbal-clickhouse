@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -12,27 +15,20 @@
 namespace FOD\DBALClickHouse;
 
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
-use Doctrine\DBAL\Types\Type;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\View;
+use Doctrine\DBAL\Types\Type;
 
 /**
  * Schema manager for the ClickHouse DBMS.
- *
- * @author Mochalygin <a@mochalygin.ru>
  */
 class ClickHouseSchemaManager extends AbstractSchemaManager
 {
     /**
-     * @param array $table
-     * @return string|null
+     * {@inheritdoc}
      */
     protected function _getPortableTableDefinition($table)
     {
-        if ($this->_conn->getDatabase() !== $table['database']) {
-            return null;
-        }
-
         return $table['name'];
     }
 
@@ -49,7 +45,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
     /**
      * {@inheritdoc}
      */
-    public function listTableIndexes($table)
+    public function listTableIndexes($table) : array
     {
         return [];
     }
@@ -57,32 +53,32 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
     /**
      * {@inheritdoc}
      */
-    protected function _getPortableTableColumnDefinition($tableColumn)
+    protected function _getPortableTableColumnDefinition($tableColumn) : Column
     {
         $tableColumn = array_change_key_case($tableColumn, CASE_LOWER);
 
         $dbType = $tableColumn['type'];
         $length = null;
-        $fixed = false;
-        if (0 === stripos(trim($tableColumn['type']), 'fixedstring')) {
+        $fixed  = false;
+        if (stripos(trim($tableColumn['type']), 'fixedstring') === 0) {
             // get length from FixedString definition
             $length = preg_replace('~.*\(([0-9]*)\).*~', '$1', $tableColumn['type']);
             $dbType = 'fixedstring';
-            $fixed = true;
+            $fixed  = true;
         }
 
         $unsigned = false;
-        if (0 === stripos(trim($tableColumn['type']), 'uint')) {
+        if (stripos(trim($tableColumn['type']), 'uint') === 0) {
             $unsigned = true;
         }
 
-        if (!isset($tableColumn['name'])) {
+        if (! isset($tableColumn['name'])) {
             $tableColumn['name'] = '';
         }
 
         $default = null;
         //TODO process not only DEFAULT type, but ALIAS and MATERIALIZED too
-        if ($tableColumn['default_expression'] && 'default' === strtolower($tableColumn['default_type'])) {
+        if ($tableColumn['default_expression'] && strtolower($tableColumn['default_type']) === 'default') {
             $default = $tableColumn['default_expression'];
         }
 
