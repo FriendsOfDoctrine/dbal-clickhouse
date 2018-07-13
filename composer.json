@@ -2,30 +2,43 @@
     "name": "friendsofdoctrine/dbal-clickhouse",
     "type": "library",
     "description": "Doctrine DBAL driver for ClickHouse",
-    "keywords": ["doctrine", "dbal", "clickhouse", "driver"],
+    "keywords": [
+        "doctrine",
+        "dbal",
+        "clickhouse",
+        "driver"
+    ],
     "homepage": "http://github.com/friendsofdoctrine/dbal-clickhouse",
     "license": "MIT",
     "authors": [
         {
             "name": "Mochalygin Aleksandr",
             "email": "a@mochalygin.ru"
+        },
+        {
+            "name": "Mitrofanov Nikolay",
+            "email": "mitrofanovnk@yandex.ru"
         }
     ],
     "require": {
         "php": "^7.1",
         "ext-PDO": "*",
         "ext-pcre": "*",
-        "smi2/phpClickHouse": "^1.0",
-        "doctrine/dbal": "^2.7"
-    },
-    "autoload": {
-        "psr-4": { "FOD\\DBALClickHouse\\": "src/" }
-    },
-    "autoload-dev": {
-        "psr-4": { "FOD\\DBALClickHouse\\Tests\\": "tests/" }
+        "doctrine/dbal": "^2.7",
+        "smi2/phpClickHouse": "^1.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.0",
         "doctrine/coding-standard": "^4.0"
+    },
+    "autoload": {
+        "psr-4": {
+            "FOD\\DBALClickHouse\\": "src/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "FOD\\DBALClickHouse\\Tests\\": "tests/"
+        }
     }
 }
