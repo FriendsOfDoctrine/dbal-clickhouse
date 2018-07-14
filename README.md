@@ -36,6 +36,7 @@ $connectionParams = [
 ];
 $conn = \Doctrine\DBAL\DriverManager::getConnection($connectionParams, new \Doctrine\DBAL\Configuration());
 ```
+`driverOptions` are special `smi2/phpclickhouse` client [settings](https://github.com/smi2/phpClickHouse#settings)
 
 ### Symfony
 configure...
@@ -52,6 +53,9 @@ doctrine:
                 dbname:   default
                 driver_class: FOD\DBALClickHouse\Driver
                 wrapper_class: FOD\DBALClickHouse\Connection
+                options:
+                    enable_http_compression: 1
+                    max_execution_time: 60
             #mysql:
             #   ...
 ```
