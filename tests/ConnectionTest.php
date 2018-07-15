@@ -12,6 +12,7 @@
 namespace FOD\DBALClickHouse\Tests;
 
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
 use FOD\DBALClickHouse\ClickHouseException;
 use FOD\DBALClickHouse\Connection;
 use PHPUnit\Framework\TestCase;
@@ -138,5 +139,21 @@ class ConnectionTest extends TestCase
     {
         $this->expectException(DBALException::class);
         $this->connection->isRollbackOnly();
+    }
+
+    public function testPing()
+    {
+        $this->assertTrue($this->connection->ping());
+    }
+
+    public function testGetServerVersion()
+    {
+        $conn = $this->connection->getWrappedConnection();
+        if ($conn instanceof ServerInfoAwareConnection) {
+            $this->assertRegExp('/(^[0-9]+.[0-9]+.[0-9]+.[0-9]$)/mi', $conn->getServerVersion());
+        } else {
+            $this->fail(sprintf('`%s` does not implement the `%s` interface', \get_class($conn),
+                ServerInfoAwareConnection::class));
+        }
     }
 }

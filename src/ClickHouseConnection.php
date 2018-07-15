@@ -15,14 +15,17 @@ declare(strict_types=1);
 namespace FOD\DBALClickHouse;
 
 use ClickHouseDB\Client as Smi2CHClient;
+use ClickHouseDB\Exception\TransportException;
 use Doctrine\DBAL\Driver\Connection;
+use Doctrine\DBAL\Driver\PingableConnection;
+use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 
 /**
  * ClickHouse implementation for the Connection interface.
  */
-class ClickHouseConnection implements Connection
+class ClickHouseConnection implements Connection, PingableConnection, ServerInfoAwareConnection
 {
     /** @var Smi2CHClient */
     protected $smi2CHClient;
@@ -143,5 +146,33 @@ class ClickHouseConnection implements Connection
     public function errorInfo()
     {
         throw new \LogicException('You need to implement ClickHouseConnection::errorInfo()');
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function ping()
+    {
+        return $this->smi2CHClient->ping();
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getServerVersion()
+    {
+        try {
+            return $this->smi2CHClient->getServerVersion();
+        } catch (TransportException $exception) {
+            return null;
+        }
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function requiresQueryForServerVersion()
+    {
+       return true;
     }
 }
