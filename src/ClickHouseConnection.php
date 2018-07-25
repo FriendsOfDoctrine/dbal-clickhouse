@@ -38,7 +38,7 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
     /**
      * Connection constructor
      *
-     * @param array $params Array with connection params.
+     * @param mixed[] $params
      */
     public function __construct(
         array $params,
