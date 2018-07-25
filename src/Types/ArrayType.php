@@ -24,7 +24,7 @@ use function strtolower;
 /**
  * Array(*) Types basic class
  */
-abstract class AbstractArrayType extends Type implements BaseClickHouseTypeInterface
+abstract class ArrayType extends Type implements ClickHouseType
 {
     protected const ARRAY_TYPES = [
         'array(int8)' => ArrayInt8Type::class,
@@ -95,9 +95,9 @@ abstract class AbstractArrayType extends Type implements BaseClickHouseTypeInter
                 'notnull',
                 $fieldDeclaration
             ) && $fieldDeclaration['notnull'] === false ? 'Array(Nullable(%s%s%s))' : 'Array(%s%s%s)',
-            $this instanceof UnsignedInterface ? 'U' : '',
+            $this instanceof UnsignedNumericalClickHouseType ? 'U' : '',
             $this->getBaseClickHouseType(),
-            $this instanceof BitInterface ? $this->getBits() : ''
+            $this instanceof BitNumericalClickHouseType ? $this->getBits() : ''
         );
     }
 }

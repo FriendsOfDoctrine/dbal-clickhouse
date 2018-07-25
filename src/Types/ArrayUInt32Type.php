@@ -17,15 +17,15 @@ namespace FOD\DBALClickHouse\Types;
 /**
  * Array(UInt32) Type
  */
-class ArrayUInt32Type extends AbstractArrayType implements BitInterface, UnsignedInterface
+class ArrayUInt32Type extends ArrayType implements BitNumericalClickHouseType, UnsignedNumericalClickHouseType
 {
-    public function getBits(): int
+    public function getBits() : int
     {
-        return BitInterface::THIRTY_TWO_BIT;
+        return BitNumericalClickHouseType::THIRTY_TWO_BIT;
     }
 
-    public function getBaseClickHouseType(): string
+    public function getBaseClickHouseType() : string
     {
-        return NumericalTypeInterface::TYPE_INT;
+        return NumericalClickHouseType::TYPE_INT;
     }
 }

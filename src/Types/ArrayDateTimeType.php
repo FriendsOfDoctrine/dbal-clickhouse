@@ -23,11 +23,11 @@ use function implode;
 /**
  * Array(DateTime) Type class
  */
-class ArrayDateTimeType extends ArrayType implements DatableType
+class ArrayDateTimeType extends ArrayType implements DatableClickHouseType
 {
     public function getBaseClickHouseType() : string
     {
-        return DatableType::TYPE_DATE_TIME;
+        return DatableClickHouseType::TYPE_DATE_TIME;
     }
 
     /**

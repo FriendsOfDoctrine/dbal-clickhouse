@@ -21,6 +21,8 @@ use Doctrine\DBAL\Driver\PingableConnection;
 use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use function array_merge;
+use function func_get_args;
 
 /**
  * ClickHouse implementation for the Connection interface.
@@ -70,7 +72,7 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
      */
     public function query()
     {
-        $args = \func_get_args();
+        $args = func_get_args();
         $stmt = $this->prepare($args[0]);
         $stmt->execute();
 
@@ -173,6 +175,6 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
      */
     public function requiresQueryForServerVersion()
     {
-       return true;
+        return true;
     }
 }

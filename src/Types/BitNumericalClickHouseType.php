@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Types;
 
-interface BitNumericalType extends NumericalType
+interface BitNumericalClickHouseType extends NumericalClickHouseType
 {
     public const EIGHT_BIT      = 8;
     public const SIXTEEN_BIT    = 16;

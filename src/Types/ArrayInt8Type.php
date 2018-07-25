@@ -17,15 +17,15 @@ namespace FOD\DBALClickHouse\Types;
 /**
  * Array(Int8) Type
  */
-class ArrayInt8Type extends AbstractArrayType implements BitInterface
+class ArrayInt8Type extends ArrayType implements BitNumericalClickHouseType
 {
-    public function getBits(): int
+    public function getBits() : int
     {
-        return BitInterface::EIGHT_BIT;
+        return BitNumericalClickHouseType::EIGHT_BIT;
     }
 
-    public function getBaseClickHouseType(): string
+    public function getBaseClickHouseType() : string
     {
-        return NumericalTypeInterface::TYPE_INT;
+        return NumericalClickHouseType::TYPE_INT;
     }
 }

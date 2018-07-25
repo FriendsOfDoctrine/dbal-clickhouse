@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Types;
 
-interface NumericalType extends ClickHouseType
+interface NumericalClickHouseType extends ClickHouseType
 {
     public const TYPE_INT   = 'Int';
     public const TYPE_FLOAT = 'Float';

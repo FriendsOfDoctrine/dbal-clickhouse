@@ -16,15 +16,17 @@ namespace FOD\DBALClickHouse\Types;
 
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use function array_map;
+use function implode;
 
 /**
  * Array(String) Type class
  */
-class ArrayStringType extends AbstractArrayType implements StringTypeInterface
+class ArrayStringType extends ArrayType implements StringClickHouseType
 {
-    public function getBaseClickHouseType(): string
+    public function getBaseClickHouseType() : string
     {
-        return StringTypeInterface::TYPE_STRING;
+        return StringClickHouseType::TYPE_STRING;
     }
 
     /**

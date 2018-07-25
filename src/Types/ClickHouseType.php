@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Types;
 
-interface BaseClickHouseTypeInterface
+interface ClickHouseType
 {
     public function getBaseClickHouseType() : string;
 }
