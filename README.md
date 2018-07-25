@@ -78,9 +78,12 @@ $newTable = $toSchema->createTable('new_table');
 
 // add columns
 $newTable->addColumn('id', 'integer', ['unsigned' => true]);
-$newTable->addColumn('payload', 'string');
+$newTable->addColumn('payload', 'string', ['notnull' => false]);
+// *option 'notnull' in false mode allows you to insert NULL into the column; 
+//                   in this case, the column will be represented in the ClickHouse as Nullable(String)
 $newTable->addColumn('hash', 'string', ['length' => 32, 'fixed' => true]);
-// *option 'fixed' sets the fixed length of a string column as specified; if specified, the type of the column is FixedString
+// *option 'fixed' sets the fixed length of a string column as specified; 
+//                 if specified, the type of the column is FixedString
 
 //set primary key
 $newTable->setPrimaryKey(['id']);
