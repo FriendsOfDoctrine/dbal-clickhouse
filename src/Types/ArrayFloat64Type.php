@@ -17,13 +17,15 @@ namespace FOD\DBALClickHouse\Types;
 /**
  * Array(Float64) Type
  */
-class ArrayFloat64Type extends AbstractArrayFloatType
+class ArrayFloat64Type extends AbstractArrayType implements BitInterface
 {
-    public const BITNESS = 64;
-
-    /** {@inheritdoc} */
-    protected function getBitness() : int
+    public function getBits(): int
     {
-        return self::BITNESS;
+        return BitInterface::SIXTY_FOUR_BIT;
+    }
+
+    public function getBaseClickHouseType(): string
+    {
+        return NumericalTypeInterface::TYPE_FLOAT;
     }
 }

@@ -17,7 +17,15 @@ namespace FOD\DBALClickHouse\Types;
 /**
  * Array(UInt64) Type
  */
-class ArrayUInt64Type extends ArrayInt64Type
+class ArrayUInt64Type extends AbstractArrayType implements BitInterface, UnsignedInterface
 {
-    public const UNSIGNED = true;
+    public function getBits(): int
+    {
+        return BitInterface::SIXTY_FOUR_BIT;
+    }
+
+    public function getBaseClickHouseType(): string
+    {
+        return NumericalTypeInterface::TYPE_INT;
+    }
 }

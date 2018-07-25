@@ -34,6 +34,11 @@ use Doctrine\DBAL\Platforms\TrimMode;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\TableDiff;
+use FOD\DBALClickHouse\Types\BitInterface;
+use FOD\DBALClickHouse\Types\DatableTypeInterface;
+use FOD\DBALClickHouse\Types\NumericalTypeInterface;
+use FOD\DBALClickHouse\Types\StringTypeInterface;
+use FOD\DBALClickHouse\Types\UnsignedInterface;
 
 /**
  * Provides the behavior, features and SQL dialect of the ClickHouse database platform.
@@ -41,58 +46,61 @@ use Doctrine\DBAL\Schema\TableDiff;
 class ClickHousePlatform extends AbstractPlatform
 {
     protected const TIME_MINUTE = 60;
-    protected const TIME_HOUR   = self::TIME_MINUTE * 60;
-    protected const TIME_DAY    = self::TIME_HOUR * 24;
-    protected const TIME_WEEK   = self::TIME_DAY * 7;
+    protected const TIME_HOUR = self::TIME_MINUTE * 60;
+    protected const TIME_DAY = self::TIME_HOUR * 24;
+    protected const TIME_WEEK = self::TIME_DAY * 7;
 
     /**
      * {@inheritDoc}
      */
-    public function getBooleanTypeDeclarationSQL(array $columnDef) : string
+    public function getBooleanTypeDeclarationSQL(array $columnDef): string
     {
-        return 'UInt8';
+        return $this->prepareDeclarationSQL(UnsignedInterface::UNSIGNED_CHAR . NumericalTypeInterface::TYPE_INT . BitInterface::EIGHT_BIT,
+            $columnDef);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getIntegerTypeDeclarationSQL(array $columnDef) : string
+    public function getIntegerTypeDeclarationSQL(array $columnDef): string
     {
-        return $this->_getCommonIntegerTypeDeclarationSQL($columnDef) . 'Int32';
+        return $this->prepareDeclarationSQL($this->_getCommonIntegerTypeDeclarationSQL($columnDef) . NumericalTypeInterface::TYPE_INT . BitInterface::THIRTY_TWO_BIT,
+            $columnDef);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getBigIntTypeDeclarationSQL(array $columnDef) : string
+    public function getBigIntTypeDeclarationSQL(array $columnDef): string
     {
-        return 'String';
+        return $this->prepareDeclarationSQL(StringTypeInterface::TYPE_STRING, $columnDef);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getSmallIntTypeDeclarationSQL(array $columnDef) : string
+    public function getSmallIntTypeDeclarationSQL(array $columnDef): string
     {
-        return $this->_getCommonIntegerTypeDeclarationSQL($columnDef) . 'Int16';
+        return $this->prepareDeclarationSQL($this->_getCommonIntegerTypeDeclarationSQL($columnDef) . NumericalTypeInterface::TYPE_INT . BitInterface::SIXTEEN_BIT,
+            $columnDef);
     }
 
     /**
      * {@inheritDoc}
      */
-    protected function _getCommonIntegerTypeDeclarationSQL(array $columnDef) : string
+    protected function _getCommonIntegerTypeDeclarationSQL(array $columnDef): string
     {
-        if (! empty($columnDef['autoincrement'])) {
+        if (!empty($columnDef['autoincrement'])) {
             throw new \Exception('Clickhouse do not support AUTO_INCREMENT fields');
         }
 
-        return empty($columnDef['unsigned']) ? '' : 'U';
+        return empty($columnDef['unsigned']) ? '' : UnsignedInterface::UNSIGNED_CHAR;
     }
 
     /**
      * {@inheritDoc}
      */
-    protected function initializeDoctrineTypeMappings() : void
+    protected function initializeDoctrineTypeMappings(): void
     {
         $this->doctrineTypeMapping = [
             'int8' => 'smallint',
@@ -128,47 +136,98 @@ class ClickHousePlatform extends AbstractPlatform
 
             'enum8' => 'string',
             'enum16' => 'string',
+
+            'nullable(int8)' => 'smallint',
+            'nullable(int16)' => 'integer',
+            'nullable(int32)' => 'integer',
+            'nullable(int64)' => 'bigint',
+            'nullable(uint8)' => 'smallint',
+            'nullable(uint16)' => 'integer',
+            'nullable(uint32)' => 'integer',
+            'nullable(uint64)' => 'bigint',
+            'nullable(float32)' => 'decimal',
+            'nullable(float64)' => 'float',
+
+            'nullable(string)' => 'string',
+            'nullable(fixedstring)' => 'string',
+            'nullable(date)' => 'date',
+            'nullable(datetime)' => 'datetime',
+
+            'array(nullable(int8))' => 'array',
+            'array(nullable(int16))' => 'array',
+            'array(nullable(int32))' => 'array',
+            'array(nullable(int64))' => 'array',
+            'array(nullable(uint8))' => 'array',
+            'array(nullable(uint16))' => 'array',
+            'array(nullable(uint32))' => 'array',
+            'array(nullable(uint64))' => 'array',
+            'array(nullable(float32))' => 'array',
+            'array(nullable(float64))' => 'array',
+
+            'array(nullable(string))' => 'array',
+            'array(nullable(date))' => 'array',
+            'array(nullable(datetime))' => 'array',
         ];
     }
 
     /**
      * {@inheritDoc}
      */
-    protected function getVarcharTypeDeclarationSQLSnippet($length, $fixed) : string
+    protected function getVarcharTypeDeclarationSQLSnippet($length, $fixed): string
     {
         return $fixed
-            ? 'FixedString(' . $length . ')'
-            : 'String';
+            ? (StringTypeInterface::TYPE_FIXED_STRING . '(' . $length . ')')
+            : StringTypeInterface::TYPE_STRING;
     }
 
-    /**
-     * {@inheritDoc}
-     */
-    protected function getBinaryTypeDeclarationSQLSnippet($length, $fixed) : string
+    public function getVarcharTypeDeclarationSQL(array $field)
     {
-        return 'String';
+        if (!isset($field['length'])) {
+            $field['length'] = $this->getVarcharDefaultLength();
+        }
+
+        $fixed = $field['fixed'] ?? false;
+
+        $maxLength = $fixed
+            ? $this->getCharMaxLength()
+            : $this->getVarcharMaxLength();
+
+        if ($field['length'] > $maxLength) {
+            return $this->getClobTypeDeclarationSQL($field);
+        }
+
+        return $this->prepareDeclarationSQL($this->getVarcharTypeDeclarationSQLSnippet($field['length'], $fixed),
+            $field);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getClobTypeDeclarationSQL(array $field) : string
+    protected function getBinaryTypeDeclarationSQLSnippet($length, $fixed): string
     {
-        return 'String';
+        return StringTypeInterface::TYPE_STRING;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getBlobTypeDeclarationSQL(array $field) : string
+    public function getClobTypeDeclarationSQL(array $field): string
     {
-        return 'String';
+        return $this->prepareDeclarationSQL(StringTypeInterface::TYPE_STRING, $field);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getName() : string
+    public function getBlobTypeDeclarationSQL(array $field): string
+    {
+        return $this->prepareDeclarationSQL(StringTypeInterface::TYPE_STRING, $field);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getName(): string
     {
         return 'clickhouse';
     }
@@ -176,7 +235,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getIdentifierQuoteCharacter() : string
+    public function getIdentifierQuoteCharacter(): string
     {
         return '`';
     }
@@ -184,7 +243,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getVarcharDefaultLength() : int
+    public function getVarcharDefaultLength(): int
     {
         return 512;
     }
@@ -192,7 +251,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCountExpression($column) : string
+    public function getCountExpression($column): string
     {
         return 'COUNT()';
     }
@@ -202,7 +261,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getMd5Expression($column) : string
+    public function getMd5Expression($column): string
     {
         return 'MD5(CAST(' . $column . ' AS String))';
     }
@@ -210,7 +269,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getLengthExpression($column) : string
+    public function getLengthExpression($column): string
     {
         return 'lengthUTF8(CAST(' . $column . ' AS String))';
     }
@@ -218,7 +277,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getSqrtExpression($column) : string
+    public function getSqrtExpression($column): string
     {
         return 'sqrt(' . $column . ')';
     }
@@ -226,7 +285,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getRoundExpression($column, $decimals = 0) : string
+    public function getRoundExpression($column, $decimals = 0): string
     {
         return 'round(' . $column . ', ' . $decimals . ')';
     }
@@ -234,7 +293,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getModExpression($expression1, $expression2) : string
+    public function getModExpression($expression1, $expression2): string
     {
         return 'modulo(' . $expression1 . ', ' . $expression2 . ')';
     }
@@ -242,9 +301,9 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getTrimExpression($str, $pos = TrimMode::UNSPECIFIED, $char = false) : string
+    public function getTrimExpression($str, $pos = TrimMode::UNSPECIFIED, $char = false): string
     {
-        if (! $char) {
+        if (!$char) {
             switch ($pos) {
                 case TrimMode::LEADING:
                     return $this->getLtrimExpression($str);
@@ -261,7 +320,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getRtrimExpression($str) : string
+    public function getRtrimExpression($str): string
     {
         return sprintf("replaceRegexpAll(%s, '(\\\s+$)', '')", $str);
     }
@@ -269,7 +328,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getLtrimExpression($str) : string
+    public function getLtrimExpression($str): string
     {
         return sprintf("replaceRegexpAll(%s, '(^\\\s+)', '')", $str);
     }
@@ -277,7 +336,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getUpperExpression($str) : string
+    public function getUpperExpression($str): string
     {
         return 'upperUTF8(' . $str . ')';
     }
@@ -285,7 +344,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getLowerExpression($str) : string
+    public function getLowerExpression($str): string
     {
         return 'lowerUTF8(' . $str . ')';
     }
@@ -293,7 +352,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getLocateExpression($str, $substr, $startPos = false) : string
+    public function getLocateExpression($str, $substr, $startPos = false): string
     {
         return 'positionUTF8(' . $str . ', ' . $substr . ')';
     }
@@ -301,7 +360,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getNowExpression() : string
+    public function getNowExpression(): string
     {
         return 'now()';
     }
@@ -309,7 +368,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getSubstringExpression($value, $from, $length = null) : string
+    public function getSubstringExpression($value, $from, $length = null): string
     {
         if ($length === null) {
             throw new \InvalidArgumentException("'length' argument must be a constant");
@@ -321,7 +380,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getConcatExpression() : string
+    public function getConcatExpression(): string
     {
         return 'concat(' . implode(', ', \func_get_args()) . ')';
     }
@@ -331,7 +390,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getIsNullExpression($expression)
     {
-        throw DBALException::notSupported(__METHOD__);
+        return 'isNull(' . $expression . ')';
     }
 
     /**
@@ -339,13 +398,13 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getIsNotNullExpression($expression)
     {
-        throw DBALException::notSupported(__METHOD__);
+        return 'isNotNull(' . $expression . ')';
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getAcosExpression($value) : string
+    public function getAcosExpression($value): string
     {
         return 'acos(' . $value . ')';
     }
@@ -353,7 +412,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getSinExpression($value) : string
+    public function getSinExpression($value): string
     {
         return 'sin(' . $value . ')';
     }
@@ -361,7 +420,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getPiExpression() : string
+    public function getPiExpression(): string
     {
         return 'pi()';
     }
@@ -369,7 +428,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCosExpression($value) : string
+    public function getCosExpression($value): string
     {
         return 'cos(' . $value . ')';
     }
@@ -377,7 +436,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDateDiffExpression($date1, $date2) : string
+    public function getDateDiffExpression($date1, $date2): string
     {
         return 'CAST(' . $date1 . ' AS Date) - CAST(' . $date2 . ' AS Date)';
     }
@@ -385,7 +444,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDateAddSecondsExpression($date, $seconds) : string
+    public function getDateAddSecondsExpression($date, $seconds): string
     {
         return $date . ' + ' . $seconds;
     }
@@ -393,7 +452,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDateSubSecondsExpression($date, $seconds) : string
+    public function getDateSubSecondsExpression($date, $seconds): string
     {
         return $date . ' - ' . $seconds;
     }
@@ -401,7 +460,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDateAddMinutesExpression($date, $minutes) : string
+    public function getDateAddMinutesExpression($date, $minutes): string
     {
         return $date . ' + ' . $minutes * self::TIME_MINUTE;
     }
@@ -409,7 +468,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDateSubMinutesExpression($date, $minutes) : string
+    public function getDateSubMinutesExpression($date, $minutes): string
     {
         return $date . ' - ' . $minutes * self::TIME_MINUTE;
     }
@@ -417,7 +476,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDateAddHourExpression($date, $hours) : string
+    public function getDateAddHourExpression($date, $hours): string
     {
         return $date . ' + ' . $hours * self::TIME_HOUR;
     }
@@ -425,7 +484,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDateSubHourExpression($date, $hours) : string
+    public function getDateSubHourExpression($date, $hours): string
     {
         return $date . ' - ' . $hours * self::TIME_HOUR;
     }
@@ -433,7 +492,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDateAddDaysExpression($date, $days) : string
+    public function getDateAddDaysExpression($date, $days): string
     {
         return $date . ' + ' . $days * self::TIME_DAY;
     }
@@ -441,7 +500,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDateSubDaysExpression($date, $days) : string
+    public function getDateSubDaysExpression($date, $days): string
     {
         return $date . ' - ' . $days * self::TIME_DAY;
     }
@@ -449,7 +508,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDateAddWeeksExpression($date, $weeks) : string
+    public function getDateAddWeeksExpression($date, $weeks): string
     {
         return $date . ' + ' . $weeks * self::TIME_WEEK;
     }
@@ -457,7 +516,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDateSubWeeksExpression($date, $weeks) : string
+    public function getDateSubWeeksExpression($date, $weeks): string
     {
         return $date . ' - ' . $weeks * self::TIME_WEEK;
     }
@@ -465,7 +524,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getBitAndComparisonExpression($value1, $value2) : string
+    public function getBitAndComparisonExpression($value1, $value2): string
     {
         return 'bitAnd(' . $value1 . ', ' . $value2 . ')';
     }
@@ -473,7 +532,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getBitOrComparisonExpression($value1, $value2) : string
+    public function getBitOrComparisonExpression($value1, $value2): string
     {
         return 'bitOr(' . $value1 . ', ' . $value2 . ')';
     }
@@ -545,16 +604,16 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    protected function _getCreateTableSQL($tableName, array $columns, array $options = []) : array
+    protected function _getCreateTableSQL($tableName, array $columns, array $options = []): array
     {
-        $engine        = ! empty($options['engine']) ? $options['engine'] : 'ReplacingMergeTree';
+        $engine = !empty($options['engine']) ? $options['engine'] : 'ReplacingMergeTree';
         $engineOptions = '';
 
-        if (isset($options['uniqueConstraints']) && ! empty($options['uniqueConstraints'])) {
+        if (isset($options['uniqueConstraints']) && !empty($options['uniqueConstraints'])) {
             throw DBALException::notSupported('uniqueConstraints');
         }
 
-        if (isset($options['indexes']) && ! empty($options['indexes'])) {
+        if (isset($options['indexes']) && !empty($options['indexes'])) {
             throw DBALException::notSupported('uniqueConstraints');
         }
 
@@ -573,7 +632,7 @@ class ClickHousePlatform extends AbstractPlatform
             ],
             true
         )) {
-            $indexGranularity = ! empty($options['indexGranularity']) ? $options['indexGranularity'] : 8192;
+            $indexGranularity = !empty($options['indexGranularity']) ? $options['indexGranularity'] : 8192;
 
             /**
              * eventDateColumn section
@@ -582,24 +641,24 @@ class ClickHousePlatform extends AbstractPlatform
                 'type' => Type::getType('date'),
                 'default' => 'today()',
             ];
-            if (! empty($options['eventDateProviderColumn'])) {
+            if (!empty($options['eventDateProviderColumn'])) {
                 $options['eventDateProviderColumn'] = trim($options['eventDateProviderColumn']);
-                if (! isset($columns[$options['eventDateProviderColumn']])) {
+                if (!isset($columns[$options['eventDateProviderColumn']])) {
                     throw new \Exception(
                         'Table `' . $tableName . '` has not column with name: `' . $options['eventDateProviderColumn']
                     );
                 }
 
-                if (! ($columns[$options['eventDateProviderColumn']]['type'] instanceof DateType) &&
-                    ! ($columns[$options['eventDateProviderColumn']]['type'] instanceof DateTimeType) &&
-                    ! ($columns[$options['eventDateProviderColumn']]['type'] instanceof TextType) &&
-                    ! ($columns[$options['eventDateProviderColumn']]['type'] instanceof IntegerType) &&
-                    ! ($columns[$options['eventDateProviderColumn']]['type'] instanceof SmallIntType) &&
-                    ! ($columns[$options['eventDateProviderColumn']]['type'] instanceof BigIntType) &&
-                    ! ($columns[$options['eventDateProviderColumn']]['type'] instanceof FloatType) &&
-                    ! ($columns[$options['eventDateProviderColumn']]['type'] instanceof DecimalType) &&
+                if (!($columns[$options['eventDateProviderColumn']]['type'] instanceof DateType) &&
+                    !($columns[$options['eventDateProviderColumn']]['type'] instanceof DateTimeType) &&
+                    !($columns[$options['eventDateProviderColumn']]['type'] instanceof TextType) &&
+                    !($columns[$options['eventDateProviderColumn']]['type'] instanceof IntegerType) &&
+                    !($columns[$options['eventDateProviderColumn']]['type'] instanceof SmallIntType) &&
+                    !($columns[$options['eventDateProviderColumn']]['type'] instanceof BigIntType) &&
+                    !($columns[$options['eventDateProviderColumn']]['type'] instanceof FloatType) &&
+                    !($columns[$options['eventDateProviderColumn']]['type'] instanceof DecimalType) &&
                     (
-                        ! ($columns[$options['eventDateProviderColumn']]['type'] instanceof StringType) ||
+                        !($columns[$options['eventDateProviderColumn']]['type'] instanceof StringType) ||
                         $columns[$options['eventDateProviderColumn']]['fixed']
                     )
                 ) {
@@ -635,7 +694,7 @@ class ClickHousePlatform extends AbstractPlatform
 
                 $eventDateColumnName = 'EventDate';
             } elseif (isset($columns[$options['eventDateColumn']])) {
-                if (! ($columns[$options['eventDateColumn']]['type'] instanceof DateType)) {
+                if (!($columns[$options['eventDateColumn']]['type'] instanceof DateType)) {
                     throw new \Exception(
                         'In table `' . $tableName . '` you have set field `' .
                         $options['eventDateColumn'] .
@@ -650,7 +709,7 @@ class ClickHousePlatform extends AbstractPlatform
                 $eventDateColumnName = $options['eventDateColumn'];
             }
             $dateColumnParams['name'] = $eventDateColumnName;
-            $columns                  = [$eventDateColumnName => $dateColumnParams] + $columns; // insert into very beginning
+            $columns = [$eventDateColumnName => $dateColumnParams] + $columns; // insert into very beginning
 
             /**
              * Primary key section
@@ -660,26 +719,26 @@ class ClickHousePlatform extends AbstractPlatform
             }
 
             $engineOptions = '(' . $eventDateColumnName . ', (' . implode(
-                ', ',
-                array_unique(array_values($options['primary']))
-            ) . '), ' . $indexGranularity;
+                    ', ',
+                    array_unique(array_values($options['primary']))
+                ) . '), ' . $indexGranularity;
 
             /**
              * any specific MergeTree* table parameters
              */
-            if ($engine === 'ReplacingMergeTree' && ! empty($options['versionColumn'])) {
-                if (! isset($columns[$options['versionColumn']])) {
+            if ($engine === 'ReplacingMergeTree' && !empty($options['versionColumn'])) {
+                if (!isset($columns[$options['versionColumn']])) {
                     throw new \Exception(
                         'If you specify `versionColumn` for ReplacingMergeTree table -- 
                         you must add this column manually (any of UInt*, Date or DateTime types)'
                     );
                 }
 
-                if (! $columns[$options['versionColumn']]['type'] instanceof IntegerType &&
-                    ! $columns[$options['versionColumn']]['type'] instanceof BigIntType &&
-                    ! $columns[$options['versionColumn']]['type'] instanceof SmallIntType &&
-                    ! $columns[$options['versionColumn']]['type'] instanceof DateType &&
-                    ! $columns[$options['versionColumn']]['type'] instanceof DateTimeType
+                if (!$columns[$options['versionColumn']]['type'] instanceof IntegerType &&
+                    !$columns[$options['versionColumn']]['type'] instanceof BigIntType &&
+                    !$columns[$options['versionColumn']]['type'] instanceof SmallIntType &&
+                    !$columns[$options['versionColumn']]['type'] instanceof DateType &&
+                    !$columns[$options['versionColumn']]['type'] instanceof DateTimeType
                 ) {
                     throw new \Exception(
                         'For ReplacingMergeTree tables `versionColumn` must be any of UInt* family, or Date, or DateTime types. ' .
@@ -694,7 +753,7 @@ class ClickHousePlatform extends AbstractPlatform
         }
 
         $columnListSql = $this->getColumnDeclarationListSQL($columns);
-        $query         = 'CREATE TABLE ' . $tableName . ' (' . $columnListSql . ') ENGINE = ' . $engine . $engineOptions;
+        $query = 'CREATE TABLE ' . $tableName . ' (' . $columnListSql . ') ENGINE = ' . $engine . $engineOptions;
 
         $sql[] = $query;
 
@@ -712,11 +771,11 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getAlterTableSQL(TableDiff $diff) : array
+    public function getAlterTableSQL(TableDiff $diff): array
     {
-        $columnSql  = [];
+        $columnSql = [];
         $queryParts = [];
-        if ($diff->newName !== false || ! empty($diff->renamedColumns)) {
+        if ($diff->newName !== false || !empty($diff->renamedColumns)) {
             throw DBALException::notSupported('RENAME COLUMN');
         }
 
@@ -725,7 +784,7 @@ class ClickHousePlatform extends AbstractPlatform
                 continue;
             }
 
-            $columnArray  = $column->toArray();
+            $columnArray = $column->toArray();
             $queryParts[] = 'ADD COLUMN ' . $this->getColumnDeclarationSQL($column->getQuotedName($this), $columnArray);
         }
 
@@ -742,7 +801,7 @@ class ClickHousePlatform extends AbstractPlatform
                 continue;
             }
 
-            $column      = $columnDiff->column;
+            $column = $columnDiff->column;
             $columnArray = $column->toArray();
 
             // Don't propagate default value changes for unsupported column types.
@@ -754,19 +813,19 @@ class ClickHousePlatform extends AbstractPlatform
             }
 
             $queryParts[] = 'MODIFY COLUMN ' . $this->getColumnDeclarationSQL(
-                $column->getQuotedName($this),
-                $columnArray
-            );
+                    $column->getQuotedName($this),
+                    $columnArray
+                );
         }
 
-        $sql      = [];
+        $sql = [];
         $tableSql = [];
 
-        if (! $this->onSchemaAlterTable($diff, $tableSql) && (count($queryParts) > 0)) {
+        if (!$this->onSchemaAlterTable($diff, $tableSql) && (count($queryParts) > 0)) {
             $sql[] = 'ALTER TABLE ' . $diff->getName($this)->getQuotedName($this) . ' ' . implode(
-                ', ',
-                $queryParts
-            );
+                    ', ',
+                    $queryParts
+                );
         }
 
         return array_merge($sql, $tableSql, $columnSql);
@@ -804,10 +863,19 @@ class ClickHousePlatform extends AbstractPlatform
         throw DBALException::notSupported(__METHOD__);
     }
 
+    protected function prepareDeclarationSQL(string $declarationSQL, array $columnDef): string
+    {
+        if (array_key_exists('notnull', $columnDef) && $columnDef['notnull'] === false) {
+            return 'Nullable(' . $declarationSQL . ')';
+        }
+
+        return $declarationSQL;
+    }
+
     /**
      * {@inheritDoc}
      */
-    public function getColumnDeclarationSQL($name, array $field) : string
+    public function getColumnDeclarationSQL($name, array $field): string
     {
         if (isset($field['columnDefinition'])) {
             $columnDef = $this->getCustomTypeDeclarationSQL($field);
@@ -823,9 +891,9 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDecimalTypeDeclarationSQL(array $columnDef) : string
+    public function getDecimalTypeDeclarationSQL(array $columnDef): string
     {
-        return 'String';
+        return $this->prepareDeclarationSQL(StringTypeInterface::TYPE_STRING, $columnDef);
     }
 
     /**
@@ -896,7 +964,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCurrentDateSQL() : string
+    public function getCurrentDateSQL(): string
     {
         return 'today()';
     }
@@ -904,7 +972,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCurrentTimeSQL() : string
+    public function getCurrentTimeSQL(): string
     {
         return 'now()';
     }
@@ -912,7 +980,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCurrentTimestampSQL() : string
+    public function getCurrentTimestampSQL(): string
     {
         return 'toUnixTimestamp(now())';
     }
@@ -920,7 +988,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getListDatabasesSQL() : string
+    public function getListDatabasesSQL(): string
     {
         return 'SHOW DATABASES';
     }
@@ -928,7 +996,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getListTableColumnsSQL($table, $database = null) : string
+    public function getListTableColumnsSQL($table, $database = null): string
     {
         return 'DESCRIBE TABLE ' . ($database ? $this->quoteSingleIdentifier($database) . '.' : '') . $this->quoteSingleIdentifier($table);
     }
@@ -936,7 +1004,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getListTablesSQL() : string
+    public function getListTablesSQL(): string
     {
         return "SELECT database, name FROM system.tables WHERE database != 'system' AND engine != 'View'";
     }
@@ -944,7 +1012,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getListViewsSQL($database) : string
+    public function getListViewsSQL($database): string
     {
         return "SELECT name FROM system.tables WHERE database != 'system' AND engine = 'View'";
     }
@@ -952,7 +1020,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCreateViewSQL($name, $sql) : string
+    public function getCreateViewSQL($name, $sql): string
     {
         return 'CREATE VIEW ' . $this->quoteIdentifier($name) . ' AS ' . $sql;
     }
@@ -960,7 +1028,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDropViewSQL($name) : string
+    public function getDropViewSQL($name): string
     {
         return 'DROP TABLE ' . $this->quoteIdentifier($name);
     }
@@ -968,7 +1036,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCreateDatabaseSQL($database) : string
+    public function getCreateDatabaseSQL($database): string
     {
         return 'CREATE DATABASE ' . $this->quoteIdentifier($database);
     }
@@ -976,38 +1044,39 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDateTimeTypeDeclarationSQL(array $fieldDeclaration) : string
+    public function getDateTimeTypeDeclarationSQL(array $fieldDeclaration): string
     {
-        return 'DateTime';
+        return $this->prepareDeclarationSQL(DatableTypeInterface::TYPE_DATE_TIME, $fieldDeclaration);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getDateTimeTzTypeDeclarationSQL(array $fieldDeclaration) : string
+    public function getDateTimeTzTypeDeclarationSQL(array $fieldDeclaration): string
     {
-        return 'DateTime';
+        return $this->prepareDeclarationSQL(DatableTypeInterface::TYPE_DATE_TIME, $fieldDeclaration);
     }
 
-    public function getTimeTypeDeclarationSQL(array $fieldDeclaration) : string
+    public function getTimeTypeDeclarationSQL(array $fieldDeclaration): string
     {
-        return 'String';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getDateTypeDeclarationSQL(array $fieldDeclaration) : string
-    {
-        return 'Date';
+        return $this->prepareDeclarationSQL(StringTypeInterface::TYPE_STRING, $fieldDeclaration);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getFloatDeclarationSQL(array $fieldDeclaration) : string
+    public function getDateTypeDeclarationSQL(array $fieldDeclaration): string
     {
-        return 'Float64';
+        return $this->prepareDeclarationSQL(DatableTypeInterface::TYPE_DATE, $fieldDeclaration);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getFloatDeclarationSQL(array $fieldDeclaration): string
+    {
+        return $this->prepareDeclarationSQL(NumericalTypeInterface::TYPE_FLOAT . BitInterface::SIXTY_FOUR_BIT,
+            $fieldDeclaration);
     }
 
     /**
@@ -1023,7 +1092,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function supportsTransactions() : bool
+    public function supportsTransactions(): bool
     {
         return false;
     }
@@ -1031,7 +1100,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function supportsSavepoints() : bool
+    public function supportsSavepoints(): bool
     {
         return false;
     }
@@ -1039,7 +1108,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function supportsPrimaryConstraints() : bool
+    public function supportsPrimaryConstraints(): bool
     {
         return false;
     }
@@ -1047,7 +1116,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function supportsForeignKeyConstraints() : bool
+    public function supportsForeignKeyConstraints(): bool
     {
         return false;
     }
@@ -1055,7 +1124,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function supportsGettingAffectedRows() : bool
+    public function supportsGettingAffectedRows(): bool
     {
         return false;
     }
@@ -1063,7 +1132,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    protected function doModifyLimitQuery($query, $limit, $offset) : string
+    protected function doModifyLimitQuery($query, $limit, $offset): string
     {
         if ($limit === null) {
             return $query;
@@ -1128,7 +1197,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    protected function getReservedKeywordsClass() : string
+    protected function getReservedKeywordsClass(): string
     {
         return ClickHouseKeywords::class;
     }
@@ -1136,23 +1205,23 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDefaultValueDeclarationSQL($field) : string
+    public function getDefaultValueDeclarationSQL($field): string
     {
-        if (! isset($field['default'])) {
+        if (!isset($field['default'])) {
             return '';
         }
 
         $default = " DEFAULT '" . $field['default'] . "'";
-        if ($fieldType = (string) ($field['type'] ?? null)) {
+        if ($fieldType = (string)($field['type'] ?? null)) {
             if (\in_array($fieldType, [
                     'Integer',
                     'SmallInt',
                     'Float',
                 ]) || ($fieldType === 'BigInt' && Type::getType('BigInt')->getBindingType() === ParameterType::INTEGER)) {
                 $default = ' DEFAULT ' . $field['default'];
-            } elseif ($fieldType === 'DateTime' && $field['default'] === $this->getCurrentTimestampSQL()) {
+            } elseif ($fieldType === DatableTypeInterface::TYPE_DATE_TIME && $field['default'] === $this->getCurrentTimestampSQL()) {
                 $default = ' DEFAULT ' . $this->getCurrentTimestampSQL();
-            } elseif ($fieldType === 'Date') { // TODO check if string matches constant date like 'dddd-yy-mm' and quote it
+            } elseif ($fieldType === DatableTypeInterface::TYPE_DATE) { // TODO check if string matches constant date like 'dddd-yy-mm' and quote it
                 $default = ' DEFAULT ' . $field['default'];
             }
         }
@@ -1163,7 +1232,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDoctrineTypeMapping($dbType) : string
+    public function getDoctrineTypeMapping($dbType): string
     {
         // FixedString
         if (stripos($dbType, 'fixedstring') === 0) {
@@ -1185,7 +1254,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function quoteStringLiteral($str) : string
+    public function quoteStringLiteral($str): string
     {
         $c = $this->getStringLiteralQuoteCharacter();
 
@@ -1195,7 +1264,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function quoteSingleIdentifier($str) : string
+    public function quoteSingleIdentifier($str): string
     {
         $c = $this->getIdentifierQuoteCharacter();
 

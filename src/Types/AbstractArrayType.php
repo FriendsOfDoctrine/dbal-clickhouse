@@ -21,9 +21,9 @@ use Doctrine\DBAL\Types\Type;
 /**
  * Array(*) Types basic class
  */
-abstract class AbstractArrayType extends Type
+abstract class AbstractArrayType extends Type implements BaseClickHouseTypeInterface
 {
-    public const ARRAY_TYPES = [
+    protected const ARRAY_TYPES = [
         'array(int8)' => ArrayInt8Type::class,
         'array(int16)' => ArrayInt16Type::class,
         'array(int32)' => ArrayInt32Type::class,
@@ -44,7 +44,7 @@ abstract class AbstractArrayType extends Type
      *
      * @throws DBALException
      */
-    public static function registerArrayTypes(AbstractPlatform $platform) : void
+    public static function registerArrayTypes(AbstractPlatform $platform): void
     {
         foreach (self::ARRAY_TYPES as $typeName => $className) {
             if (self::hasType($typeName)) {
@@ -61,8 +61,37 @@ abstract class AbstractArrayType extends Type
     /**
      * {@inheritDoc}
      */
-    public function getMappedDatabaseTypes(AbstractPlatform $platform) : array
+    public function getMappedDatabaseTypes(AbstractPlatform $platform): array
     {
         return [$this->getName()];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
+    {
+        return $this->getDeclaration($fieldDeclaration);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getName(): string
+    {
+        return strtolower($this->getDeclaration());
+    }
+
+    protected function getDeclaration(array $fieldDeclaration = []): string
+    {
+        return sprintf(
+            array_key_exists(
+                'notnull',
+                $fieldDeclaration
+            ) && $fieldDeclaration['notnull'] === false ? 'Array(Nullable(%s%s%s))' : 'Array(%s%s%s)',
+            $this instanceof UnsignedInterface ? 'U' : '',
+            $this->getBaseClickHouseType(),
+            $this instanceof BitInterface ? $this->getBits() : ''
+        );
     }
 }

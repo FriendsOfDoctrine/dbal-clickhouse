@@ -14,18 +14,7 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Types;
 
-/**
- * Array(Float32) Type
- */
-class ArrayFloat32Type extends AbstractArrayType implements BitInterface
+interface UnsignedInterface extends NumericalTypeInterface
 {
-    public function getBits(): int
-    {
-        return BitInterface::THIRTY_TWO_BIT;
-    }
-
-    public function getBaseClickHouseType(): string
-    {
-        return NumericalTypeInterface::TYPE_FLOAT;
-    }
+    public const UNSIGNED_CHAR = 'U';
 }

@@ -20,22 +20,11 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 /**
  * Array(Date) Type class
  */
-class ArrayDateType extends AbstractArrayType
+class ArrayDateType extends AbstractArrayType implements DatableTypeInterface
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
+    public function getBaseClickHouseType(): string
     {
-        return 'Array(Date)';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getName() : string
-    {
-        return 'array(date)';
+        return DatableTypeInterface::TYPE_DATE;
     }
 
     /**
@@ -43,9 +32,11 @@ class ArrayDateType extends AbstractArrayType
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
-        return array_map(function ($stringDatetime) use ($platform) {
-            return \DateTime::createFromFormat($platform->getDateFormatString(), $stringDatetime);
-        }, (array) $value);
+        return array_map(
+            function ($stringDatetime) use ($platform) {
+                return \DateTime::createFromFormat($platform->getDateFormatString(), $stringDatetime);
+            }, (array) $value
+        );
     }
 
     /**
@@ -55,11 +46,15 @@ class ArrayDateType extends AbstractArrayType
     {
         return '[' . implode(
             ', ',
-            array_map(function (\DateTime $datetime) use ($platform) {
+            array_map(
+                function (\DateTime $datetime) use ($platform) {
                     return "'" . $datetime->format($platform->getDateFormatString()) . "'";
-            }, array_filter((array) $value, function ($datetime) {
-                return $datetime instanceof \DateTime;
-            }))
+                }, array_filter(
+                    (array) $value, function ($datetime) {
+                        return $datetime instanceof \DateTime;
+                    }
+                )
+            )
         ) . ']';
     }
 

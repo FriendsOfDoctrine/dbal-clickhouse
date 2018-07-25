@@ -14,18 +14,8 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Types;
 
-/**
- * Array(Float32) Type
- */
-class ArrayFloat32Type extends AbstractArrayType implements BitInterface
+interface DatableTypeInterface extends BaseClickHouseTypeInterface
 {
-    public function getBits(): int
-    {
-        return BitInterface::THIRTY_TWO_BIT;
-    }
-
-    public function getBaseClickHouseType(): string
-    {
-        return NumericalTypeInterface::TYPE_FLOAT;
-    }
+    public const TYPE_DATE = 'Date';
+    public const TYPE_DATE_TIME = 'DateTime';
 }

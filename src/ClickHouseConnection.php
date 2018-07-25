@@ -164,7 +164,7 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
         try {
             return $this->smi2CHClient->getServerVersion();
         } catch (TransportException $exception) {
-            return null;
+            return '';
         }
     }
 

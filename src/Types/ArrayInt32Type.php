@@ -17,13 +17,15 @@ namespace FOD\DBALClickHouse\Types;
 /**
  * Array(Int32) Type
  */
-class ArrayInt32Type extends AbstractArrayIntType
+class ArrayInt32Type extends AbstractArrayType implements BitInterface
 {
-    public const BITNESS = 32;
-
-    /** {@inheritdoc} */
-    protected function getBitness() : int
+    public function getBits(): int
     {
-        return self::BITNESS;
+        return BitInterface::THIRTY_TWO_BIT;
+    }
+
+    public function getBaseClickHouseType(): string
+    {
+        return NumericalTypeInterface::TYPE_INT;
     }
 }

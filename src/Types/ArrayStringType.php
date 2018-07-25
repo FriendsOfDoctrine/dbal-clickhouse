@@ -20,22 +20,11 @@ use Doctrine\DBAL\Platforms\AbstractPlatform;
 /**
  * Array(String) Type class
  */
-class ArrayStringType extends AbstractArrayType
+class ArrayStringType extends AbstractArrayType implements StringTypeInterface
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
+    public function getBaseClickHouseType(): string
     {
-        return 'Array(String)';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getName() : string
-    {
-        return 'array(string)';
+        return StringTypeInterface::TYPE_STRING;
     }
 
     /**
