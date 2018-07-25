@@ -231,8 +231,8 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
     public function fetchColumn($columnIndex = 0)
     {
         $elem = $this->fetch(FetchMode::NUMERIC);
-        if (is_array($elem) && array_key_exists($columnIndex, $elem)) {
-            return $elem[$columnIndex];
+        if (is_array($elem)) {
+            return $elem[$columnIndex] ?? $elem[0];
         }
 
         return false;

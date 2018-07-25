@@ -1253,31 +1253,30 @@ class ClickHousePlatform extends AbstractPlatform
         if (! isset($field['default'])) {
             return '';
         }
-
-        $default   = " DEFAULT '" . $field['default'] . "'";
-        $fieldType = $field['type'] ?? null;
+        $defaultValue = $this->quoteStringLiteral($field['default']);
+        $fieldType    = $field['type'] ?: null;
         if ($fieldType !== null) {
-            if (in_array($fieldType, [
+            if ($fieldType === DatableClickHouseType::TYPE_DATE ||
+                $fieldType instanceof DateType ||
+                in_array($fieldType, [
                     'Integer',
                     'SmallInt',
                     'Float',
                 ]) ||
                 (
                     $fieldType === 'BigInt'
-                    && Type::getType('BigInt')->getBindingType() === ParameterType::INTEGER)
+                    && Type::getType('BigInt')->getBindingType() === ParameterType::INTEGER
+                )
             ) {
-                $default = ' DEFAULT ' . $field['default'];
+                $defaultValue = $field['default'];
             } elseif ($fieldType === DatableClickHouseType::TYPE_DATE_TIME &&
                 $field['default'] === $this->getCurrentTimestampSQL()
             ) {
-                $default = ' DEFAULT ' . $this->getCurrentTimestampSQL();
-            } elseif (// TODO check if string matches constant date like 'dddd-yy-mm' and quote it
-                $fieldType === DatableClickHouseType::TYPE_DATE) {
-                $default = ' DEFAULT ' . $field['default'];
+                $defaultValue = $this->getCurrentTimestampSQL();
             }
         }
 
-        return $default;
+        return sprintf(' DEFAULT %s', $defaultValue);
     }
 
     /**
