@@ -14,19 +14,6 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse;
 
-use Doctrine\DBAL\Types\{
-    BlobType,
-    DecimalType,
-    FloatType,
-    StringType,
-    TextType,
-    Type,
-    DateType,
-    IntegerType,
-    SmallIntType,
-    BigIntType,
-    DateTimeType
-};
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
@@ -34,6 +21,37 @@ use Doctrine\DBAL\Platforms\TrimMode;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\TableDiff;
+use Doctrine\DBAL\Types\BigIntType;
+use Doctrine\DBAL\Types\BlobType;
+use Doctrine\DBAL\Types\DateTimeType;
+use Doctrine\DBAL\Types\DateType;
+use Doctrine\DBAL\Types\DecimalType;
+use Doctrine\DBAL\Types\FloatType;
+use Doctrine\DBAL\Types\IntegerType;
+use Doctrine\DBAL\Types\SmallIntType;
+use Doctrine\DBAL\Types\StringType;
+use Doctrine\DBAL\Types\TextType;
+use Doctrine\DBAL\Types\Type;
+use FOD\DBALClickHouse\Types\BitNumericalClickHouseType;
+use FOD\DBALClickHouse\Types\DatableClickHouseType;
+use FOD\DBALClickHouse\Types\NumericalClickHouseType;
+use FOD\DBALClickHouse\Types\StringClickHouseType;
+use FOD\DBALClickHouse\Types\UnsignedNumericalClickHouseType;
+use function addslashes;
+use function array_filter;
+use function array_key_exists;
+use function array_keys;
+use function array_merge;
+use function array_unique;
+use function array_values;
+use function count;
+use function func_get_args;
+use function get_class;
+use function implode;
+use function in_array;
+use function sprintf;
+use function stripos;
+use function trim;
 
 /**
  * Provides the behavior, features and SQL dialect of the ClickHouse database platform.
@@ -50,7 +68,11 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getBooleanTypeDeclarationSQL(array $columnDef) : string
     {
-        return 'UInt8';
+        return $this->prepareDeclarationSQL(
+            UnsignedNumericalClickHouseType::UNSIGNED_CHAR .
+            NumericalClickHouseType::TYPE_INT . BitNumericalClickHouseType::EIGHT_BIT,
+            $columnDef
+        );
     }
 
     /**
@@ -58,7 +80,11 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getIntegerTypeDeclarationSQL(array $columnDef) : string
     {
-        return $this->_getCommonIntegerTypeDeclarationSQL($columnDef) . 'Int32';
+        return $this->prepareDeclarationSQL(
+            $this->_getCommonIntegerTypeDeclarationSQL($columnDef) .
+            NumericalClickHouseType::TYPE_INT . BitNumericalClickHouseType::THIRTY_TWO_BIT,
+            $columnDef
+        );
     }
 
     /**
@@ -66,7 +92,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getBigIntTypeDeclarationSQL(array $columnDef) : string
     {
-        return 'String';
+        return $this->prepareDeclarationSQL(StringClickHouseType::TYPE_STRING, $columnDef);
     }
 
     /**
@@ -74,7 +100,11 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getSmallIntTypeDeclarationSQL(array $columnDef) : string
     {
-        return $this->_getCommonIntegerTypeDeclarationSQL($columnDef) . 'Int16';
+        return $this->prepareDeclarationSQL(
+            $this->_getCommonIntegerTypeDeclarationSQL($columnDef) .
+            NumericalClickHouseType::TYPE_INT . BitNumericalClickHouseType::SIXTEEN_BIT,
+            $columnDef
+        );
     }
 
     /**
@@ -86,7 +116,7 @@ class ClickHousePlatform extends AbstractPlatform
             throw new \Exception('Clickhouse do not support AUTO_INCREMENT fields');
         }
 
-        return empty($columnDef['unsigned']) ? '' : 'U';
+        return empty($columnDef['unsigned']) ? '' : UnsignedNumericalClickHouseType::UNSIGNED_CHAR;
     }
 
     /**
@@ -128,6 +158,37 @@ class ClickHousePlatform extends AbstractPlatform
 
             'enum8' => 'string',
             'enum16' => 'string',
+
+            'nullable(int8)' => 'smallint',
+            'nullable(int16)' => 'integer',
+            'nullable(int32)' => 'integer',
+            'nullable(int64)' => 'bigint',
+            'nullable(uint8)' => 'smallint',
+            'nullable(uint16)' => 'integer',
+            'nullable(uint32)' => 'integer',
+            'nullable(uint64)' => 'bigint',
+            'nullable(float32)' => 'decimal',
+            'nullable(float64)' => 'float',
+
+            'nullable(string)' => 'string',
+            'nullable(fixedstring)' => 'string',
+            'nullable(date)' => 'date',
+            'nullable(datetime)' => 'datetime',
+
+            'array(nullable(int8))' => 'array',
+            'array(nullable(int16))' => 'array',
+            'array(nullable(int32))' => 'array',
+            'array(nullable(int64))' => 'array',
+            'array(nullable(uint8))' => 'array',
+            'array(nullable(uint16))' => 'array',
+            'array(nullable(uint32))' => 'array',
+            'array(nullable(uint64))' => 'array',
+            'array(nullable(float32))' => 'array',
+            'array(nullable(float64))' => 'array',
+
+            'array(nullable(string))' => 'array',
+            'array(nullable(date))' => 'array',
+            'array(nullable(datetime))' => 'array',
         ];
     }
 
@@ -137,8 +198,33 @@ class ClickHousePlatform extends AbstractPlatform
     protected function getVarcharTypeDeclarationSQLSnippet($length, $fixed) : string
     {
         return $fixed
-            ? 'FixedString(' . $length . ')'
-            : 'String';
+            ? (StringClickHouseType::TYPE_FIXED_STRING . '(' . $length . ')')
+            : StringClickHouseType::TYPE_STRING;
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getVarcharTypeDeclarationSQL(array $field)
+    {
+        if (! isset($field['length'])) {
+            $field['length'] = $this->getVarcharDefaultLength();
+        }
+
+        $fixed = $field['fixed'] ?? false;
+
+        $maxLength = $fixed
+            ? $this->getCharMaxLength()
+            : $this->getVarcharMaxLength();
+
+        if ($field['length'] > $maxLength) {
+            return $this->getClobTypeDeclarationSQL($field);
+        }
+
+        return $this->prepareDeclarationSQL(
+            $this->getVarcharTypeDeclarationSQLSnippet($field['length'], $fixed),
+            $field
+        );
     }
 
     /**
@@ -146,7 +232,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     protected function getBinaryTypeDeclarationSQLSnippet($length, $fixed) : string
     {
-        return 'String';
+        return StringClickHouseType::TYPE_STRING;
     }
 
     /**
@@ -154,7 +240,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getClobTypeDeclarationSQL(array $field) : string
     {
-        return 'String';
+        return $this->prepareDeclarationSQL(StringClickHouseType::TYPE_STRING, $field);
     }
 
     /**
@@ -162,7 +248,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getBlobTypeDeclarationSQL(array $field) : string
     {
-        return 'String';
+        return $this->prepareDeclarationSQL(StringClickHouseType::TYPE_STRING, $field);
     }
 
     /**
@@ -323,7 +409,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getConcatExpression() : string
     {
-        return 'concat(' . implode(', ', \func_get_args()) . ')';
+        return 'concat(' . implode(', ', func_get_args()) . ')';
     }
 
     /**
@@ -331,7 +417,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getIsNullExpression($expression)
     {
-        throw DBALException::notSupported(__METHOD__);
+        return 'isNull(' . $expression . ')';
     }
 
     /**
@@ -339,7 +425,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getIsNotNullExpression($expression)
     {
-        throw DBALException::notSupported(__METHOD__);
+        return 'isNotNull(' . $expression . ')';
     }
 
     /**
@@ -561,7 +647,7 @@ class ClickHousePlatform extends AbstractPlatform
         /**
          * MergeTree* specific section
          */
-        if (\in_array(
+        if (in_array(
             $engine,
             [
                 'MergeTree',
@@ -639,7 +725,7 @@ class ClickHousePlatform extends AbstractPlatform
                     throw new \Exception(
                         'In table `' . $tableName . '` you have set field `' .
                         $options['eventDateColumn'] .
-                        '` (' . \get_class($columns[$options['eventDateColumn']]['type']) . ')
+                        '` (' . get_class($columns[$options['eventDateColumn']]['type']) . ')
                          as `eventDateColumn`, but it is not instance of DateType'
                     );
                 }
@@ -650,7 +736,8 @@ class ClickHousePlatform extends AbstractPlatform
                 $eventDateColumnName = $options['eventDateColumn'];
             }
             $dateColumnParams['name'] = $eventDateColumnName;
-            $columns                  = [$eventDateColumnName => $dateColumnParams] + $columns; // insert into very beginning
+            // insert into very beginning
+            $columns = [$eventDateColumnName => $dateColumnParams] + $columns;
 
             /**
              * Primary key section
@@ -682,8 +769,9 @@ class ClickHousePlatform extends AbstractPlatform
                     ! $columns[$options['versionColumn']]['type'] instanceof DateTimeType
                 ) {
                     throw new \Exception(
-                        'For ReplacingMergeTree tables `versionColumn` must be any of UInt* family, or Date, or DateTime types. ' .
-                        \get_class($columns[$options['versionColumn']]['type']) . ' given.'
+                        'For ReplacingMergeTree tables `versionColumn` must be any of UInt* family, 
+                        or Date, or DateTime types. ' .
+                        get_class($columns[$options['versionColumn']]['type']) . ' given.'
                     );
                 }
 
@@ -693,10 +781,13 @@ class ClickHousePlatform extends AbstractPlatform
             $engineOptions .= ')';
         }
 
-        $columnListSql = $this->getColumnDeclarationListSQL($columns);
-        $query         = 'CREATE TABLE ' . $tableName . ' (' . $columnListSql . ') ENGINE = ' . $engine . $engineOptions;
-
-        $sql[] = $query;
+        $sql[] = sprintf(
+            'CREATE TABLE %s (%s) ENGINE = %s%s',
+            $tableName,
+            $this->getColumnDeclarationListSQL($columns),
+            $engine,
+            $engineOptions
+        );
 
         return $sql;
     }
@@ -805,6 +896,18 @@ class ClickHousePlatform extends AbstractPlatform
     }
 
     /**
+     * @param mixed[] $columnDef
+     */
+    protected function prepareDeclarationSQL(string $declarationSQL, array $columnDef) : string
+    {
+        if (array_key_exists('notnull', $columnDef) && $columnDef['notnull'] === false) {
+            return 'Nullable(' . $declarationSQL . ')';
+        }
+
+        return $declarationSQL;
+    }
+
+    /**
      * {@inheritDoc}
      */
     public function getColumnDeclarationSQL($name, array $field) : string
@@ -825,7 +928,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDecimalTypeDeclarationSQL(array $columnDef) : string
     {
-        return 'String';
+        return $this->prepareDeclarationSQL(StringClickHouseType::TYPE_STRING, $columnDef);
     }
 
     /**
@@ -930,7 +1033,10 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getListTableColumnsSQL($table, $database = null) : string
     {
-        return 'DESCRIBE TABLE ' . ($database ? $this->quoteSingleIdentifier($database) . '.' : '') . $this->quoteSingleIdentifier($table);
+        return sprintf(
+            'DESCRIBE TABLE %s',
+            ($database ? $this->quoteSingleIdentifier($database) . '.' : '') . $this->quoteSingleIdentifier($table)
+        );
     }
 
     /**
@@ -978,7 +1084,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateTimeTypeDeclarationSQL(array $fieldDeclaration) : string
     {
-        return 'DateTime';
+        return $this->prepareDeclarationSQL(DatableClickHouseType::TYPE_DATE_TIME, $fieldDeclaration);
     }
 
     /**
@@ -986,12 +1092,15 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateTimeTzTypeDeclarationSQL(array $fieldDeclaration) : string
     {
-        return 'DateTime';
+        return $this->prepareDeclarationSQL(DatableClickHouseType::TYPE_DATE_TIME, $fieldDeclaration);
     }
 
+    /**
+     * {@inheritDoc}
+     */
     public function getTimeTypeDeclarationSQL(array $fieldDeclaration) : string
     {
-        return 'String';
+        return $this->prepareDeclarationSQL(StringClickHouseType::TYPE_STRING, $fieldDeclaration);
     }
 
     /**
@@ -999,7 +1108,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateTypeDeclarationSQL(array $fieldDeclaration) : string
     {
-        return 'Date';
+        return $this->prepareDeclarationSQL(DatableClickHouseType::TYPE_DATE, $fieldDeclaration);
     }
 
     /**
@@ -1007,7 +1116,10 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getFloatDeclarationSQL(array $fieldDeclaration) : string
     {
-        return 'Float64';
+        return $this->prepareDeclarationSQL(
+            NumericalClickHouseType::TYPE_FLOAT . BitNumericalClickHouseType::SIXTY_FOUR_BIT,
+            $fieldDeclaration
+        );
     }
 
     /**
@@ -1141,23 +1253,30 @@ class ClickHousePlatform extends AbstractPlatform
         if (! isset($field['default'])) {
             return '';
         }
-
-        $default = " DEFAULT '" . $field['default'] . "'";
-        if ($fieldType = (string) ($field['type'] ?? null)) {
-            if (\in_array($fieldType, [
+        $defaultValue = $this->quoteStringLiteral($field['default']);
+        $fieldType    = $field['type'] ?: null;
+        if ($fieldType !== null) {
+            if ($fieldType === DatableClickHouseType::TYPE_DATE ||
+                $fieldType instanceof DateType ||
+                in_array($fieldType, [
                     'Integer',
                     'SmallInt',
                     'Float',
-                ]) || ($fieldType === 'BigInt' && Type::getType('BigInt')->getBindingType() === ParameterType::INTEGER)) {
-                $default = ' DEFAULT ' . $field['default'];
-            } elseif ($fieldType === 'DateTime' && $field['default'] === $this->getCurrentTimestampSQL()) {
-                $default = ' DEFAULT ' . $this->getCurrentTimestampSQL();
-            } elseif ($fieldType === 'Date') { // TODO check if string matches constant date like 'dddd-yy-mm' and quote it
-                $default = ' DEFAULT ' . $field['default'];
+                ]) ||
+                (
+                    $fieldType === 'BigInt'
+                    && Type::getType('BigInt')->getBindingType() === ParameterType::INTEGER
+                )
+            ) {
+                $defaultValue = $field['default'];
+            } elseif ($fieldType === DatableClickHouseType::TYPE_DATE_TIME &&
+                $field['default'] === $this->getCurrentTimestampSQL()
+            ) {
+                $defaultValue = $this->getCurrentTimestampSQL();
             }
         }
 
-        return $default;
+        return sprintf(' DEFAULT %s', $defaultValue);
     }
 
     /**

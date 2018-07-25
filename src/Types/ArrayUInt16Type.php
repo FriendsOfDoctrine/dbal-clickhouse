@@ -17,7 +17,15 @@ namespace FOD\DBALClickHouse\Types;
 /**
  * Array(UInt16) Type
  */
-class ArrayUInt16Type extends ArrayInt16Type
+class ArrayUInt16Type extends ArrayType implements BitNumericalClickHouseType, UnsignedNumericalClickHouseType
 {
-    public const UNSIGNED = true;
+    public function getBits() : int
+    {
+        return BitNumericalClickHouseType::SIXTEEN_BIT;
+    }
+
+    public function getBaseClickHouseType() : string
+    {
+        return NumericalClickHouseType::TYPE_INT;
+    }
 }

@@ -17,7 +17,15 @@ namespace FOD\DBALClickHouse\Types;
 /**
  * Array(UInt8) Type
  */
-class ArrayUInt8Type extends ArrayInt8Type
+class ArrayUInt8Type extends ArrayType implements BitNumericalClickHouseType, UnsignedNumericalClickHouseType
 {
-    public const UNSIGNED = true;
+    public function getBits() : int
+    {
+        return BitNumericalClickHouseType::EIGHT_BIT;
+    }
+
+    public function getBaseClickHouseType() : string
+    {
+        return NumericalClickHouseType::TYPE_INT;
+    }
 }

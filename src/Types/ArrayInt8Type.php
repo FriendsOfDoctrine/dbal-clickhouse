@@ -17,13 +17,15 @@ namespace FOD\DBALClickHouse\Types;
 /**
  * Array(Int8) Type
  */
-class ArrayInt8Type extends AbstractArrayIntType
+class ArrayInt8Type extends ArrayType implements BitNumericalClickHouseType
 {
-    public const BITNESS = 8;
-
-    /** {@inheritdoc} */
-    protected function getBitness() : int
+    public function getBits() : int
     {
-        return self::BITNESS;
+        return BitNumericalClickHouseType::EIGHT_BIT;
+    }
+
+    public function getBaseClickHouseType() : string
+    {
+        return NumericalClickHouseType::TYPE_INT;
     }
 }

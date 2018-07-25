@@ -16,26 +16,18 @@ namespace FOD\DBALClickHouse\Types;
 
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use function array_filter;
+use function array_map;
+use function implode;
 
 /**
  * Array(DateTime) Type class
  */
-class ArrayDateTimeType extends AbstractArrayType
+class ArrayDateTimeType extends ArrayType implements DatableClickHouseType
 {
-    /**
-     * {@inheritDoc}
-     */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
+    public function getBaseClickHouseType() : string
     {
-        return 'Array(DateTime)';
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getName() : string
-    {
-        return 'array(datetime)';
+        return DatableClickHouseType::TYPE_DATE_TIME;
     }
 
     /**
@@ -43,9 +35,12 @@ class ArrayDateTimeType extends AbstractArrayType
      */
     public function convertToPHPValue($value, AbstractPlatform $platform)
     {
-        return array_map(function ($stringDatetime) use ($platform) {
-            return \DateTime::createFromFormat($platform->getDateTimeFormatString(), $stringDatetime);
-        }, (array) $value);
+        return array_map(
+            function ($stringDatetime) use ($platform) {
+                return \DateTime::createFromFormat($platform->getDateTimeFormatString(), $stringDatetime);
+            },
+            (array) $value
+        );
     }
 
     /**
@@ -55,11 +50,17 @@ class ArrayDateTimeType extends AbstractArrayType
     {
         return '[' . implode(
             ', ',
-            array_map(function (\DateTime $datetime) use ($platform) {
+            array_map(
+                function (\DateTime $datetime) use ($platform) {
                     return "'" . $datetime->format($platform->getDateTimeFormatString()) . "'";
-            }, array_filter((array) $value, function ($datetime) {
-                return $datetime instanceof \DateTime;
-            }))
+                },
+                array_filter(
+                    (array) $value,
+                    function ($datetime) {
+                        return $datetime instanceof \DateTime;
+                    }
+                )
+            )
         ) . ']';
     }
 

@@ -14,13 +14,8 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Types;
 
-/**
- * Array(Numeric) Types basic class
- */
-abstract class AbstractArrayNumType extends AbstractArrayType
+interface StringClickHouseType extends ClickHouseType
 {
-    /**
-     * @return int Bitness of integers or floats in Array (Array(Int{bitness}) or Array(Float{bitness}))
-     */
-    abstract protected function getBitness() : int;
+    public const TYPE_STRING       = 'String';
+    public const TYPE_FIXED_STRING = 'FixedString';
 }

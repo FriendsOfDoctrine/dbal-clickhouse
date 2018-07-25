@@ -14,18 +14,7 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Types;
 
-/**
- * Array(Float64) Type
- */
-class ArrayFloat64Type extends ArrayType implements BitNumericalClickHouseType
+interface ClickHouseType
 {
-    public function getBits() : int
-    {
-        return BitNumericalClickHouseType::SIXTY_FOUR_BIT;
-    }
-
-    public function getBaseClickHouseType() : string
-    {
-        return NumericalClickHouseType::TYPE_FLOAT;
-    }
+    public function getBaseClickHouseType() : string;
 }

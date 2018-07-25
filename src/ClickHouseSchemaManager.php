@@ -18,6 +18,12 @@ use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Types\Type;
+use const CASE_LOWER;
+use function array_change_key_case;
+use function preg_replace;
+use function stripos;
+use function strtolower;
+use function trim;
 
 /**
  * Schema manager for the ClickHouse DBMS.

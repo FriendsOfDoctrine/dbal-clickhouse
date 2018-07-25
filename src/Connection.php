@@ -15,6 +15,9 @@ declare(strict_types=1);
 namespace FOD\DBALClickHouse;
 
 use Doctrine\DBAL\DBALException;
+use function strtoupper;
+use function substr;
+use function trim;
 
 /**
  * ClickHouse Connection

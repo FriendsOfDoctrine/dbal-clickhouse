@@ -17,13 +17,16 @@ namespace FOD\DBALClickHouse\Types;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
+use function array_key_exists;
+use function sprintf;
+use function strtolower;
 
 /**
  * Array(*) Types basic class
  */
-abstract class AbstractArrayType extends Type
+abstract class ArrayType extends Type implements ClickHouseType
 {
-    public const ARRAY_TYPES = [
+    protected const ARRAY_TYPES = [
         'array(int8)' => ArrayInt8Type::class,
         'array(int16)' => ArrayInt16Type::class,
         'array(int32)' => ArrayInt32Type::class,
@@ -64,5 +67,37 @@ abstract class AbstractArrayType extends Type
     public function getMappedDatabaseTypes(AbstractPlatform $platform) : array
     {
         return [$this->getName()];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
+    {
+        return $this->getDeclaration($fieldDeclaration);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getName() : string
+    {
+        return strtolower($this->getDeclaration());
+    }
+
+    /**
+     * @param mixed[] $fieldDeclaration
+     */
+    protected function getDeclaration(array $fieldDeclaration = []) : string
+    {
+        return sprintf(
+            array_key_exists(
+                'notnull',
+                $fieldDeclaration
+            ) && $fieldDeclaration['notnull'] === false ? 'Array(Nullable(%s%s%s))' : 'Array(%s%s%s)',
+            $this instanceof UnsignedNumericalClickHouseType ? 'U' : '',
+            $this->getBaseClickHouseType(),
+            $this instanceof BitNumericalClickHouseType ? $this->getBits() : ''
+        );
     }
 }

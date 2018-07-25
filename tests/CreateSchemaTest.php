@@ -15,6 +15,7 @@ use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Types\Type;
 use FOD\DBALClickHouse\ClickHouseSchemaManager;
 use FOD\DBALClickHouse\Connection;
+use FOD\DBALClickHouse\Types\ArrayType;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -237,5 +238,76 @@ class CreateSchemaTest extends TestCase
             $this->connection->exec($sql);
         }
         $this->connection->exec('DROP TABLE test_table');
+    }
+
+    public function testNullableColumns()
+    {
+        $fromSchema = $this->connection->getSchemaManager()->createSchema();
+        ArrayType::registerArrayTypes($this->connection->getDatabasePlatform());
+
+        $toSchema = clone $fromSchema;
+
+        $newTable = $toSchema->createTable('test_table_nullable');
+
+        $newTable->addColumn('id', 'integer', ['unsigned' => true, 'notnull' => false]);
+        $newTable->addColumn('payload', 'string', ['notnull' => false]);
+        $newTable->addColumn('price', 'float', ['notnull' => false]);
+        $newTable->addColumn('transactions', 'array(datetime)', ['notnull' => false]);
+        $newTable->addColumn('status', 'boolean', ['notnull' => false]);
+        $newTable->setPrimaryKey(['id']);
+        $newTable->addOption('engine', 'Memory');
+
+        $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+        $generatedSQL = implode(';', $migrationSQLs);
+        $this->assertEquals("CREATE TABLE test_table_nullable (id UInt32, payload Nullable(String), price Nullable(Float64), transactions Array(Nullable(DateTime)), status Nullable(UInt8)) ENGINE = Memory",
+            $generatedSQL);
+        foreach ($migrationSQLs as $sql) {
+            $this->connection->exec($sql);
+        }
+        $this->connection->insert('test_table_nullable',
+            [
+                'id' => 1,
+                'payload' => 's1',
+                'price' => 1.5,
+                'transactions' => [date('Y-m-d H:i:s'), null],
+                'status' => null
+            ]);
+        $this->connection->insert('test_table_nullable',
+            [
+                'id' => 2,
+                'payload' => 's2',
+                'price' => 120,
+                'transactions' => [null, null],
+                'status' => false
+            ]);
+        $this->connection->insert('test_table_nullable',
+            [
+                'id' => 3,
+                'payload' => null,
+                'price' => 1000,
+                'transactions' => [date('Y-m-d H:i:s')],
+                'status' => true
+            ]);
+        $this->connection->insert('test_table_nullable',
+            [
+                'id' => 4,
+                'payload' => 's4',
+                'price' => null,
+                'transactions' => [date('Y-m-d H:i:s'), date('Y-m-d H:i:s')],
+                'status' => null
+            ]);
+        $this->connection->insert('test_table_nullable',
+            [
+                'id' => 5,
+                'payload' => 's5',
+                'price' => 100,
+                'transactions' => [date('Y-m-d H:i:s')],
+                'status' => true
+            ]);
+
+        $this->assertEquals(2,
+            (int)$this->connection->fetchColumn("SELECT count() from test_table_nullable WHERE {$this->connection->getDatabasePlatform()->getIsNullExpression('status')}"));
+
+        $this->connection->exec('DROP TABLE test_table_nullable');
     }
 }
