@@ -16,15 +16,18 @@ namespace FOD\DBALClickHouse\Types;
 
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use function array_filter;
+use function array_map;
+use function implode;
 
 /**
  * Array(DateTime) Type class
  */
-class ArrayDateTimeType extends AbstractArrayType implements DatableTypeInterface
+class ArrayDateTimeType extends ArrayType implements DatableType
 {
-    public function getBaseClickHouseType(): string
+    public function getBaseClickHouseType() : string
     {
-        return DatableTypeInterface::TYPE_DATE_TIME;
+        return DatableType::TYPE_DATE_TIME;
     }
 
     /**
@@ -35,7 +38,8 @@ class ArrayDateTimeType extends AbstractArrayType implements DatableTypeInterfac
         return array_map(
             function ($stringDatetime) use ($platform) {
                 return \DateTime::createFromFormat($platform->getDateTimeFormatString(), $stringDatetime);
-            }, (array) $value
+            },
+            (array) $value
         );
     }
 
@@ -49,8 +53,10 @@ class ArrayDateTimeType extends AbstractArrayType implements DatableTypeInterfac
             array_map(
                 function (\DateTime $datetime) use ($platform) {
                     return "'" . $datetime->format($platform->getDateTimeFormatString()) . "'";
-                }, array_filter(
-                    (array) $value, function ($datetime) {
+                },
+                array_filter(
+                    (array) $value,
+                    function ($datetime) {
                         return $datetime instanceof \DateTime;
                     }
                 )

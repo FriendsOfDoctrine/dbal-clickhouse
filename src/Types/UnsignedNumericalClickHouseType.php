@@ -14,8 +14,7 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Types;
 
-
-interface BaseClickHouseTypeInterface
+interface UnsignedNumericalType extends NumericalType
 {
-    public function getBaseClickHouseType(): string;
+    public const UNSIGNED_CHAR = 'U';
 }

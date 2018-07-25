@@ -14,8 +14,8 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Types;
 
-interface DatableTypeInterface extends BaseClickHouseTypeInterface
+interface DatableType extends ClickHouseType
 {
-    public const TYPE_DATE = 'Date';
+    public const TYPE_DATE      = 'Date';
     public const TYPE_DATE_TIME = 'DateTime';
 }

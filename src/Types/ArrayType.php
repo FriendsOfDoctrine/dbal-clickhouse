@@ -17,6 +17,9 @@ namespace FOD\DBALClickHouse\Types;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
+use function array_key_exists;
+use function sprintf;
+use function strtolower;
 
 /**
  * Array(*) Types basic class
@@ -44,7 +47,7 @@ abstract class AbstractArrayType extends Type implements BaseClickHouseTypeInter
      *
      * @throws DBALException
      */
-    public static function registerArrayTypes(AbstractPlatform $platform): void
+    public static function registerArrayTypes(AbstractPlatform $platform) : void
     {
         foreach (self::ARRAY_TYPES as $typeName => $className) {
             if (self::hasType($typeName)) {
@@ -61,7 +64,7 @@ abstract class AbstractArrayType extends Type implements BaseClickHouseTypeInter
     /**
      * {@inheritDoc}
      */
-    public function getMappedDatabaseTypes(AbstractPlatform $platform): array
+    public function getMappedDatabaseTypes(AbstractPlatform $platform) : array
     {
         return [$this->getName()];
     }
@@ -69,7 +72,7 @@ abstract class AbstractArrayType extends Type implements BaseClickHouseTypeInter
     /**
      * {@inheritDoc}
      */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
     {
         return $this->getDeclaration($fieldDeclaration);
     }
@@ -77,12 +80,15 @@ abstract class AbstractArrayType extends Type implements BaseClickHouseTypeInter
     /**
      * {@inheritDoc}
      */
-    public function getName(): string
+    public function getName() : string
     {
         return strtolower($this->getDeclaration());
     }
 
-    protected function getDeclaration(array $fieldDeclaration = []): string
+    /**
+     * @param mixed[] $fieldDeclaration
+     */
+    protected function getDeclaration(array $fieldDeclaration = []) : string
     {
         return sprintf(
             array_key_exists(
