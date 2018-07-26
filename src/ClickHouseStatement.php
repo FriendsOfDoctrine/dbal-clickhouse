@@ -185,7 +185,7 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
         if ($this->assumeFetchMode($fetchMode) === FetchMode::NUMERIC) {
             return array_map(
                 'array_values',
-                (array) $this->rows
+                $this->rows
             );
         }
 
@@ -194,7 +194,7 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
                 function ($row) {
                     return array_values($row) + $row;
                 },
-                (array) $this->rows
+                $this->rows
             );
         }
 
@@ -203,7 +203,7 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
                 function ($row) {
                     return (object) $row;
                 },
-                (array) $this->rows
+                $this->rows
             );
         }
 
@@ -218,7 +218,7 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
 
                     return [array_shift($row) => array_shift($row)];
                 },
-                (array) $this->rows
+                $this->rows
             );
         }
 

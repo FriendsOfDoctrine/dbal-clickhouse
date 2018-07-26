@@ -12,6 +12,7 @@
 namespace FOD\DBALClickHouse\Tests;
 
 use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Types\Type;
 use FOD\DBALClickHouse\ClickHouseSchemaManager;
 use FOD\DBALClickHouse\Connection;
@@ -238,6 +239,37 @@ class CreateSchemaTest extends TestCase
             $this->connection->exec($sql);
         }
         $this->connection->exec('DROP TABLE test_table');
+    }
+
+    public function testListTableIndexes()
+    {
+        $fromSchema = $this->connection->getSchemaManager()->createSchema();
+        $toSchema = clone $fromSchema;
+
+        $newTable = $toSchema->createTable('test_indexes_table');
+
+        $newTable->addColumn('id', 'integer', ['unsigned' => true]);
+        $newTable->addColumn('payload', 'string');
+        $newTable->addColumn('event_date', Type::DATE);
+        $newTable->addOption('eventDateColumn', 'event_date');
+        $newTable->setPrimaryKey(['id', 'event_date']);
+        $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+        foreach ($migrationSQLs as $sql) {
+            $this->connection->exec($sql);
+        }
+
+        $indexes = $this->connection->getSchemaManager()->listTableIndexes('test_indexes_table');
+
+        $this->assertEquals(1, \count($indexes));
+
+        if($index = current($indexes)) {
+            $this->assertInstanceOf(Index::class, $index);
+
+            $this->assertEquals(['id', 'event_date'], $index->getColumns());
+            $this->assertTrue($index->isPrimary());
+        }
+
+        $this->connection->exec('DROP TABLE test_indexes_table');
     }
 
     public function testNullableColumns()

@@ -16,12 +16,22 @@ namespace FOD\DBALClickHouse;
 
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\Column;
+use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Types\Type;
 use const CASE_LOWER;
 use function array_change_key_case;
+use function array_filter;
+use function array_key_exists;
+use function array_map;
+use function array_reverse;
+use function current;
+use function explode;
+use function is_array;
+use function preg_match;
 use function preg_replace;
 use function stripos;
+use function strpos;
 use function strtolower;
 use function trim;
 
@@ -53,6 +63,32 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
      */
     public function listTableIndexes($table) : array
     {
+        $tableView = $this->_getPortableViewDefinition(['name' => $table]);
+
+        preg_match(
+            '/MergeTree\(([\w+, \(\)]+)(?= \(((?:[^()]|\((?2)\))+)\),)/mi',
+            $tableView->getSql(),
+            $matches
+        );
+
+        if (is_array($matches) && array_key_exists(2, $matches)) {
+            $indexColumns = array_filter(
+                array_map('trim', explode(',', $matches[2])),
+                function (string $column) {
+                    return strpos($column, '(') === false;
+                }
+            );
+
+            return [
+                new Index(
+                    current(array_reverse(explode('.', $table))) . '__pk',
+                    $indexColumns,
+                    false,
+                    true
+                ),
+            ];
+        }
+
         return [];
     }
 
