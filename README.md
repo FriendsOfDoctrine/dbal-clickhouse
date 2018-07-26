@@ -97,7 +97,7 @@ foreach ($sqlArray as $sql) {
 ```
 
 ```php
-// ***more options***
+// ***more options (optional)***
 
 //specify table engine
 $newTable->addOption('engine', 'MergeTree');
@@ -112,7 +112,8 @@ $newTable->addOption('eventDateProviderColumn', 'updated_at');
 // *if specified -- event date column will be added with default value toDate(updated_at); 
 //    if the type of the provider column is `string`, the valid format of provider column values must be either `YYYY-MM-DD` or `YYYY-MM-DD hh:mm:ss`
 //    if the type of provider column is neither `string`, nor `date`, nor `datetime`, provider column values must contain a valid UNIX Timestamp
-
+$newTable->addOption('samplingExpression', 'intHash32(id)');
+// samplingExpression -- a tuple that defines the table's primary key, and the index granularity
 
 //specify index granularity
 $newTable->addOption('indexGranularity', 4096);

@@ -659,7 +659,8 @@ class ClickHousePlatform extends AbstractPlatform
             ],
             true
         )) {
-            $indexGranularity = ! empty($options['indexGranularity']) ? $options['indexGranularity'] : 8192;
+            $indexGranularity   = ! empty($options['indexGranularity']) ? $options['indexGranularity'] : 8192;
+            $samplingExpression = '';
 
             /**
              * eventDateColumn section
@@ -746,10 +747,22 @@ class ClickHousePlatform extends AbstractPlatform
                 throw new \Exception('You need specify PrimaryKey for MergeTree* tables');
             }
 
-            $engineOptions = '(' . $eventDateColumnName . ', (' . implode(
-                ', ',
-                array_unique(array_values($options['primary']))
-            ) . '), ' . $indexGranularity;
+            $primaryIndex = array_values($options['primary']);
+            if (! empty($options['samplingExpression'])) {
+                $samplingExpression = ', ' . $options['samplingExpression'];
+                $primaryIndex[]     = $options['samplingExpression'];
+            }
+
+            $engineOptions = sprintf(
+                '(%s%s, (%s), %d',
+                $eventDateColumnName,
+                $samplingExpression,
+                implode(
+                    ', ',
+                    array_unique($primaryIndex)
+                ),
+                $indexGranularity
+            );
 
             /**
              * any specific MergeTree* table parameters
