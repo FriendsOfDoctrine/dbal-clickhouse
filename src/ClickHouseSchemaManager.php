@@ -30,6 +30,7 @@ use function explode;
 use function is_array;
 use function preg_match;
 use function preg_replace;
+use function str_replace;
 use function stripos;
 use function strpos;
 use function strtolower;
@@ -99,18 +100,25 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
     {
         $tableColumn = array_change_key_case($tableColumn, CASE_LOWER);
 
-        $dbType = $tableColumn['type'];
-        $length = null;
-        $fixed  = false;
-        if (stripos(trim($tableColumn['type']), 'fixedstring') === 0) {
+        $dbType  = $columnType = trim($tableColumn['type']);
+        $length  = null;
+        $fixed   = false;
+        $notnull = true;
+
+        if (preg_match('/(Nullable\((\w+)\))/i', $columnType, $matches)) {
+            $columnType = str_replace($matches[1], $matches[2], $columnType);
+            $notnull    = false;
+        }
+
+        if (stripos($columnType, 'fixedstring') === 0) {
             // get length from FixedString definition
-            $length = preg_replace('~.*\(([0-9]*)\).*~', '$1', $tableColumn['type']);
+            $length = preg_replace('~.*\(([0-9]*)\).*~', '$1', $columnType);
             $dbType = 'fixedstring';
             $fixed  = true;
         }
 
         $unsigned = false;
-        if (stripos(trim($tableColumn['type']), 'uint') === 0) {
+        if (stripos($columnType, 'uint') === 0) {
             $unsigned = true;
         }
 
@@ -126,7 +134,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
 
         $options = [
             'length' => $length,
-            'notnull' => true,
+            'notnull' => $notnull,
             'default' => $default,
             'primary' => false,
             'fixed' => $fixed,
