@@ -667,7 +667,13 @@ class ClickHousePlatform extends AbstractPlatform
              */
             $dateColumnParams = [
                 'type' => Type::getType('date'),
-                'default' => 'today()',
+                'default' =>
+                    isset($options['eventDateColumn']) &&
+                    isset($columns[$options['eventDateColumn']]) &&
+                    isset($columns[$options['eventDateColumn']]['default']) &&
+                    $columns[$options['eventDateColumn']]['default'] ?
+                        $columns[$options['eventDateColumn']]['default'] :
+                        'today()'
             ];
             if (! empty($options['eventDateProviderColumn'])) {
                 $options['eventDateProviderColumn'] = trim($options['eventDateProviderColumn']);
