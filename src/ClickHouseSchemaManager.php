@@ -120,6 +120,8 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
         $unsigned = false;
         if (stripos($columnType, 'uint') === 0) {
             $unsigned = true;
+            // getting correct name of integer column
+            $dbType = substr($columnType, 1);
         }
 
         if (! isset($tableColumn['name'])) {

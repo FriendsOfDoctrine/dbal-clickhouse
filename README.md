@@ -195,19 +195,26 @@ doctrine:
             array(date): FOD\DBALClickHouse\Types\ArrayDateType
 ```
 
-Additional type `BigIntType` helps you to store bigint values as [Int64/UInt64](https://clickhouse.yandex/reference_en.html#UInt8,%20UInt16,%20UInt32,%20UInt64,%20Int8,%20Int16,%20Int32,%20Int64) value type in ClickHouse.
-You can override DBAL type in your code:
-```php
-Type::overrideType(Type::BIGINT, 'FOD\DBALClickHouse\Types\BigIntType');
-```
-or use custom mapping types in Symfony configuration:
+If you want to use [numeric types](https://clickhouse.yandex/docs/en/single/#uint8-uint16-uint32-uint64-int8-int16-int32-int64), register additional DBAL types in your Symfony configuration file:
+
 ```yml
 # app/config/config.yml
 doctrine:
     dbal:
+        connections:
+        ...
         types:
-            bigint:  FOD\DBALClickHouse\Types\BigIntType
-            ...
+            int8: FOD\DBALClickHouse\Types\Int8Type
+            int16: FOD\DBALClickHouse\Types\Int16Type
+            int32: FOD\DBALClickHouse\Types\Int32Type
+            int64: FOD\DBALClickHouse\Types\Int64Type
+            float32: FOD\DBALClickHouse\Types\Float32Type
+            float64: FOD\DBALClickHouse\Types\Float64Type
+```
+
+or you can override DBAL type in your code:
+```php
+Type::overrideType(Type::BIGINT, 'FOD\DBALClickHouse\Types\Int64Type');
 ```
 
 ### More information in Doctrine DBAL documentation:
