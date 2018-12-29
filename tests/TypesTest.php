@@ -209,6 +209,24 @@ class TypesTest extends TestCase
         $this->assertIsNotBool(strpos($this->connection->fetchColumn("SHOW CREATE {$this->tableName}"), "field {$fieldSQLDeclaration}"));
     }
 
+    public function testDecimal()
+    {
+
+        $fieldName = 'decimal';
+
+        $neededFieldSQLDeclaration = 'Decimal(10, 0)';
+
+        Type::overrideType(Type::DECIMAL, 'FOD\DBALClickHouse\Types\DecimalType');
+
+        $fieldSQLDeclaration = Type::getType($fieldName)->getSQLDeclaration([], $this->connection->getDatabasePlatform());
+
+        $this->assertEquals($fieldSQLDeclaration, $neededFieldSQLDeclaration);
+
+        $this->createTempTable($fieldName);
+
+        $this->assertIsNotBool(strpos($this->connection->fetchColumn("SHOW CREATE {$this->tableName}"), "field {$fieldSQLDeclaration}"));
+    }
+
     protected function createTempTable($type, $options = [])
     {
         $fromSchema = $this->connection->getSchemaManager()->createSchema();

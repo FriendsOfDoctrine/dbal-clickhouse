@@ -210,11 +210,14 @@ doctrine:
             int64: FOD\DBALClickHouse\Types\Int64Type
             float32: FOD\DBALClickHouse\Types\Float32Type
             float64: FOD\DBALClickHouse\Types\Float64Type
+            decimal: FOD\DBALClickHouse\Types\DecimalType
 ```
 
 or you can override DBAL type in your code:
 ```php
 Type::overrideType(Type::BIGINT, 'FOD\DBALClickHouse\Types\Int64Type');
+
+Type::overrideType(Type::DECIMAL, 'FOD\DBALClickHouse\Types\DecimalType');
 ```
 
 ### More information in Doctrine DBAL documentation:

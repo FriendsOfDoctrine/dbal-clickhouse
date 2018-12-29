@@ -14,8 +14,6 @@ namespace FOD\DBALClickHouse\Types;
 
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
-use function array_key_exists;
-use function sprintf;
 use function strtolower;
 
 /**
@@ -30,6 +28,7 @@ abstract class Type extends \Doctrine\DBAL\Types\Type implements ClickHouseType
     public const INT64  = 'int64';
     public const FLOAT32 = 'float32';
     public const FLOAT64 = 'float64';
+    public const DECIMAL = 'decimal';
 
     protected const TYPES = [
         self::INT8 => Int8Type::class,
@@ -37,7 +36,8 @@ abstract class Type extends \Doctrine\DBAL\Types\Type implements ClickHouseType
         self::INT32 => Int32Type::class,
         self::INT64 => Int64Type::class,
         self::FLOAT32 => Float32Type::class,
-        self::FLOAT64 => Float64Type::class
+        self::FLOAT64 => Float64Type::class,
+        self::DECIMAL => DecimalType::class
     ];
 
     /**

@@ -18,4 +18,5 @@ interface NumericalClickHouseType extends ClickHouseType
 {
     public const TYPE_INT   = 'Int';
     public const TYPE_FLOAT = 'Float';
+    public const TYPE_DECIMAL = 'Decimal';
 }
