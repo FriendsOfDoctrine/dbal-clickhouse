@@ -292,8 +292,8 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
         } else {
             foreach (array_keys($this->values) as $key) {
                 $sql = preg_replace(
-                    '/(' . (is_int($key) ? '\?' : ':' . $key) . ')/i',
-                    $this->getTypedParam($key),
+                    '/(' . (is_int($key) ? '\?([,\)])' : ':' . $key) . ')/i',
+                    $this->getTypedParam($key).'$2',
                     $sql,
                     1
                 );
