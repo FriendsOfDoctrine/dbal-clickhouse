@@ -327,7 +327,11 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
     {
         $sql = trim($sql);
 
-        if (stripos($sql, 'select') !== 0 && stripos($sql, 'show') !== 0 && stripos($sql, 'describe') !== 0) {
+        if (
+            stripos($sql, 'select') !== 0 &&
+            stripos($sql, 'show') !== 0 &&
+            stripos($sql, 'describe') !== 0
+        ) {
             $this->rows = $this->smi2CHClient->write($sql)->rows();
             return;
         }
