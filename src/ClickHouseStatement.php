@@ -336,8 +336,9 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
             return;
         }
 
-        $this->rows = $this->smi2CHClient->select($sql)->rows();
-        $totals = $this->smi2CHClient->select($sql)->totals();
+        $statement = $this->smi2CHClient->select($sql);
+        $this->rows = $statement->rows();
+        $totals = $statement->totals();
         if (null !== $totals) {
             $this->rows = array_merge($this->rows, ['totals' => $totals]);
         }
