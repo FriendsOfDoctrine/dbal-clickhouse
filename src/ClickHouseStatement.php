@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FOD\DBALClickHouse;
 
 use ClickHouseDB\Client;
+use ClickHouseDB\Statement as ClientStatement;
 use Doctrine\DBAL\Driver\Statement;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\ParameterType;
@@ -46,6 +47,9 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
 {
     /** @var Client */
     protected $smi2CHClient;
+
+    /** @var ClientStatement */
+    protected $clientStatement;
 
     /** @var string */
     protected $statement;
@@ -328,20 +332,24 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
         $sql = trim($sql);
 
         if (
-            stripos($sql, 'select') !== 0 &&
-            stripos($sql, 'show') !== 0 &&
-            stripos($sql, 'describe') !== 0
+            stripos($sql, 'select') === 0 ||
+            stripos($sql, 'show') === 0 ||
+            stripos($sql, 'describe') === 0
         ) {
-            $this->rows = $this->smi2CHClient->write($sql)->rows();
-            return;
+            $this->clientStatement = $this->smi2CHClient->select($sql);
+        } else {
+            $this->clientStatement = $this->smi2CHClient->write($sql);
         }
 
-        $statement = $this->smi2CHClient->select($sql);
-        $this->rows = $statement->rows();
-        $totals = $statement->totals();
-        if (null !== $totals) {
-            $this->rows = array_merge($this->rows, ['totals' => $totals]);
-        }
+        $this->rows = $this->clientStatement->rows();
+    }
+
+    /**
+     * @return array
+     */
+    public function getTotals(): array
+    {
+        return $this->clientStatement->totals();
     }
 
     /**
