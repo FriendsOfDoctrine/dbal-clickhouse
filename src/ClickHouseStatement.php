@@ -321,23 +321,27 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
     /**
      * Specific SMI2 ClickHouse lib statement execution
      * If you want to use any other lib for working with CH -- just update this method
-     *
+     * @param string $sql
      */
     protected function processViaSMI2(string $sql) : void
     {
         $sql = trim($sql);
 
-        $this->rows =
-            stripos($sql, 'select') === 0 ||
-            stripos($sql, 'show') === 0 ||
-            stripos($sql, 'describe') === 0 ?
-                $this->smi2CHClient->select($sql)->rows() :
-                $this->smi2CHClient->write($sql)->rows();
+        if (stripos($sql, 'select') !== 0 && stripos($sql, 'show') !== 0 && stripos($sql, 'describe') !== 0) {
+            $this->rows = $this->smi2CHClient->write($sql)->rows();
+            return;
+        }
+
+        $this->rows = $this->smi2CHClient->select($sql)->rows();
+        $totals = $this->smi2CHClient->select($sql)->totals();
+        if (null !== $totals) {
+            $this->rows = array_merge($this->rows, ['totals' => $totals]);
+        }
     }
 
     /**
      * @param string|int $key
-     * @throws ClickHouseException
+     * @return string
      */
     protected function getTypedParam($key) : string
     {
