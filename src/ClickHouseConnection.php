@@ -46,15 +46,17 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
         string $password,
         AbstractPlatform $platform
     ) {
-        $this->smi2CHClient = new Smi2CHClient([
-            'host' => $params['host'] ?? 'localhost',
-            'port' => $params['port'] ?? 8123,
-            'username' => $username,
-            'password' => $password,
-            'settings' => array_merge([
+        $this->smi2CHClient = new Smi2CHClient(
+            [
+                'host' => $params['host'] ?? 'localhost',
+                'port' => $params['port'] ?? 8123,
+                'username' => $username,
+                'password' => $password,
+            ],
+            array_merge([
                 'database' => $params['dbname'] ?? 'default',
-            ], $params['driverOptions'] ?? []),
-        ]);
+            ], $params['driverOptions'] ?? [])
+        );
 
         $this->platform = $platform;
     }
