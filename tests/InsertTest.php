@@ -119,4 +119,11 @@ class InsertTest extends TestCase
 
         $this->assertEquals([['payload' => 'v?9'], ['payload' => 'v10']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (9, 10) ORDER BY id"));
     }
+
+    public function testStatementInsertWithKeysHaveSamePrefix()
+    {
+        $statement = $this->connection->prepare('INSERT INTO test_insert_table(id, payload) VALUES (:v1, :v10)');
+        $statement->execute(['v1' => 9, 'v10' => 'v9']);
+        $this->assertEquals([['payload' => 'v9']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (9) ORDER BY id"));
+    }
 }

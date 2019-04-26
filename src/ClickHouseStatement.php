@@ -291,7 +291,7 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
         $wordKeyPatterns = [];
         if (count($wordKeys)) {
             $wordKeyPatterns = array_map(function (string $key) : string {
-                return ':' . preg_quote($key, '/');
+                return ':' . preg_quote($key, '/') . '\b';
             }, $wordKeys);
         }
 
