@@ -51,11 +51,9 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
             'port' => $params['port'] ?? 8123,
             'username' => $username,
             'password' => $password,
-            'settings' => array_merge([
-                'database' => $params['dbname'] ?? 'default',
-            ], $params['driverOptions'] ?? []),
-        ]);
-
+        ], array_merge([
+            'database' => $params['dbname'] ?? 'default',
+        ], $params['driverOptions'] ?? []));
         $this->platform = $platform;
     }
 
