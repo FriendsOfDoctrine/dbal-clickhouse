@@ -284,5 +284,27 @@ class SelectTest extends TestCase
 
         $this->assertEquals('t2', $stmt->fetchColumn());
     }
+
+    public function testStatementSelectWithBindingIntegersArray(): void
+    {
+        $statement = $this->connection->prepare('INSERT INTO test_select_table(id, payload) VALUES (:v0, :v1), (:v2, :v3)');
+        $statement->execute(['v0' => 11, 'v1' => 'v?11', 'v2' => 12, 'v3' => 'v12']);
+
+        $statement = $this->connection->prepare('SELECT payload from test_select_table WHERE id IN (:array) ORDER BY id');
+        $statement->bindValue('array', [11, 12], Connection::PARAM_INT_ARRAY);
+        $statement->execute();
+        $this->assertEquals([['payload' => 'v?11'], ['payload' => 'v12']], $statement->fetchAll());
+    }
+
+    public function testStatementSelectWithBindingStringsArray(): void
+    {
+        $statement = $this->connection->prepare('INSERT INTO test_select_table(id, payload) VALUES (:v0, :v1), (:v2, :v3)');
+        $statement->execute(['v0' => 13, 'v1' => 'v?13', 'v2' => 14, 'v3' => 'v14']);
+
+        $statement = $this->connection->prepare('SELECT id from test_select_table WHERE payload IN (:array) ORDER BY id');
+        $statement->bindValue('array', ['v?13', 'v14'], Connection::PARAM_STR_ARRAY);
+        $statement->execute();
+        $this->assertEquals([['id' => 13], ['id' => 14]], $statement->fetchAll());
+    }
 }
 

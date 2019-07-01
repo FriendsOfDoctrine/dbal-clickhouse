@@ -166,6 +166,22 @@ while ($row = $stmt->fetch()) {
 }
 ```
 
+### Select using placeholders with arrays as values
+```php
+$stmt = $conn->prepare('SELECT authorId FROM articles WHERE categoryId IN (:categoryIds)');
+
+$stmt->bindValue('categoryIds', [123, 124], \Doctrine\DBAL\Connection::PARAM_INT_ARRAY);
+$stmt->execute();
+$result = $stmt->fetchAll();
+```
+```php
+$stmt = $conn->prepare('SELECT authorId FROM articles WHERE categoryName IN (:categoryNames)');
+
+$stmt->bindValue('categoryNames', ['Auto', 'News'], \Doctrine\DBAL\Connection::PARAM_STR_ARRAY);
+$stmt->execute();
+$result = $stmt->fetchAll();
+```
+
 ### Additional types
 
 If you want to use [Array(T) type](https://clickhouse.yandex/reference_en.html#Array(T)), register additional DBAL types in your code:

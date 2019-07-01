@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FOD\DBALClickHouse;
 
 use ClickHouseDB\Client;
+use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\Statement;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\ParameterType;
@@ -385,6 +386,14 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
 
         if ($type === ParameterType::BOOLEAN) {
             return (string) (int) (bool) $this->values[$key];
+        }
+
+        if ($type === Connection::PARAM_INT_ARRAY) {
+            return implode(',', $this->values[$key]);
+        }
+
+        if ($type === Connection::PARAM_STR_ARRAY) {
+            return "'" . implode("','", $this->values[$key]) . "'";
         }
 
         return $this->platform->quoteStringLiteral((string) $this->values[$key]);
