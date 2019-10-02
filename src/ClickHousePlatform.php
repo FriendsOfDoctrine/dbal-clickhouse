@@ -135,6 +135,7 @@ class ClickHousePlatform extends AbstractPlatform
             'uint64' => 'bigint',
             'float32' => 'decimal',
             'float64' => 'float',
+            'decimal' => 'decimal',
 
             'string' => 'string',
             'fixedstring' => 'string',
