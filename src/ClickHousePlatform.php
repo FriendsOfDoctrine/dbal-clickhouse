@@ -8,7 +8,7 @@ declare(strict_types=1);
  *
  * (c) FriendsOfDoctrine <https://github.com/FriendsOfDoctrine/>.
  *
- * For the full copyright and license inflormation, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
@@ -667,7 +667,13 @@ class ClickHousePlatform extends AbstractPlatform
              */
             $dateColumnParams = [
                 'type' => Type::getType('date'),
-                'default' => 'today()',
+                'default' =>
+                    isset($options['eventDateColumn']) &&
+                    isset($columns[$options['eventDateColumn']]) &&
+                    isset($columns[$options['eventDateColumn']]['default']) &&
+                    $columns[$options['eventDateColumn']]['default'] ?
+                        $columns[$options['eventDateColumn']]['default'] :
+                        'today()'
             ];
             if (! empty($options['eventDateProviderColumn'])) {
                 $options['eventDateProviderColumn'] = trim($options['eventDateProviderColumn']);

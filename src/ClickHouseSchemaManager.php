@@ -8,7 +8,7 @@ declare(strict_types=1);
  *
  * (c) FriendsOfDoctrine <https://github.com/FriendsOfDoctrine/>.
  *
- * For the full copyright and license inflormation, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
@@ -118,8 +118,29 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
         }
 
         $unsigned = false;
+
         if (stripos($columnType, 'uint') === 0) {
+
             $unsigned = true;
+
+            $dbType = substr($columnType, 1);
+        }
+
+        $precision = 10;
+
+        $scale = 0;
+
+        if (stripos($columnType, 'decimal') === 0) {
+
+            $unsigned = false;
+
+            $dbType = 'decimal';
+
+            preg_match('/([0-9]{1,2})(, )?([0-9]{1,2})?/', $columnType, $matches);
+
+            $precision = isset($matches[1]) ? $matches[1] : 10;
+
+            $scale = isset($matches[3]) ? $matches[3] : 0;
         }
 
         if (! isset($tableColumn['name'])) {
@@ -141,6 +162,8 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
             'unsigned' => $unsigned,
             'autoincrement' => false,
             'comment' => null,
+            'precision' => $precision,
+            'scale' => $scale,
         ];
 
         return new Column(
