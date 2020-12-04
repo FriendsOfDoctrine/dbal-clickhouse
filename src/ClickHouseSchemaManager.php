@@ -133,7 +133,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
         }
 
         $comment = null;
-        if (! is_null($tableColumn['comment'])) {
+        if (isset($tableColumn['comment'])) {
             $comment = $tableColumn['comment'];
         }
 
