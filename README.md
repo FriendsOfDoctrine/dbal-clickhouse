@@ -1,3 +1,6 @@
+If you want to become a maintainer of this package -- please, contact me via a@mochalygin.ru
+
+
 [![Build Status](https://travis-ci.org/FriendsOfDoctrine/dbal-clickhouse.svg?branch=master)](https://travis-ci.org/FriendsOfDoctrine/dbal-clickhouse)
 [![Total Downloads](https://poser.pugx.org/friendsofdoctrine/dbal-clickhouse/d/total.svg)](https://packagist.org/packages/friendsofdoctrine/dbal-clickhouse)
 [![Latest Stable Version](https://poser.pugx.org/friendsofdoctrine/dbal-clickhouse/v/stable.svg)](https://packagist.org/packages/friendsofdoctrine/dbal-clickhouse)
