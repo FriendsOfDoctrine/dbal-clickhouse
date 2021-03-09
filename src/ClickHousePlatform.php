@@ -1311,6 +1311,10 @@ class ClickHousePlatform extends AbstractPlatform
         if (stripos($dbType, 'enum16') === 0) {
             $dbType = 'enum16';
         }
+        //Decimal // For table imported from MySQL into Clickhouse. Decimal should be converted to string as per https://clickhouse.tech/docs/en/engines/database-engines/mysql/
+        if (stripos($dbType, 'decimal') === 0) {
+            $dbType = 'string';
+        }
         return parent::getDoctrineTypeMapping($dbType);
     }
 
