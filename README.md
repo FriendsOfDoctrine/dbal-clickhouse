@@ -1,10 +1,12 @@
-If you want to become a maintainer of this package -- please, contact me via a@mochalygin.ru
+This is a fork of FriendsOfDoctrine/dbal-clickhouse
+
+If you want to become a maintainer of the main package -- please, contact via a@mochalygin.ru
 
 
-[![Build Status](https://travis-ci.org/FriendsOfDoctrine/dbal-clickhouse.svg?branch=master)](https://travis-ci.org/FriendsOfDoctrine/dbal-clickhouse)
-[![Total Downloads](https://poser.pugx.org/friendsofdoctrine/dbal-clickhouse/d/total.svg)](https://packagist.org/packages/friendsofdoctrine/dbal-clickhouse)
-[![Latest Stable Version](https://poser.pugx.org/friendsofdoctrine/dbal-clickhouse/v/stable.svg)](https://packagist.org/packages/friendsofdoctrine/dbal-clickhouse)
-[![License](https://poser.pugx.org/friendsofdoctrine/dbal-clickhouse/license.svg)](https://packagist.org/packages/friendsofdoctrine/dbal-clickhouse)
+[![Build Status](https://travis-ci.org/imdad/dbal-clickhouse.svg?branch=master)](https://travis-ci.org/imdad/dbal-clickhouse)
+[![Total Downloads](https://poser.pugx.org/imdad/dbal-clickhouse/d/total.svg)](https://packagist.org/packages/imdad/dbal-clickhouse)
+[![Latest Stable Version](https://poser.pugx.org/imdad/dbal-clickhouse/v/stable.svg)](https://packagist.org/packages/imdad/dbal-clickhouse)
+[![License](https://poser.pugx.org/imdad/dbal-clickhouse/license.svg)](https://packagist.org/packages/imdad/dbal-clickhouse)
 
 # Doctrine DBAL ClickHouse Driver
 
@@ -15,7 +17,7 @@ Driver is suitable for Symfony or any other framework using Doctrine.
 ## Installation
 
 ```
-composer require friendsofdoctrine/dbal-clickhouse
+composer require imdad/dbal-clickhouse
 ```
 
 ## Initialization

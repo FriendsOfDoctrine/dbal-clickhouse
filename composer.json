@@ -1,14 +1,14 @@
 {
-    "name": "friendsofdoctrine/dbal-clickhouse",
+    "name": "imdad/dbal-clickhouse",
     "type": "library",
-    "description": "Doctrine DBAL driver for ClickHouse",
+    "description": "Doctrine DBAL driver for ClickHouse with some fixes for MySQL data types",
     "keywords": [
         "doctrine",
         "dbal",
         "clickhouse",
         "driver"
     ],
-    "homepage": "http://github.com/friendsofdoctrine/dbal-clickhouse",
+    "homepage": "http://github.com/imdad/dbal-clickhouse",
     "license": "MIT",
     "authors": [
         {
@@ -18,6 +18,9 @@
         {
             "name": "Mitrofanov Nikolay",
             "email": "mitrofanovnk@yandex.ru"
+        },
+        {
+            "name": "SK Imdad"
         }
     ],
     "require": {
