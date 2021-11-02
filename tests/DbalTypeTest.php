@@ -28,7 +28,7 @@ class DbalTypeTest extends TestCase
 
     protected $schemaSQLs = [];
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->connection = CreateConnectionTest::createConnection();
 
@@ -65,7 +65,7 @@ class DbalTypeTest extends TestCase
         }
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->connection->exec('DROP TABLE test_dbal_type_table');
     }
