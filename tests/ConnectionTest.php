@@ -150,7 +150,7 @@ class ConnectionTest extends TestCase
     {
         $conn = $this->connection->getWrappedConnection();
         if ($conn instanceof ServerInfoAwareConnection) {
-            $this->assertRegExp('/(^[0-9]+.[0-9]+.[0-9]+(.[0-9]$|$))/mi', $conn->getServerVersion());
+            $this->assertMatchesRegularExpression('/^\d+.\d+.\d+(.\d+)?$/', $conn->getServerVersion());
         } else {
             $this->fail(sprintf('`%s` does not implement the `%s` interface', \get_class($conn),
                 ServerInfoAwareConnection::class));
