@@ -12,7 +12,7 @@
 namespace FOD\DBALClickHouse\Tests;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\Exception;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -29,7 +29,7 @@ class CreateConnectionTest extends TestCase
 
     public function testCreateConnectionWithBadParams()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(Exception::class);
         $this->assertInstanceOf(Connection::class, self::createConnection([]));
     }
 

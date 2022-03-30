@@ -33,7 +33,7 @@ class ArrayDateType extends ArrayType implements DatableClickHouseType
     /**
      * {@inheritDoc}
      */
-    public function convertToPHPValue($value, AbstractPlatform $platform)
+    public function convertToPHPValue($value, AbstractPlatform $platform) : array
     {
         return array_map(
             function ($stringDatetime) use ($platform) {
@@ -46,7 +46,7 @@ class ArrayDateType extends ArrayType implements DatableClickHouseType
     /**
      * {@inheritDoc}
      */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue($value, AbstractPlatform $platform) : string
     {
         return '[' . implode(
             ', ',

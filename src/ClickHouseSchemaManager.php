@@ -52,9 +52,9 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
     /**
      * {@inheritdoc}
      */
-    protected function _getPortableViewDefinition($view)
+    protected function _getPortableViewDefinition($view) : View
     {
-        $statement = $this->_conn->fetchColumn('SHOW CREATE TABLE ' . $view['name']);
+        $statement = $this->_conn->fetchOne('SHOW CREATE TABLE ' . $view['name']);
 
         return new View($view['name'], $statement);
     }

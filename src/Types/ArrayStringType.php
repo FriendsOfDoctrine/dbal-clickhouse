@@ -32,7 +32,7 @@ class ArrayStringType extends ArrayType implements StringClickHouseType
     /**
      * {@inheritDoc}
      */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue($value, AbstractPlatform $platform) : string
     {
         return '[' . implode(
             ', ',

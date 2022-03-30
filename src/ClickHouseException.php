@@ -14,9 +14,15 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse;
 
+use Doctrine\DBAL\Exception;
+
 /**
  * Specific Exception for ClickHouse
  */
-class ClickHouseException extends \Exception
+class ClickHouseException extends Exception
 {
+    public static function notSupported($method) : ClickHouseException
+    {
+        return new self(sprintf("Operation '%s' is not supported by platform.", $method));
+    }
 }

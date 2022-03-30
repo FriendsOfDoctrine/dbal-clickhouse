@@ -33,7 +33,7 @@ class BigIntType extends \Doctrine\DBAL\Types\BigIntType
     /**
      * {@inheritdoc}
      */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue($value, AbstractPlatform $platform) : int
     {
         return (int) $value;
     }
