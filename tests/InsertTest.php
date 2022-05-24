@@ -5,7 +5,7 @@
  *
  * (c) FriendsOfDoctrine <https://github.com/FriendsOfDoctrine/>.
  *
- * For the full copyright and license inflormation, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
@@ -24,7 +24,7 @@ class InsertTest extends TestCase
     /** @var  Connection */
     protected $connection;
 
-    public function setUp()
+    public function setUp() : void
     {
         $this->connection = CreateConnectionTest::createConnection();
 
@@ -43,7 +43,7 @@ class InsertTest extends TestCase
         }
     }
 
-    public function tearDown()
+    public function tearDown() : void
     {
         $this->connection->exec('DROP TABLE test_insert_table');
     }

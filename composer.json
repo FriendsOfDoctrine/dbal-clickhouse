@@ -18,18 +18,22 @@
         {
             "name": "Mitrofanov Nikolay",
             "email": "mitrofanovnk@yandex.ru"
+        },
+        {
+            "name": "Sanikovich Aleksey",
+            "email": "asanikovich@gmail.com"
         }
     ],
     "require": {
-        "php": "^7.1",
-        "ext-PDO": "*",
+        "php": "^7.1 || ^8.0",
+        "ext-pdo": "*",
         "ext-pcre": "*",
         "doctrine/dbal": "^2.7",
-        "smi2/phpClickHouse": "^1.0"
+        "smi2/phpclickhouse": "^1.0"
     },
     "require-dev": {
-        "doctrine/coding-standard": "^4.0",
-        "phpunit/phpunit": "^7.0"
+        "doctrine/coding-standard": "^4.0 || ^9.0",
+        "phpunit/phpunit": "^7.0 || ^9.0"
     },
     "autoload": {
         "psr-4": {

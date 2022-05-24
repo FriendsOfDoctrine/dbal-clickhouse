@@ -8,7 +8,7 @@ declare(strict_types=1);
  *
  * (c) FriendsOfDoctrine <https://github.com/FriendsOfDoctrine/>.
  *
- * For the full copyright and license inflormation, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
@@ -35,11 +35,6 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
     /** @var AbstractPlatform */
     protected $platform;
 
-    /**
-     * Connection constructor
-     *
-     * @param mixed[] $params
-     */
     public function __construct(
         array $params,
         string $username,
@@ -60,7 +55,7 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
     /**
      * {@inheritDoc}
      */
-    public function prepare($prepareString)
+    public function prepare($prepareString) : ClickHouseStatement
     {
         return new ClickHouseStatement($this->smi2CHClient, $prepareString, $this->platform);
     }
@@ -68,7 +63,7 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
     /**
      * {@inheritDoc}
      */
-    public function query()
+    public function query() : ClickHouseStatement
     {
         $args = func_get_args();
         $stmt = $this->prepare($args[0]);
@@ -105,53 +100,53 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
      */
     public function lastInsertId($name = null)
     {
-        throw new \LogicException('Unable to get last insert id in ClickHouse');
+        throw ClickHouseException::notSupported('Unable to get last insert id in ClickHouse');
     }
 
     /**
      * {@inheritDoc}
      */
-    public function beginTransaction()
+    public function beginTransaction() : bool
     {
-        throw new \LogicException('Transactions are not allowed in ClickHouse');
+        throw ClickHouseException::notSupported('Transactions are not allowed in ClickHouse');
     }
 
     /**
      * {@inheritDoc}
      */
-    public function commit()
+    public function commit() : bool
     {
-        throw new \LogicException('Transactions are not allowed in ClickHouse');
+        throw ClickHouseException::notSupported('Transactions are not allowed in ClickHouse');
     }
 
     /**
      * {@inheritDoc}
      */
-    public function rollBack()
+    public function rollBack() : bool
     {
-        throw new \LogicException('Transactions are not allowed in ClickHouse');
+        throw ClickHouseException::notSupported('Transactions are not allowed in ClickHouse');
     }
 
     /**
      * {@inheritDoc}
      */
-    public function errorCode()
+    public function errorCode() : ?string
     {
-        throw new \LogicException('You need to implement ClickHouseConnection::errorCode()');
+        throw ClickHouseException::notSupported('You need to implement ClickHouseConnection::errorCode()');
     }
 
     /**
      * {@inheritDoc}
      */
-    public function errorInfo()
+    public function errorInfo() : array
     {
-        throw new \LogicException('You need to implement ClickHouseConnection::errorInfo()');
+        throw ClickHouseException::notSupported('You need to implement ClickHouseConnection::errorInfo()');
     }
 
     /**
      * {@inheritDoc}
      */
-    public function ping()
+    public function ping() : bool
     {
         return $this->smi2CHClient->ping();
     }
@@ -159,11 +154,11 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
     /**
      * {@inheritDoc}
      */
-    public function getServerVersion()
+    public function getServerVersion() : string
     {
         try {
             return $this->smi2CHClient->getServerVersion();
-        } catch (TransportException $exception) {
+        } catch (TransportException $e) {
             return '';
         }
     }
@@ -171,7 +166,7 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
     /**
      * {@inheritDoc}
      */
-    public function requiresQueryForServerVersion()
+    public function requiresQueryForServerVersion() : bool
     {
         return true;
     }

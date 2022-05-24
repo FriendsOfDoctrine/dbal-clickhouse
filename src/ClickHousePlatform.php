@@ -8,13 +8,12 @@ declare(strict_types=1);
  *
  * (c) FriendsOfDoctrine <https://github.com/FriendsOfDoctrine/>.
  *
- * For the full copyright and license inflormation, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
 namespace FOD\DBALClickHouse;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Platforms\TrimMode;
@@ -113,7 +112,7 @@ class ClickHousePlatform extends AbstractPlatform
     protected function _getCommonIntegerTypeDeclarationSQL(array $columnDef) : string
     {
         if (! empty($columnDef['autoincrement'])) {
-            throw new \Exception('Clickhouse do not support AUTO_INCREMENT fields');
+            throw ClickHouseException::notSupported('Clickhouse do not support AUTO_INCREMENT fields');
         }
 
         return empty($columnDef['unsigned']) ? '' : UnsignedNumericalClickHouseType::UNSIGNED_CHAR;
@@ -205,7 +204,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getVarcharTypeDeclarationSQL(array $field)
+    public function getVarcharTypeDeclarationSQL(array $field) : string
     {
         if (! isset($field['length'])) {
             $field['length'] = $this->getVarcharDefaultLength();
@@ -415,7 +414,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getIsNullExpression($expression)
+    public function getIsNullExpression($expression) : string
     {
         return 'isNull(' . $expression . ')';
     }
@@ -423,7 +422,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getIsNotNullExpression($expression)
+    public function getIsNotNullExpression($expression) : string
     {
         return 'isNotNull(' . $expression . ')';
     }
@@ -567,65 +566,65 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getForUpdateSQL()
+    public function getForUpdateSQL() : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function appendLockHint($fromClause, $lockMode)
+    public function appendLockHint($fromClause, $lockMode) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getReadLockSQL()
+    public function getReadLockSQL() : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getWriteLockSQL()
+    public function getWriteLockSQL() : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getDropIndexSQL($index, $table = null)
+    public function getDropIndexSQL($index, $table = null) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getDropConstraintSQL($constraint, $table)
+    public function getDropConstraintSQL($constraint, $table) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getDropForeignKeySQL($foreignKey, $table)
+    public function getDropForeignKeySQL($foreignKey, $table) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getCommentOnColumnSQL($tableName, $columnName, $comment)
+    public function getCommentOnColumnSQL($tableName, $columnName, $comment) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
@@ -637,11 +636,11 @@ class ClickHousePlatform extends AbstractPlatform
         $engineOptions = '';
 
         if (isset($options['uniqueConstraints']) && ! empty($options['uniqueConstraints'])) {
-            throw DBALException::notSupported('uniqueConstraints');
+            throw ClickHouseException::notSupported('uniqueConstraints');
         }
 
         if (isset($options['indexes']) && ! empty($options['indexes'])) {
-            throw DBALException::notSupported('uniqueConstraints');
+            throw ClickHouseException::notSupported('uniqueConstraints');
         }
 
         /**
@@ -808,9 +807,9 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCreateForeignKeySQL(ForeignKeyConstraint $foreignKey, $table)
+    public function getCreateForeignKeySQL(ForeignKeyConstraint $foreignKey, $table) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
@@ -821,7 +820,7 @@ class ClickHousePlatform extends AbstractPlatform
         $columnSql  = [];
         $queryParts = [];
         if ($diff->newName !== false || ! empty($diff->renamedColumns)) {
-            throw DBALException::notSupported('RENAME COLUMN');
+            throw ClickHouseException::notSupported('RENAME COLUMN');
         }
 
         foreach ($diff->addedColumns as $column) {
@@ -879,38 +878,35 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    protected function getPreAlterTableIndexForeignKeySQL(TableDiff $diff)
+    protected function getPreAlterTableIndexForeignKeySQL(TableDiff $diff) : array
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    protected function getPostAlterTableIndexForeignKeySQL(TableDiff $diff)
+    protected function getPostAlterTableIndexForeignKeySQL(TableDiff $diff) : array
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    protected function getRenameIndexSQL($oldIndexName, Index $index, $tableName)
+    protected function getRenameIndexSQL($oldIndexName, Index $index, $tableName) : array
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    protected function _getAlterTableIndexForeignKeySQL(TableDiff $diff)
+    protected function _getAlterTableIndexForeignKeySQL(TableDiff $diff) : array
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
-    /**
-     * @param mixed[] $columnDef
-     */
     protected function prepareDeclarationSQL(string $declarationSQL, array $columnDef) : string
     {
         if (array_key_exists('notnull', $columnDef) && $columnDef['notnull'] === false) {
@@ -947,66 +943,66 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCheckDeclarationSQL(array $definition)
+    public function getCheckDeclarationSQL(array $definition) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getUniqueConstraintDeclarationSQL($name, Index $index)
+    public function getUniqueConstraintDeclarationSQL($name, Index $index) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getIndexDeclarationSQL($name, Index $index)
+    public function getIndexDeclarationSQL($name, Index $index) : string
     {
         // Index declaration in statements like CREATE TABLE is not supported.
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getForeignKeyDeclarationSQL(ForeignKeyConstraint $foreignKey)
+    public function getForeignKeyDeclarationSQL(ForeignKeyConstraint $foreignKey) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getAdvancedForeignKeyOptionsSQL(ForeignKeyConstraint $foreignKey)
+    public function getAdvancedForeignKeyOptionsSQL(ForeignKeyConstraint $foreignKey) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getForeignKeyReferentialActionSQL($action)
+    public function getForeignKeyReferentialActionSQL($action) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getForeignKeyBaseDeclarationSQL(ForeignKeyConstraint $foreignKey)
+    public function getForeignKeyBaseDeclarationSQL(ForeignKeyConstraint $foreignKey) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getUniqueFieldDeclarationSQL()
+    public function getUniqueFieldDeclarationSQL() : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
@@ -1138,9 +1134,9 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDefaultTransactionIsolationLevel()
+    public function getDefaultTransactionIsolationLevel() : int
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /* supports*() methods */
@@ -1207,15 +1203,15 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getEmptyIdentityInsertSQL($tableName, $identifierColumnName)
+    public function getEmptyIdentityInsertSQL($tableName, $identifierColumnName) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getTruncateTableSQL($tableName, $cascade = false)
+    public function getTruncateTableSQL($tableName, $cascade = false) : string
     {
         /**
          * For MergeTree* engines may be done with next workaround:
@@ -1223,31 +1219,31 @@ class ClickHousePlatform extends AbstractPlatform
          * SELECT partition FROM system.parts WHERE table= '$tableName';
          * ALTER TABLE $tableName DROP PARTITION $partitionName
          */
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function createSavePoint($savepoint)
+    public function createSavePoint($savepoint) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function releaseSavePoint($savepoint)
+    public function releaseSavePoint($savepoint) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function rollbackSavePoint($savepoint)
+    public function rollbackSavePoint($savepoint) : string
     {
-        throw DBALException::notSupported(__METHOD__);
+        throw ClickHouseException::notSupported(__METHOD__);
     }
 
     /**

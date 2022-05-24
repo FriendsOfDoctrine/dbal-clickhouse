@@ -5,13 +5,12 @@
  *
  * (c) FriendsOfDoctrine <https://github.com/FriendsOfDoctrine/>.
  *
- * For the full copyright and license inflormation, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
 namespace FOD\DBALClickHouse\Tests;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Types\Type;
 use FOD\DBALClickHouse\Connection;
 use PHPUnit\Framework\TestCase;
@@ -28,7 +27,7 @@ class DbalTypeTest extends TestCase
 
     protected $schemaSQLs = [];
 
-    public function setUp()
+    public function setUp() : void
     {
         $this->connection = CreateConnectionTest::createConnection();
 
@@ -65,7 +64,7 @@ class DbalTypeTest extends TestCase
         }
     }
 
-    public function tearDown()
+    public function tearDown() : void
     {
         $this->connection->exec('DROP TABLE test_dbal_type_table');
     }

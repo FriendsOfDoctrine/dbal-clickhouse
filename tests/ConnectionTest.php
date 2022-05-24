@@ -5,13 +5,12 @@
  *
  * (c) FriendsOfDoctrine <https://github.com/FriendsOfDoctrine/>.
  *
- * For the full copyright and license inflormation, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
 namespace FOD\DBALClickHouse\Tests;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
 use FOD\DBALClickHouse\ClickHouseException;
 use FOD\DBALClickHouse\Connection;
@@ -27,7 +26,7 @@ class ConnectionTest extends TestCase
     /** @var  Connection */
     protected $connection;
 
-    public function setUp()
+    public function setUp() : void
     {
         $this->connection = CreateConnectionTest::createConnection();
     }
@@ -46,98 +45,98 @@ class ConnectionTest extends TestCase
 
     public function testDelete()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->delete('test', ['id' => 1]);
     }
 
     public function testUpdate()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->update('test', ['name' => 'test'], ['id' => 1]);
     }
 
     public function testSetTransactionIsolation()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->setTransactionIsolation(1);
     }
 
     public function testGetTransactionIsolation()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->getTransactionIsolation();
     }
 
     public function testGetTransactionNestingLevel()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->getTransactionNestingLevel();
     }
 
     public function testTransactional()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->transactional(function () {
         });
     }
 
     public function testSetNestTransactionsWithSavepoints()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->setNestTransactionsWithSavepoints(true);
     }
 
     public function testGetNestTransactionsWithSavepoints()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->getNestTransactionsWithSavepoints();
     }
 
     public function testBeginTransaction()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->beginTransaction();
     }
 
     public function testCommit()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->commit();
     }
 
     public function testRollBack()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->rollBack();
     }
 
     public function testCreateSavepoint()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->createSavepoint('1');
     }
 
     public function testReleaseSavepoint()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->releaseSavepoint('1');
     }
 
     public function testRollbackSavepoint()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->rollbackSavepoint('1');
     }
 
     public function testSetRollbackOnly()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->setRollbackOnly();
     }
 
     public function testIsRollbackOnly()
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ClickHouseException::class);
         $this->connection->isRollbackOnly();
     }
 
@@ -150,7 +149,12 @@ class ConnectionTest extends TestCase
     {
         $conn = $this->connection->getWrappedConnection();
         if ($conn instanceof ServerInfoAwareConnection) {
-            $this->assertRegExp('/(^[0-9]+.[0-9]+.[0-9]+(.[0-9]$|$))/mi', $conn->getServerVersion());
+            $pattern = '/(^[0-9]+.[0-9]+.[0-9]+(.[0-9]$|$))/mi';
+            if (method_exists($this, 'assertMatchesRegularExpression')) {
+                $this->assertMatchesRegularExpression($pattern, $conn->getServerVersion());
+            } else {
+                $this->assertRegExp($pattern, $conn->getServerVersion());
+            }
         } else {
             $this->fail(sprintf('`%s` does not implement the `%s` interface', \get_class($conn),
                 ServerInfoAwareConnection::class));

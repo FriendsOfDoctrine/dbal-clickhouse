@@ -8,7 +8,7 @@ declare(strict_types=1);
  *
  * (c) FriendsOfDoctrine <https://github.com/FriendsOfDoctrine/>.
  *
- * For the full copyright and license inflormation, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
@@ -24,14 +24,14 @@ class Driver implements \Doctrine\DBAL\Driver
     /**
      * {@inheritDoc}
      */
-    public function connect(array $params, $user = null, $password = null, array $driverOptions = [])
+    public function connect(array $params, $username = null, $password = null, array $driverOptions = []) : ClickHouseConnection
     {
-        if ($user === null) {
+        if ($username === null) {
             if (! isset($params['user'])) {
                 throw new ClickHouseException('Connection parameter `user` is required');
             }
 
-            $user = $params['user'];
+            $username = $params['user'];
         }
 
         if ($password === null) {
@@ -54,13 +54,13 @@ class Driver implements \Doctrine\DBAL\Driver
             throw new ClickHouseException('Connection parameter `dbname` is required');
         }
 
-        return new ClickHouseConnection($params, (string) $user, (string) $password, $this->getDatabasePlatform());
+        return new ClickHouseConnection($params, (string) $username, (string) $password, $this->getDatabasePlatform());
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getDatabasePlatform()
+    public function getDatabasePlatform() : ClickHousePlatform
     {
         return new ClickHousePlatform();
     }
@@ -68,7 +68,7 @@ class Driver implements \Doctrine\DBAL\Driver
     /**
      * {@inheritDoc}
      */
-    public function getSchemaManager(Connection $conn)
+    public function getSchemaManager(Connection $conn) : ClickHouseSchemaManager
     {
         return new ClickHouseSchemaManager($conn);
     }
@@ -84,13 +84,10 @@ class Driver implements \Doctrine\DBAL\Driver
     /**
      * {@inheritDoc}
      */
-    public function getDatabase(Connection $conn)
+    public function getDatabase(Connection $conn) : string
     {
         $params = $conn->getParams();
-        if (isset($params['dbname'])) {
-            return $params['dbname'];
-        }
 
-        return $conn->fetchColumn('SELECT currentDatabase() as dbname');
+        return $params['dbname'] ?? $conn->fetchOne('SELECT currentDatabase() as dbname');
     }
 }

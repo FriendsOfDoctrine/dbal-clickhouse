@@ -2,6 +2,7 @@
 composer.lock
 vendor/
 phpunit.xml
+.phpunit.result.cache
 Vagrantfile
 puphpet/
 .vagrant/

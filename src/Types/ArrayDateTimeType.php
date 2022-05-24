@@ -8,7 +8,7 @@ declare(strict_types=1);
  *
  * (c) FriendsOfDoctrine <https://github.com/FriendsOfDoctrine/>.
  *
- * For the full copyright and license inflormation, please view the LICENSE
+ * For the full copyright and license information, please view the LICENSE
  * file that was distributed with this source code.
  */
 
@@ -33,7 +33,7 @@ class ArrayDateTimeType extends ArrayType implements DatableClickHouseType
     /**
      * {@inheritDoc}
      */
-    public function convertToPHPValue($value, AbstractPlatform $platform)
+    public function convertToPHPValue($value, AbstractPlatform $platform) : array
     {
         return array_map(
             function ($stringDatetime) use ($platform) {
@@ -46,7 +46,7 @@ class ArrayDateTimeType extends ArrayType implements DatableClickHouseType
     /**
      * {@inheritDoc}
      */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform)
+    public function convertToDatabaseValue($value, AbstractPlatform $platform) : string
     {
         return '[' . implode(
             ', ',
