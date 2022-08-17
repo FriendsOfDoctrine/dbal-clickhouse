@@ -69,6 +69,11 @@ $conn = $this->get('doctrine.dbal.clickhouse_connection');
 
 ## Usage
 
+### Create database
+```php
+php bin/console doctrine:database:create --connection=clickhouse --if-not-exists
+```
+
 ### Create new table
 ```php
 // ***quick start***
