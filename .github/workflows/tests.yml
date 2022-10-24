@@ -47,4 +47,4 @@ jobs:
           composer install  --prefer-dist
 
       - name: Run tests
-        run: ./phpunit --configuration ./phpunit.xml.dist -v
+        run: ./vendor/bin/phpunit --configuration ./phpunit.xml.dist -v

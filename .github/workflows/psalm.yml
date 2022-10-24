@@ -27,6 +27,7 @@ jobs:
           extensions: pdo
           ini-values: "memory_limit=-1"
           coverage: none
+          tools: psalm
 
       - name: Install dependencies
         run: |
