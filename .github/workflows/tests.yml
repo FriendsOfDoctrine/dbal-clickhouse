@@ -1,0 +1,47 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+defaults:
+  run:
+    shell: bash
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+
+  tests:
+    name: Tests
+    runs-on: Ubuntu-20.04
+
+    strategy:
+      matrix:
+        include:
+          - php: '7.1'
+          - php: '8.1'
+      fail-fast: false
+
+    services:
+      clickhouse:
+        image: yandex/clickhouse-server
+        hostname: clickhouse
+        ports:
+          - 8123:8123
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+
+      - name: Install dependencies
+        run: |
+          composer install
+
+      - name: Run tests
+        run: ./phpunit --configuration ./phpunit.xml.dist -v
