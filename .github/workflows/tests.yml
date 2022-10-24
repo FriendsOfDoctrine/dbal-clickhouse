@@ -35,9 +35,16 @@ jobs:
           - 8123:8123
 
     steps:
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: json, pdo
+          ini-values: "memory_limit=-1"
+          coverage: none
+
       - name: Install dependencies
-        run: |
-          composer install
+        run: composer install
 
       - name: Run tests
         run: ./phpunit --configuration ./phpunit.xml.dist -v
