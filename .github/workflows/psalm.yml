@@ -31,12 +31,8 @@ jobs:
 
       - name: Install dependencies
         run: |
-          ls -al
           composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer false
           composer install  --prefer-dist
-          
 
       - name: Psalm
-        run: |
-          ls -al vendor/bin/
-          ./vendor/bin/psalm.phar --no-progress || ./vendor/bin/psalm.phar --output-format=github --no-progress
+        run: psalm --output-format=github
