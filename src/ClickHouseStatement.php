@@ -15,6 +15,7 @@ declare(strict_types=1);
 namespace FOD\DBALClickHouse;
 
 use ClickHouseDB\Client;
+use ClickHouseDB\Statement as ClientStatement;
 use Doctrine\DBAL\Driver\Statement;
 use Doctrine\DBAL\FetchMode;
 use Doctrine\DBAL\ParameterType;
@@ -46,6 +47,9 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
 {
     /** @var Client */
     protected $smi2CHClient;
+
+    /** @var ClientStatement */
+    protected $clientStatement;
 
     /** @var string */
     protected $statement;
@@ -325,23 +329,36 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
     /**
      * Specific SMI2 ClickHouse lib statement execution
      * If you want to use any other lib for working with CH -- just update this method
-     *
+     * @param string $sql
      */
     protected function processViaSMI2(string $sql) : void
     {
         $sql = trim($sql);
 
-        $this->rows =
+        if (
             stripos($sql, 'select') === 0 ||
             stripos($sql, 'show') === 0 ||
-            stripos($sql, 'describe') === 0 ?
-                $this->smi2CHClient->select($sql)->rows() :
-                $this->smi2CHClient->write($sql)->rows();
+            stripos($sql, 'describe') === 0
+        ) {
+            $this->clientStatement = $this->smi2CHClient->select($sql);
+        } else {
+            $this->clientStatement = $this->smi2CHClient->write($sql);
+        }
+
+        $this->rows = $this->clientStatement->rows();
+    }
+
+    /**
+     * @return array
+     */
+    public function getTotals(): array
+    {
+        return $this->clientStatement->totals();
     }
 
     /**
      * @param string|int $key
-     * @throws ClickHouseException
+     * @return string
      */
     protected function getTypedParam($key) : string
     {
