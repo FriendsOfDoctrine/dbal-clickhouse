@@ -42,7 +42,9 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        run: composer install  --prefer-dist
+        run: |
+          composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer false
+          composer install  --prefer-dist
 
       - name: Run tests
         run: ./phpunit --configuration ./phpunit.xml.dist -v

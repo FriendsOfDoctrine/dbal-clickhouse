@@ -31,6 +31,7 @@ jobs:
       - name: Install dependencies
         run: |
           ls -al
+          composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer false
           composer install  --prefer-dist
           
 
