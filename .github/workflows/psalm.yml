@@ -25,10 +25,9 @@ jobs:
         uses: shivammathur/setup-php@v2
         with:
           php-version: '8.1'
-          extensions: json, pdo
+          extensions: pdo
           ini-values: "memory_limit=-1"
           coverage: none
-          tools: composer
 
       - name: Install dependencies
         run: composer install
