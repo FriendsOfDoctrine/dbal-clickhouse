@@ -39,7 +39,7 @@ jobs:
           extensions: pdo
           ini-values: "memory_limit=-1"
           tools: composer
-          coverage: none
+          coverage: xdebug
 
       - name: Install dependencies
         run: |
