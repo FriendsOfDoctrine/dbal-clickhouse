@@ -31,14 +31,10 @@ jobs:
     services:
       clickhouse:
         image: yandex/clickhouse-server
-        hostname: clickhouse
         ports:
           - 8123:8123
 
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-
       - name: Install dependencies
         run: |
           composer install
