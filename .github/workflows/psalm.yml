@@ -12,8 +12,8 @@ permissions:
   contents: read
 
 jobs:
-  psalm:
-    name: Psalm
+  phpstan:
+    name: PHPStan
     runs-on: Ubuntu-20.04
 
     steps:
@@ -27,12 +27,12 @@ jobs:
           extensions: pdo
           ini-values: "memory_limit=-1"
           coverage: none
-          tools: psalm
+          tools: phpstan
 
       - name: Install dependencies
         run: |
           composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer false
           composer install --prefer-dist
 
-      - name: Psalm
-        run: psalm --output-format=github ./
+      - name: phpstan
+        run: phpstan analyse -l 6 src

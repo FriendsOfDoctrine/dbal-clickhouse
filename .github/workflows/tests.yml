@@ -42,9 +42,7 @@ jobs:
           coverage: xdebug
 
       - name: Install dependencies
-        run: |
-          composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer false
-          composer install --prefer-dist
+        run: composer install --prefer-dist
 
       - name: Run tests
-        run: ./vendor/bin/phpunit --configuration ./phpunit.xml.dist -coverage-text
+        run: ./vendor/bin/phpunit --configuration ./phpunit.xml.dist --coverage-text
