@@ -40,7 +40,7 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * @throws ClickHouseException
      */
-    public function delete($tableExpression, array $identifier, array $types = []) : void
+    public function delete($tableExpression, array $identifier, array $types = []) : int
     {
         throw ClickHouseException::notSupported(__METHOD__);
     }
@@ -48,7 +48,7 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * @throws ClickHouseException
      */
-    public function update($tableExpression, array $data, array $identifier, array $types = []) : void
+    public function update($tableExpression, array $data, array $identifier, array $types = []) : int
     {
         throw ClickHouseException::notSupported(__METHOD__);
     }
@@ -60,7 +60,7 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * @throws ClickHouseException
      */
-    public function setTransactionIsolation($level) : void
+    public function setTransactionIsolation($level) : int
     {
         throw ClickHouseException::notSupported(__METHOD__);
     }
@@ -68,7 +68,7 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * @throws ClickHouseException
      */
-    public function getTransactionIsolation() : void
+    public function getTransactionIsolation() : int
     {
         throw ClickHouseException::notSupported(__METHOD__);
     }
@@ -76,7 +76,7 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * @throws ClickHouseException
      */
-    public function getTransactionNestingLevel() : void
+    public function getTransactionNestingLevel() : int
     {
         throw ClickHouseException::notSupported(__METHOD__);
     }
@@ -100,7 +100,7 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * @throws ClickHouseException
      */
-    public function getNestTransactionsWithSavepoints() : void
+    public function getNestTransactionsWithSavepoints() : bool
     {
         throw ClickHouseException::notSupported(__METHOD__);
     }
@@ -108,7 +108,7 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * @throws ClickHouseException
      */
-    public function beginTransaction() : void
+    public function beginTransaction() : bool
     {
         throw ClickHouseException::notSupported(__METHOD__);
     }
@@ -116,7 +116,7 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * @throws ClickHouseException
      */
-    public function commit() : void
+    public function commit() : bool
     {
         throw ClickHouseException::notSupported(__METHOD__);
     }
@@ -124,7 +124,7 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * @throws ClickHouseException
      */
-    public function rollBack() : void
+    public function rollBack() : bool
     {
         throw ClickHouseException::notSupported(__METHOD__);
     }
@@ -164,7 +164,7 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * @throws ClickHouseException
      */
-    public function isRollbackOnly() : void
+    public function isRollbackOnly() : bool
     {
         throw ClickHouseException::notSupported(__METHOD__);
     }

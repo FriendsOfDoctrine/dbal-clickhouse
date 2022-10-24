@@ -35,4 +35,4 @@ jobs:
           composer install --prefer-dist
 
       - name: phpstan
-        run: phpstan analyse -l 6 src
+        run: phpstan analyse -l 5 src
