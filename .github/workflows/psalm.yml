@@ -30,7 +30,10 @@ jobs:
           coverage: none
 
       - name: Install dependencies
-        run: composer install
+        run: |
+          ls -al
+          composer install
+          
 
       - name: Psalm
         run: |
