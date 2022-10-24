@@ -41,6 +41,7 @@ jobs:
           php-version: '8.1'
           extensions: json, pdo
           ini-values: "memory_limit=-1"
+          tools: composer
           coverage: none
 
       - name: Install dependencies

@@ -28,11 +28,10 @@ jobs:
           extensions: json, pdo
           ini-values: "memory_limit=-1"
           coverage: none
+          tools: composer
 
       - name: Install dependencies
-        run: |
-          COMPOSER_HOME="$(composer config home)"
-          composer require --no-progress --ansi psalm/phar phpunit/phpunit:^9.5 php-http/discovery psr/event-dispatcher mongodb/mongodb
+        run: composer install
 
       - name: Psalm
         run: |
