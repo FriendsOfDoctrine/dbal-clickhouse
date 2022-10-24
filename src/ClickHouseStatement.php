@@ -245,6 +245,8 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
     {
         $this->values[$param] = $value;
         $this->types[$param]  = $type;
+        
+        return true;
     }
 
     /**
@@ -254,6 +256,8 @@ class ClickHouseStatement implements \IteratorAggregate, Statement
     {
         $this->values[$column] = &$variable;
         $this->types[$column]  = $type;
+        
+        return true;
     }
 
     public function errorCode() : void
