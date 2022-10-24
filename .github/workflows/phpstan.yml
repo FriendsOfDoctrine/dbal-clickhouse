@@ -1,0 +1,38 @@
+name: Static analysis
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  phpstan:
+    name: PHPStan
+    runs-on: Ubuntu-20.04
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: '8.1'
+          extensions: pdo
+          ini-values: "memory_limit=-1"
+          coverage: none
+          tools: phpstan
+
+      - name: Install dependencies
+        run: |
+          composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer false
+          composer install --prefer-dist
+
+      - name: phpstan
+        run: phpstan analyse -l 5 src

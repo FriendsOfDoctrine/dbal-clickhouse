@@ -1,0 +1,48 @@
+name: Tests
+
+on:
+  push:
+  pull_request:
+
+concurrency:
+    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+
+  tests:
+    name: Tests
+    runs-on: Ubuntu-20.04
+
+    strategy:
+      matrix:
+        php-versions: ['7.1', '7.4', '8.0', '8.1']
+      fail-fast: false
+
+    services:
+      clickhouse:
+        image: yandex/clickhouse-server
+        ports:
+          - 8123:8123
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v3
+
+      - name: Setup PHP
+        uses: shivammathur/setup-php@v2
+        with:
+          php-version: ${{ matrix.php-versions }}
+          extensions: pdo
+          ini-values: "memory_limit=-1"
+          tools: composer
+          coverage: xdebug
+
+      - name: Install dependencies
+        run: composer install --prefer-dist
+
+      - name: Run tests
+        run: ./vendor/bin/phpunit --configuration ./phpunit.xml.dist --coverage-text

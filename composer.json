@@ -44,5 +44,10 @@
         "psr-4": {
             "FOD\\DBALClickHouse\\Tests\\": "tests/"
         }
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
+        }
     }
 }
