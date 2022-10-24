@@ -11,6 +11,7 @@
 
 namespace FOD\DBALClickHouse\Tests;
 
+use Doctrine\DBAL\ParameterType;
 use FOD\DBALClickHouse\Connection;
 use PHPUnit\Framework\TestCase;
 
@@ -88,10 +89,41 @@ class InsertTest extends TestCase
         $this->assertEquals([['payload' => 'v?7'], ['payload' => 'v8']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (7, 8) ORDER BY id"));
     }
 
+    public function testStatementInsertWithoutKeyNameThroughBind()
+    {
+        $statement = $this->connection->prepare('INSERT INTO test_insert_table(id, payload) VALUES (?, ?), (?, ?)');
+        $statement->bindValue(0, 7, ParameterType::INTEGER);
+        $statement->bindValue(1, 'v?7');
+        $statement->bindValue(2, 8, ParameterType::INTEGER);
+        $statement->bindValue(3, 'v8');
+        $statement->execute();
+
+        $this->assertEquals([['payload' => 'v?7'], ['payload' => 'v8']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (7, 8) ORDER BY id"));
+    }
+
     public function testStatementInsertWithKeyName()
     {
         $statement = $this->connection->prepare('INSERT INTO test_insert_table(id, payload) VALUES (:v0, :v1), (:v2, :v3)');
         $statement->execute(['v0' => 9, 'v1' => 'v?9', 'v2' => 10, 'v3' => 'v10']);
         $this->assertEquals([['payload' => 'v?9'], ['payload' => 'v10']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (9, 10) ORDER BY id"));
+    }
+
+    public function testStatementInsertWithKeyNameThroughBind()
+    {
+        $statement = $this->connection->prepare('INSERT INTO test_insert_table(id, payload) VALUES (:v0, :v1), (:v2, :v3)');
+        $statement->bindValue('v0', 9, ParameterType::INTEGER);
+        $statement->bindValue('v1', 'v?9');
+        $statement->bindValue('v2', 10, ParameterType::INTEGER);
+        $statement->bindValue('v3', 'v10');
+        $statement->execute();
+
+        $this->assertEquals([['payload' => 'v?9'], ['payload' => 'v10']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (9, 10) ORDER BY id"));
+    }
+
+    public function testStatementInsertWithKeysHaveSamePrefix()
+    {
+        $statement = $this->connection->prepare('INSERT INTO test_insert_table(id, payload) VALUES (:v1, :v10)');
+        $statement->execute(['v1' => 9, 'v10' => 'v9']);
+        $this->assertEquals([['payload' => 'v9']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (9) ORDER BY id"));
     }
 }
