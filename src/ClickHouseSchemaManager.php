@@ -132,6 +132,11 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
             $default = $tableColumn['default_expression'];
         }
 
+        $comment = null;
+        if (isset($tableColumn['comment'])) {
+            $comment = $tableColumn['comment'];
+        }
+
         $options = [
             'length' => $length,
             'notnull' => $notnull,
@@ -140,7 +145,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
             'fixed' => $fixed,
             'unsigned' => $unsigned,
             'autoincrement' => false,
-            'comment' => null,
+            'comment' => $comment,
         ];
 
         return new Column(
