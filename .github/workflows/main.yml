@@ -19,15 +19,13 @@ jobs:
           extensions: intl pcre pdo #optional
       - name: Check PHP Version
         run: php -v
-      - name: Export vendor bin to path
-        run: export PATH=$PATH:vendor/bin
       - name: Install Composer
         run: composer install
       - name: Psalm
-        run: psalm
+        run: php vendor/bin/psalm
       - name: PHP CodeSniffer
-        run: vendor/bin/phpcs
+        run: php vendor/bin/phpcs
       - name: Copy phpunit.xml.dist
         run: cp phpunit.xml.dist phpunit.xml
       - name: PhpUnit
-        run: vendor/bin/phpunit
+        run: php vendor/bin/phpunit
