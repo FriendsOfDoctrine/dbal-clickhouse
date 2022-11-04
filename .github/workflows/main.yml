@@ -20,7 +20,7 @@ jobs:
       - name: Check PHP Version
         run: php -v
       - name: Export vendor bin to path
-        run: export PATh=$PATH:vendor/bin
+        run: export PATH=$PATH:vendor/bin
       - name: Install Composer
         run: composer install
       - name: Psalm
