@@ -7,7 +7,7 @@ jobs:
     strategy:
       matrix:
         operating-system: [ubuntu-latest, windows-latest, macOS-latest]
-        php-versions: ['7.4', '8.0', '8.1']
+        php-versions: ['7.4', '8.0', '8.1', 'nightly']
     name: PHP ${{ matrix.php-versions }} Test on ${{ matrix.operating-system }}
     steps:
       - name: Checkout
@@ -17,6 +17,15 @@ jobs:
         with:
           php-version: ${{ matrix.php-versions }}
           extensions: intl pcre pdo #optional
-          ini-values: "post_max_size=256M" #optional
       - name: Check PHP Version
         run: php -v
+      - name: Install Composer
+        run: composer install
+      - name: Psalm
+        run: psalm
+      - name: PHP CodeSniffer
+        run: vendor/bin/phpcs
+      - name: Copy phpunit.xml.dist
+        run: cp phpunit.xml.dist phpunit.xml
+      - name: PhpUnit
+        run: vendor/bin/phpunit

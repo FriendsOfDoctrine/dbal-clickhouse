@@ -30,9 +30,9 @@
     "require-dev": {
         "doctrine/coding-standard": "^10.0",
         "phpunit/phpunit": "^9.0",
-        "phpstan/phpstan": "^1.9",
         "squizlabs/php_codesniffer": "^3.7",
-        "slevomat/coding-standard": "^8.6"
+        "slevomat/coding-standard": "^8.6",
+        "vimeo/psalm": "^4.29"
     },
     "autoload": {
         "psr-4": {
