@@ -15,11 +15,15 @@ declare(strict_types=1);
 namespace FOD\DBALClickHouse;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Driver as DoctrineDriver;
+use Doctrine\DBAL\Driver\API\ExceptionConverter;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+use FOD\DBALClickHouse\ExceptionConverter as ClickHouseExceptionConverter;
 
 /**
  * ClickHouse Driver
  */
-class Driver implements \Doctrine\DBAL\Driver
+class Driver implements DoctrineDriver
 {
     /**
      * {@inheritDoc}
@@ -27,7 +31,7 @@ class Driver implements \Doctrine\DBAL\Driver
     public function connect(array $params, $user = null, $password = null, array $driverOptions = [])
     {
         if ($user === null) {
-            if (! isset($params['user'])) {
+            if (!isset($params['user'])) {
                 throw new ClickHouseException('Connection parameter `user` is required');
             }
 
@@ -35,22 +39,22 @@ class Driver implements \Doctrine\DBAL\Driver
         }
 
         if ($password === null) {
-            if (! isset($params['password'])) {
+            if (!isset($params['password'])) {
                 throw new ClickHouseException('Connection parameter `password` is required');
             }
 
             $password = $params['password'];
         }
 
-        if (! isset($params['host'])) {
+        if (!isset($params['host'])) {
             throw new ClickHouseException('Connection parameter `host` is required');
         }
 
-        if (! isset($params['port'])) {
+        if (!isset($params['port'])) {
             throw new ClickHouseException('Connection parameter `port` is required');
         }
 
-        if (! isset($params['dbname'])) {
+        if (!isset($params['dbname'])) {
             throw new ClickHouseException('Connection parameter `dbname` is required');
         }
 
@@ -68,15 +72,15 @@ class Driver implements \Doctrine\DBAL\Driver
     /**
      * {@inheritDoc}
      */
-    public function getSchemaManager(Connection $conn)
+    public function getSchemaManager(Connection $conn, AbstractPlatform $platform): ClickHouseSchemaManager
     {
-        return new ClickHouseSchemaManager($conn);
+        return new ClickHouseSchemaManager($conn, $platform);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getName() : string
+    public function getName(): string
     {
         return 'clickhouse';
     }
@@ -84,13 +88,22 @@ class Driver implements \Doctrine\DBAL\Driver
     /**
      * {@inheritDoc}
      */
-    public function getDatabase(Connection $conn)
+    public function getDatabase(Connection $conn): string
     {
         $params = $conn->getParams();
         if (isset($params['dbname'])) {
             return $params['dbname'];
         }
 
-        return $conn->fetchColumn('SELECT currentDatabase() as dbname');
+        $data = $conn->fetchColumn('SELECT currentDatabase() as dbname');
+        \var_dump($data);
+        exit();
+
+        return $data;
+    }
+
+    public function getExceptionConverter(): ExceptionConverter
+    {
+        return new ClickHouseExceptionConverter();
     }
 }

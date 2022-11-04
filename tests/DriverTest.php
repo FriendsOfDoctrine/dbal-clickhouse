@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -27,12 +30,12 @@ class DriverTest extends TestCase
     /** @var  Connection */
     protected $connection;
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->connection = CreateConnectionTest::createConnection();
     }
 
-    public function testConnect()
+    public function testConnect(): void
     {
         $this->assertInstanceOf(ClickHouseConnection::class, $this->connection->getDriver()->connect(
             $this->connection->getParams(),
@@ -41,22 +44,22 @@ class DriverTest extends TestCase
         ));
     }
 
-    public function testGetDatabasePlatform()
+    public function testGetDatabasePlatform(): void
     {
         $this->assertInstanceOf(ClickHousePlatform::class, $this->connection->getDriver()->getDatabasePlatform());
     }
 
-    public function testGetSchemaManager()
+    public function testcreateSchemaManager(): void
     {
-        $this->assertInstanceOf(ClickHouseSchemaManager::class, $this->connection->getDriver()->getSchemaManager($this->connection));
+        $this->assertInstanceOf(ClickHouseSchemaManager::class, $this->connection->getDriver()->createSchemaManager($this->connection));
     }
 
-    public function testGetName()
+    public function testGetName(): void
     {
         $this->assertEquals('clickhouse', $this->connection->getDriver()->getName());
     }
 
-    public function testGetDatabase()
+    public function testGetDatabase(): void
     {
         $this->assertEquals(phpunit_ch_dbname, $this->connection->getDriver()->getDatabase($this->connection));
     }

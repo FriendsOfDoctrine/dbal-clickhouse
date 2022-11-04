@@ -17,6 +17,7 @@ namespace FOD\DBALClickHouse\Types;
 use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
+
 use function array_key_exists;
 use function sprintf;
 use function strtolower;
@@ -43,11 +44,35 @@ abstract class ArrayType extends Type implements ClickHouseType
     ];
 
     /**
+     * {@inheritDoc}
+     */
+    public function getMappedDatabaseTypes(AbstractPlatform $platform): array
+    {
+        return [$this->getName()];
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
+    {
+        return $this->getDeclaration($fieldDeclaration);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function getName(): string
+    {
+        return strtolower($this->getDeclaration());
+    }
+
+    /**
      * Register Array types to the type map.
      *
      * @throws DBALException
      */
-    public static function registerArrayTypes(AbstractPlatform $platform) : void
+    public static function registerArrayTypes(AbstractPlatform $platform): void
     {
         foreach (self::ARRAY_TYPES as $typeName => $className) {
             if (self::hasType($typeName)) {
@@ -62,33 +87,9 @@ abstract class ArrayType extends Type implements ClickHouseType
     }
 
     /**
-     * {@inheritDoc}
-     */
-    public function getMappedDatabaseTypes(AbstractPlatform $platform) : array
-    {
-        return [$this->getName()];
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
-    {
-        return $this->getDeclaration($fieldDeclaration);
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getName() : string
-    {
-        return strtolower($this->getDeclaration());
-    }
-
-    /**
      * @param mixed[] $fieldDeclaration
      */
-    protected function getDeclaration(array $fieldDeclaration = []) : string
+    protected function getDeclaration(array $fieldDeclaration = []): string
     {
         return sprintf(
             array_key_exists(

@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -11,7 +14,6 @@
 
 namespace FOD\DBALClickHouse\Tests;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Types\Type;
 use FOD\DBALClickHouse\Connection;
 use PHPUnit\Framework\TestCase;
@@ -28,11 +30,11 @@ class DbalTypeTest extends TestCase
 
     protected $schemaSQLs = [];
 
-    public function setUp()
+    public function setUp(): void
     {
         $this->connection = CreateConnectionTest::createConnection();
 
-        $fromSchema = $this->connection->getSchemaManager()->createSchema();
+        $fromSchema = $this->connection->createSchemaManager()->createSchema();
         $toSchema = clone $fromSchema;
 
         $newTable = $toSchema->createTable('test_dbal_type_table');
@@ -65,46 +67,46 @@ class DbalTypeTest extends TestCase
         }
     }
 
-    public function tearDown()
+    public function tearDown(): void
     {
         $this->connection->exec('DROP TABLE test_dbal_type_table');
     }
 
-    public function testCreateSchema()
+    public function testCreateSchema(): void
     {
         $this->assertEquals('CREATE TABLE test_dbal_type_table (typeArray String, typeSimpleArray String, typeJsonArray String, typeBigInt String, typeBoolean UInt8, typeDateTime DateTime, typeDateTimeTZ DateTime, typeDate Date, typeTime String, typeDecimal String, typeInteger Int32, typeObject String, typeSmallInt Int16, typeString String, typeText String, typeBinary String, typeBlob String, typeFloat Float64, typeGUID FixedString(36)) ENGINE = Memory', implode(';', $this->schemaSQLs));
     }
 
-    public function testTypeArray()
+    public function testTypeArray(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeArray' => ['v1' => 123, 'v2' => 234]], ['typeArray' => Type::TARRAY]);
         $this->assertEquals(serialize(['v1' => 123, 'v2' => 234]), $this->connection->fetchColumn('SELECT typeArray FROM test_dbal_type_table'));
     }
 
-    public function testTypeSimpleArray()
+    public function testTypeSimpleArray(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeSimpleArray' => [123, 234]], ['typeSimpleArray' => Type::SIMPLE_ARRAY]);
         $this->assertEquals(implode(',', [123, 234]), $this->connection->fetchColumn('SELECT typeSimpleArray FROM test_dbal_type_table'));
     }
 
-    public function testTypeJsonArray()
+    public function testTypeJsonArray(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeJsonArray' => [123, 'foo' => 'bar']], ['typeJsonArray' => Type::JSON_ARRAY]);
         $this->assertEquals(json_encode([123, 'foo' => 'bar']), $this->connection->fetchColumn('SELECT typeJsonArray FROM test_dbal_type_table'));
     }
 
-    public function testTypeBigInt()
+    public function testTypeBigInt(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeBigInt' => 123123123123], ['typeBigInt' => Type::BIGINT]);
         $this->assertEquals('123123123123', $this->connection->fetchColumn('SELECT typeBigInt FROM test_dbal_type_table'));
     }
 
-    public function testTypeBigIntReload()
+    public function testTypeBigIntReload(): void
     {
         Type::overrideType(Type::BIGINT, 'FOD\DBALClickHouse\Types\BigIntType');
         $this->connection = CreateConnectionTest::createConnection();
 
-        $fromSchema = $this->connection->getSchemaManager()->createSchema();
+        $fromSchema = $this->connection->createSchemaManager()->createSchema();
         $toSchema = clone $fromSchema;
 
         $newTable = $toSchema->createTable('test_dbal_type_bigint_table');
@@ -116,92 +118,93 @@ class DbalTypeTest extends TestCase
             $this->connection->exec($sql);
             $this->assertEquals('CREATE TABLE test_dbal_type_bigint_table (typeBigInt Int64) ENGINE = Memory', $sql);
         }
+
         $this->connection->insert('test_dbal_type_bigint_table', ['typeBigInt' => 123123123123], ['typeBigInt' => Type::BIGINT]);
         $this->assertEquals(123123123123, $this->connection->fetchColumn('SELECT typeBigInt FROM test_dbal_type_bigint_table'));
 
         $this->connection->exec('DROP TABLE test_dbal_type_bigint_table');
     }
 
-    public function testTypeBoolean()
+    public function testTypeBoolean(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeBoolean' => true], ['typeBoolean' => Type::BOOLEAN]);
         $this->assertEquals(1, $this->connection->fetchColumn('SELECT typeBoolean FROM test_dbal_type_table'));
     }
 
-    public function testTypeDatetime()
+    public function testTypeDatetime(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeDateTime' => new \DateTime('2000-05-05')], ['typeDateTime' => Type::DATETIME]);
         $this->assertEquals('2000-05-05 00:00:00', $this->connection->fetchColumn('SELECT typeDateTime FROM test_dbal_type_table'));
     }
 
-    public function testTypeDatetimeTZ()
+    public function testTypeDatetimeTZ(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeDateTimeTZ' => new \DateTime('2000-05-05')], ['typeDateTimeTZ' => Type::DATETIMETZ]);
         $this->assertEquals('2000-05-05 00:00:00', $this->connection->fetchColumn('SELECT typeDateTimeTZ FROM test_dbal_type_table'));
     }
 
-    public function testTypeDate()
+    public function testTypeDate(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeDate' => new \DateTime('2000-05-05')], ['typeDate' => Type::DATE]);
         $this->assertEquals('2000-05-05', $this->connection->fetchColumn('SELECT typeDate FROM test_dbal_type_table'));
     }
 
-    public function testTypeTime()
+    public function testTypeTime(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeTime' => new \DateTime('13:41:18')], ['typeTime' => Type::TIME]);
         $this->assertEquals('13:41:18', $this->connection->fetchColumn('SELECT typeTime FROM test_dbal_type_table'));
     }
 
-    public function testTypeDecimalFail()
+    public function testTypeDecimalFail(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeDecimal' => 142.15], ['typeDecimal' => Type::DECIMAL]);
         $this->assertEquals('142.15', $this->connection->fetchColumn('SELECT typeDecimal FROM test_dbal_type_table'));
     }
 
-    public function testTypeInteger()
+    public function testTypeInteger(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeInteger' => 142], ['typeInteger' => Type::INTEGER]);
         $this->assertEquals(142, $this->connection->fetchColumn('SELECT typeInteger FROM test_dbal_type_table'));
     }
 
-    public function testTypeObject()
+    public function testTypeObject(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeObject' => (object)['foo' => 'bar']], ['typeObject' => Type::OBJECT]);
         $this->assertEquals(serialize((object)['foo' => 'bar']), $this->connection->fetchColumn('SELECT typeObject FROM test_dbal_type_table'));
     }
 
-    public function testTypeSmallInt()
+    public function testTypeSmallInt(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeSmallInt' => 14], ['typeSmallInt' => Type::SMALLINT]);
         $this->assertEquals(14, $this->connection->fetchColumn('SELECT typeSmallInt FROM test_dbal_type_table'));
     }
 
-    public function testTypeString()
+    public function testTypeString(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeString' => 'foo bar baz'], ['typeString' => Type::STRING]);
         $this->assertEquals('foo bar baz', $this->connection->fetchColumn('SELECT typeString FROM test_dbal_type_table'));
     }
 
-    public function testTypeText()
+    public function testTypeText(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeText' => 'foo bar baz'], ['typeText' => Type::TEXT]);
         $this->assertEquals('foo bar baz', $this->connection->fetchColumn('SELECT typeText FROM test_dbal_type_table'));
     }
 
-    public function testTypeBinary()
+    public function testTypeBinary(): void
     {
         $this->connection->insert('test_dbal_type_table', ['typeBinary' => 1], ['typeBinary' => Type::BINARY]);
         $this->assertEquals(1, $this->connection->fetchColumn('SELECT typeBinary FROM test_dbal_type_table'));
     }
 
-    public function testTypeBlob()
+    public function testTypeBlob(): void
     {
         $val = md5(time());
         $this->connection->insert('test_dbal_type_table', ['typeBlob' => $val], ['typeBlob' => Type::BLOB]);
         $this->assertEquals($val, $this->connection->fetchColumn('SELECT typeBlob FROM test_dbal_type_table'));
     }
 
-    public function testTypeGUID()
+    public function testTypeGUID(): void
     {
         $val = 'a0eebc99-9c0b-4ef8-bb6d-6bb9bd380a11';
         $this->connection->insert('test_dbal_type_table', ['typeGUID' => $val], ['typeGUID' => Type::GUID]);

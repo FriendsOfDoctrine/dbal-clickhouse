@@ -19,7 +19,7 @@ use Doctrine\DBAL\Schema\Column;
 use Doctrine\DBAL\Schema\Index;
 use Doctrine\DBAL\Schema\View;
 use Doctrine\DBAL\Types\Type;
-use const CASE_LOWER;
+
 use function array_change_key_case;
 use function array_filter;
 use function array_key_exists;
@@ -36,11 +36,45 @@ use function strpos;
 use function strtolower;
 use function trim;
 
+use const CASE_LOWER;
+
 /**
  * Schema manager for the ClickHouse DBMS.
  */
 class ClickHouseSchemaManager extends AbstractSchemaManager
 {
+    /**
+     * {@inheritdoc}
+     */
+    public function listTableIndexes($table): array
+    {
+        $tableView = $this->_getPortableViewDefinition(['name' => $table]);
+
+        preg_match(
+            '/MergeTree\(([\w+, \(\)]+)(?= \(((?:[^()]|\((?2)\))+)\),)/mi',
+            $tableView->getSql(),
+            $matches
+        );
+
+        if (is_array($matches) && array_key_exists(2, $matches)) {
+            $indexColumns = array_filter(
+                array_map('trim', explode(',', $matches[2])),
+                fn(string $column) => strpos($column, '(') === false
+            );
+
+            return [
+                new Index(
+                    current(array_reverse(explode('.', $table))) . '__pk',
+                    $indexColumns,
+                    false,
+                    true
+                ),
+            ];
+        }
+
+        return [];
+    }
+
     /**
      * {@inheritdoc}
      */
@@ -62,59 +96,25 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
     /**
      * {@inheritdoc}
      */
-    public function listTableIndexes($table) : array
-    {
-        $tableView = $this->_getPortableViewDefinition(['name' => $table]);
-
-        preg_match(
-            '/MergeTree\(([\w+, \(\)]+)(?= \(((?:[^()]|\((?2)\))+)\),)/mi',
-            $tableView->getSql(),
-            $matches
-        );
-
-        if (is_array($matches) && array_key_exists(2, $matches)) {
-            $indexColumns = array_filter(
-                array_map('trim', explode(',', $matches[2])),
-                function (string $column) {
-                    return strpos($column, '(') === false;
-                }
-            );
-
-            return [
-                new Index(
-                    current(array_reverse(explode('.', $table))) . '__pk',
-                    $indexColumns,
-                    false,
-                    true
-                ),
-            ];
-        }
-
-        return [];
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function _getPortableTableColumnDefinition($tableColumn) : Column
+    protected function _getPortableTableColumnDefinition($tableColumn): Column
     {
         $tableColumn = array_change_key_case($tableColumn, CASE_LOWER);
 
-        $dbType  = $columnType = trim($tableColumn['type']);
-        $length  = null;
-        $fixed   = false;
+        $dbType = $columnType = trim($tableColumn['type']);
+        $length = null;
+        $fixed = false;
         $notnull = true;
 
         if (preg_match('/(Nullable\((\w+)\))/i', $columnType, $matches)) {
             $columnType = str_replace($matches[1], $matches[2], $columnType);
-            $notnull    = false;
+            $notnull = false;
         }
 
         if (stripos($columnType, 'fixedstring') === 0) {
             // get length from FixedString definition
             $length = preg_replace('~.*\(([0-9]*)\).*~', '$1', $columnType);
             $dbType = 'fixedstring';
-            $fixed  = true;
+            $fixed = true;
         }
 
         $unsigned = false;
@@ -122,7 +122,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
             $unsigned = true;
         }
 
-        if (! isset($tableColumn['name'])) {
+        if (!isset($tableColumn['name'])) {
             $tableColumn['name'] = '';
         }
 

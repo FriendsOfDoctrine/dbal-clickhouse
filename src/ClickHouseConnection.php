@@ -15,19 +15,19 @@ declare(strict_types=1);
 namespace FOD\DBALClickHouse;
 
 use ClickHouseDB\Client as Smi2CHClient;
-use ClickHouseDB\Exception\TransportException;
 use Doctrine\DBAL\Driver\Connection;
-use Doctrine\DBAL\Driver\PingableConnection;
-use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
+use Doctrine\DBAL\Driver\Result;
+use Doctrine\DBAL\Driver\Statement;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+
 use function array_merge;
 use function func_get_args;
 
 /**
  * ClickHouse implementation for the Connection interface.
  */
-class ClickHouseConnection implements Connection, PingableConnection, ServerInfoAwareConnection
+class ClickHouseConnection implements Connection
 {
     /** @var Smi2CHClient */
     protected $smi2CHClient;
@@ -60,21 +60,21 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
     /**
      * {@inheritDoc}
      */
-    public function prepare($prepareString)
+    public function prepare(string $sql): Statement
     {
-        return new ClickHouseStatement($this->smi2CHClient, $prepareString, $this->platform);
+        return new ClickHouseStatement($this->smi2CHClient, $sql, $this->platform);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function query()
+    public function query(string $sql): Result
     {
         $args = func_get_args();
         $stmt = $this->prepare($args[0]);
         $stmt->execute();
 
-        return $stmt;
+        return new ClickHouseResult($stmt);
     }
 
     /**
@@ -92,9 +92,9 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
     /**
      * {@inheritDoc}
      */
-    public function exec($statement) : int
+    public function exec(string $sql): int
     {
-        $stmt = $this->prepare($statement);
+        $stmt = $this->prepare($sql);
         $stmt->execute();
 
         return $stmt->rowCount();
@@ -146,33 +146,5 @@ class ClickHouseConnection implements Connection, PingableConnection, ServerInfo
     public function errorInfo()
     {
         throw new \LogicException('You need to implement ClickHouseConnection::errorInfo()');
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function ping()
-    {
-        return $this->smi2CHClient->ping();
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function getServerVersion()
-    {
-        try {
-            return $this->smi2CHClient->getServerVersion();
-        } catch (TransportException $exception) {
-            return '';
-        }
-    }
-
-    /**
-     * {@inheritDoc}
-     */
-    public function requiresQueryForServerVersion()
-    {
-        return true;
     }
 }

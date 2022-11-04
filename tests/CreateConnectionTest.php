@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -12,7 +15,7 @@
 namespace FOD\DBALClickHouse\Tests;
 
 use Doctrine\DBAL\Connection;
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\ConnectionException;
 use PHPUnit\Framework\TestCase;
 
 /**
@@ -22,22 +25,21 @@ use PHPUnit\Framework\TestCase;
  */
 class CreateConnectionTest extends TestCase
 {
-    public function testCreateConnectionWithRightParams()
+    public function testCreateConnectionWithRightParams(): void
     {
         $this->assertInstanceOf(Connection::class, self::createConnection());
     }
 
-    public function testCreateConnectionWithBadParams()
+    public function testCreateConnectionWithBadParams(): void
     {
-        $this->expectException(DBALException::class);
+        $this->expectException(ConnectionException::class);
         $this->assertInstanceOf(Connection::class, self::createConnection([]));
     }
 
     /**
      * @param null|array $params
-     * @return Connection
      */
-    public static function createConnection($params = null)
+    public static function createConnection(?array $params = null): Connection
     {
         if (null === $params) {
             $params = [
@@ -49,14 +51,15 @@ class CreateConnectionTest extends TestCase
                 'driverClass' => phpunit_ch_driver_class,
                 'wrapperClass' => phpunit_ch_wrapper_class,
                 'driverOptions' => [
-                    'extremes'                => false,
-                    'readonly'                => true,
-                    'max_execution_time'      => 30,
+                    'extremes' => false,
+                    'readonly' => true,
+                    'max_execution_time' => 30,
                     'enable_http_compression' => 0,
-                    'https'                   => false
+                    'https' => false,
                 ],
             ];
         }
+
         return \Doctrine\DBAL\DriverManager::getConnection($params, new \Doctrine\DBAL\Configuration());
     }
 }

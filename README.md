@@ -217,3 +217,7 @@ doctrine:
 * [Data Retrieval And Manipulation](http://docs.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/data-retrieval-and-manipulation.html)
 * [SQL Query Builder](http://docs.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/query-builder.html)
 * [Schema-Representation](http://docs.doctrine-project.org/projects/doctrine-dbal/en/latest/reference/schema-representation.html)
+
+# ClickHouse Error Codes list
+
+* https://github.com/ClickHouse/ClickHouse/blob/master/src/Common/ErrorCodes.cpp

@@ -16,5 +16,5 @@ namespace FOD\DBALClickHouse\Types;
 
 interface ClickHouseType
 {
-    public function getBaseClickHouseType() : string;
+    public function getBaseClickHouseType(): string;
 }

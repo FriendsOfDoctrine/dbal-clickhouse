@@ -16,10 +16,10 @@ namespace FOD\DBALClickHouse\Types;
 
 interface BitNumericalClickHouseType extends NumericalClickHouseType
 {
-    public const EIGHT_BIT      = 8;
-    public const SIXTEEN_BIT    = 16;
+    public const EIGHT_BIT = 8;
+    public const SIXTEEN_BIT = 16;
     public const THIRTY_TWO_BIT = 32;
     public const SIXTY_FOUR_BIT = 64;
 
-    public function getBits() : int;
+    public function getBits(): int;
 }

@@ -25,7 +25,7 @@ class BigIntType extends \Doctrine\DBAL\Types\BigIntType
     /**
      * {@inheritdoc}
      */
-    public function getBindingType() : int
+    public function getBindingType(): int
     {
         return ParameterType::INTEGER;
     }
@@ -41,7 +41,7 @@ class BigIntType extends \Doctrine\DBAL\Types\BigIntType
     /**
      * {@inheritdoc}
      */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
+    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform): string
     {
         return (empty($fieldDeclaration['unsigned']) ? '' : 'U') . 'Int64';
     }

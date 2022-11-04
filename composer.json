@@ -21,15 +21,18 @@
         }
     ],
     "require": {
-        "php": "^7.1",
+        "php": "^7.4 || ^8.0",
         "ext-PDO": "*",
         "ext-pcre": "*",
-        "doctrine/dbal": "^2.7",
-        "smi2/phpClickHouse": "^1.0"
+        "doctrine/dbal": "^3.0",
+        "smi2/phpclickhouse": "^1.0"
     },
     "require-dev": {
-        "doctrine/coding-standard": "^4.0",
-        "phpunit/phpunit": "^7.0"
+        "doctrine/coding-standard": "^10.0",
+        "phpunit/phpunit": "^9.0",
+        "phpstan/phpstan": "^1.9",
+        "squizlabs/php_codesniffer": "^3.7",
+        "slevomat/coding-standard": "^8.6"
     },
     "autoload": {
         "psr-4": {
@@ -39,6 +42,11 @@
     "autoload-dev": {
         "psr-4": {
             "FOD\\DBALClickHouse\\Tests\\": "tests/"
+        }
+    },
+    "config": {
+        "allow-plugins": {
+            "dealerdirect/phpcodesniffer-composer-installer": true
         }
     }
 }

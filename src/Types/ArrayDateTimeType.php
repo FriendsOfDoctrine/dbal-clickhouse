@@ -16,6 +16,7 @@ namespace FOD\DBALClickHouse\Types;
 
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+
 use function array_filter;
 use function array_map;
 use function implode;
@@ -25,7 +26,7 @@ use function implode;
  */
 class ArrayDateTimeType extends ArrayType implements DatableClickHouseType
 {
-    public function getBaseClickHouseType() : string
+    public function getBaseClickHouseType(): string
     {
         return DatableClickHouseType::TYPE_DATE_TIME;
     }
@@ -67,7 +68,7 @@ class ArrayDateTimeType extends ArrayType implements DatableClickHouseType
     /**
      * {@inheritDoc}
      */
-    public function getBindingType() : int
+    public function getBindingType(): int
     {
         return ParameterType::INTEGER;
     }
