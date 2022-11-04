@@ -19,6 +19,8 @@ jobs:
           extensions: intl pcre pdo #optional
       - name: Check PHP Version
         run: php -v
+      - name: Export vendor bin to path
+        run: export PATh=$PATH:vendor/bin
       - name: Install Composer
         run: composer install
       - name: Psalm
