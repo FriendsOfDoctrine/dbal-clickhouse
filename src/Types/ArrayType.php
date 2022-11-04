@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Types;
 
-use Doctrine\DBAL\DBALException;
+use Doctrine\DBAL\ConnectionException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
 
@@ -70,7 +70,7 @@ abstract class ArrayType extends Type implements ClickHouseType
     /**
      * Register Array types to the type map.
      *
-     * @throws DBALException
+     * @throws ConnectionException
      */
     public static function registerArrayTypes(AbstractPlatform $platform): void
     {
