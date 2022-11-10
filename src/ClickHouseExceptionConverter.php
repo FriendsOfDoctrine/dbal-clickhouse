@@ -14,15 +14,15 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse;
 
-use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Driver\API\ExceptionConverter;
+use Doctrine\DBAL\Driver\Exception;
+use Doctrine\DBAL\Exception\DriverException;
+use Doctrine\DBAL\Query;
 
-/**
- * Specific Exception for ClickHouse
- */
-class ClickHouseException extends Exception
+class ClickHouseExceptionConverter implements ExceptionConverter
 {
-    public static function notSupported($method) : ClickHouseException
+    public function convert(Exception $exception, ?Query $query): DriverException
     {
-        return new self(sprintf("Operation '%s' is not supported by platform.", $method));
+        return new DriverException($exception, $query);
     }
 }

@@ -16,39 +16,37 @@ namespace FOD\DBALClickHouse\Types;
 
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+
 use function array_map;
 use function implode;
 
-/**
- * Array(String) Type class
- */
-class ArrayStringType extends ArrayType implements StringClickHouseType
+class ArrayStringableType extends ArrayType implements StringableClickHouseType
 {
-    public function getBaseClickHouseType() : string
+    public function getBaseClickHouseType(): string
     {
-        return StringClickHouseType::TYPE_STRING;
+        return StringableClickHouseType::TYPE_STRING;
     }
 
     /**
      * {@inheritDoc}
      */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform) : string
+    public function convertToDatabaseValue($value, AbstractPlatform $platform): string
     {
         return '[' . implode(
-            ', ',
-            array_map(
-                function (string $value) use ($platform) {
+                ', ',
+                array_map(
+                    function (string $value) use ($platform): string {
                         return $platform->quoteStringLiteral($value);
-                },
-                (array) $value
-            )
-        ) . ']';
+                    },
+                    (array) $value
+                )
+            ) . ']';
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getBindingType() : int
+    public function getBindingType(): int
     {
         return ParameterType::INTEGER;
     }

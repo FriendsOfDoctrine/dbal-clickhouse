@@ -25,15 +25,15 @@
         }
     ],
     "require": {
-        "php": "^7.1 || ^8.0",
-        "ext-pdo": "*",
+        "php": "^8.0",
         "ext-pcre": "*",
-        "doctrine/dbal": "^2.7",
+        "ext-mbstring": "*",
+        "doctrine/dbal": "^3.0",
         "smi2/phpclickhouse": "^1.0"
     },
     "require-dev": {
         "doctrine/coding-standard": "^4.0 || ^9.0",
-        "phpunit/phpunit": "^7.0 || ^9.0"
+        "phpunit/phpunit": "^9.5"
     },
     "autoload": {
         "psr-4": {

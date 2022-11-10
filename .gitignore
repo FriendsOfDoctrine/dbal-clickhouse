@@ -1,8 +1,5 @@
-.idea/
-composer.lock
-vendor/
-phpunit.xml
-.phpunit.result.cache
-Vagrantfile
-puphpet/
-.vagrant/
+/.idea/
+/vendor/
+/.phpunit.result.cache
+/composer.lock
+/phpunit.xml

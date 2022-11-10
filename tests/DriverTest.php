@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -24,40 +27,34 @@ use PHPUnit\Framework\TestCase;
  */
 class DriverTest extends TestCase
 {
-    /** @var  Connection */
-    protected $connection;
+    private Connection $connection;
 
-    public function setUp() : void
+    public function setUp(): void
     {
         $this->connection = CreateConnectionTest::createConnection();
     }
 
-    public function testConnect()
+    public function testConnect(): void
     {
-        $this->assertInstanceOf(ClickHouseConnection::class, $this->connection->getDriver()->connect(
-            $this->connection->getParams(),
-            $this->connection->getUsername(),
-            $this->connection->getPassword()
-        ));
+        $this->assertInstanceOf(
+            ClickHouseConnection::class,
+            $this->connection->getDriver()->connect($this->connection->getParams())
+        );
     }
 
-    public function testGetDatabasePlatform()
+    public function testGetDatabasePlatform(): void
     {
         $this->assertInstanceOf(ClickHousePlatform::class, $this->connection->getDriver()->getDatabasePlatform());
     }
 
-    public function testGetSchemaManager()
+    public function testGetSchemaManager(): void
     {
-        $this->assertInstanceOf(ClickHouseSchemaManager::class, $this->connection->getDriver()->getSchemaManager($this->connection));
-    }
-
-    public function testGetName()
-    {
-        $this->assertEquals('clickhouse', $this->connection->getDriver()->getName());
-    }
-
-    public function testGetDatabase()
-    {
-        $this->assertEquals(phpunit_ch_dbname, $this->connection->getDriver()->getDatabase($this->connection));
+        $this->assertInstanceOf(
+            ClickHouseSchemaManager::class,
+            $this->connection->getDriver()->getSchemaManager(
+                $this->connection,
+                $this->connection->getDatabasePlatform()
+            )
+        );
     }
 }

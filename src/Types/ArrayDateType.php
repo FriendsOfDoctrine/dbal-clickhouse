@@ -16,16 +16,14 @@ namespace FOD\DBALClickHouse\Types;
 
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+
 use function array_filter;
 use function array_map;
 use function implode;
 
-/**
- * Array(Date) Type class
- */
 class ArrayDateType extends ArrayType implements DatableClickHouseType
 {
-    public function getBaseClickHouseType() : string
+    public function getBaseClickHouseType(): string
     {
         return DatableClickHouseType::TYPE_DATE;
     }
@@ -33,10 +31,10 @@ class ArrayDateType extends ArrayType implements DatableClickHouseType
     /**
      * {@inheritDoc}
      */
-    public function convertToPHPValue($value, AbstractPlatform $platform) : array
+    public function convertToPHPValue($value, AbstractPlatform $platform): array
     {
         return array_map(
-            function ($stringDatetime) use ($platform) {
+            function ($stringDatetime) use ($platform): \DateTime {
                 return \DateTime::createFromFormat($platform->getDateFormatString(), $stringDatetime);
             },
             (array) $value
@@ -46,28 +44,28 @@ class ArrayDateType extends ArrayType implements DatableClickHouseType
     /**
      * {@inheritDoc}
      */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform) : string
+    public function convertToDatabaseValue($value, AbstractPlatform $platform): string
     {
         return '[' . implode(
-            ', ',
-            array_map(
-                function (\DateTime $datetime) use ($platform) {
-                    return "'" . $datetime->format($platform->getDateFormatString()) . "'";
-                },
-                array_filter(
-                    (array) $value,
-                    function ($datetime) {
-                        return $datetime instanceof \DateTime;
-                    }
+                ', ',
+                array_map(
+                    function (\DateTime $datetime) use ($platform) {
+                        return "'" . $datetime->format($platform->getDateFormatString()) . "'";
+                    },
+                    array_filter(
+                        (array) $value,
+                        function ($datetime): bool {
+                            return $datetime instanceof \DateTime;
+                        }
+                    )
                 )
-            )
-        ) . ']';
+            ) . ']';
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getBindingType() : int
+    public function getBindingType(): int
     {
         return ParameterType::INTEGER;
     }
