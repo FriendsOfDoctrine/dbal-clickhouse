@@ -23,19 +23,15 @@ use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use FOD\DBALClickHouse\Driver\Exception\Exception;
 
-use function array_key_exists;
-use function array_keys;
 use function array_map;
 use function array_replace;
 use function current;
-use function explode;
 use function implode;
 use function is_array;
 use function is_bool;
 use function is_float;
 use function is_int;
 use function mb_stripos;
-use function preg_replace;
 
 class ClickHouseStatement implements Statement
 {
@@ -83,34 +79,43 @@ class ClickHouseStatement implements Statement
      */
     public function execute($params = null): Result
     {
-        $hasZeroIndex = false;
-
         if (is_array($params)) {
             $this->values = array_replace($this->values, $params);
-
-            $hasZeroIndex = array_key_exists(0, $params);
         }
 
         $statement = $this->statement;
 
-        if ($hasZeroIndex) {
-            $statementPieces = explode('?', $statement);
+        $firstPlaceholder = array_key_first($this->values);
 
-            foreach ($statementPieces as $key => &$statementPiece) {
-                if (array_key_exists($key, $this->values)) {
-                    $statementPiece .= $this->getTypedParam($key);
+        $positionalPlaceholders       = is_int($firstPlaceholder);
+        $positionalPlaceholdersIsList = $firstPlaceholder === 0;
+
+        if ($positionalPlaceholders) {
+            $pieces = explode('?', $statement);
+
+            foreach ($pieces as $key => &$piece) {
+                $positionalPlaceholder = $positionalPlaceholdersIsList ? $key : $key + 1;
+
+                if (array_key_exists($positionalPlaceholder, $this->values)) {
+                    $piece .= $this->resolveType($positionalPlaceholder);
                 }
             }
 
-            $statement = implode('', $statementPieces);
+            $statement = implode('', $pieces);
         } else {
             foreach (array_keys($this->values) as $key) {
-                $statement = preg_replace(
-                    '/(' . (is_int($key) ? '\?' : ':' . $key) . ')/i',
-                    $this->getTypedParam($key),
-                    $statement,
-                    1
-                );
+                $namedPlaceholder       = ":$key";
+                $namedPlaceholderOffset = mb_stripos($statement, $namedPlaceholder);
+                $namedPlaceholderLength = mb_strlen($namedPlaceholder);
+
+                if ($namedPlaceholderOffset !== false) {
+                    $statement = substr_replace(
+                        $statement,
+                        $this->resolveType($key),
+                        $namedPlaceholderOffset,
+                        $namedPlaceholderLength
+                    );
+                }
             }
         }
 
@@ -132,7 +137,7 @@ class ClickHouseStatement implements Statement
     /**
      * @throws DBALException
      */
-    protected function getTypedParam(int|string $key): string
+    protected function resolveType(int|string $key): string
     {
         $value = $this->values[$key];
 
@@ -142,14 +147,11 @@ class ClickHouseStatement implements Statement
 
         if (is_array($value)) {
             if (is_int(current($value)) || is_float(current($value))) {
-                array_map(
-                    function ($item): void {
-                        if (!is_int($item) && !is_float($item)) {
-                            throw new DBALException('Array values must all be int/float or string, mixes not allowed');
-                        }
-                    },
-                    $value
-                );
+                foreach ($value as $item) {
+                    if (!is_int($item) && !is_float($item)) {
+                        throw new DBALException('Array values must all be int/float or string, mixes not allowed');
+                    }
+                }
             } else {
                 $value = array_map(function (?string $item): string {
                     return $item === null ? 'NULL' : $this->platform->quoteStringLiteral($item);
