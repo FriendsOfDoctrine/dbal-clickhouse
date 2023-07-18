@@ -24,7 +24,7 @@ class ClickHouseKeywords extends KeywordList
     /**
      * {@inheritdoc}
      */
-    public function getName() : string
+    public function getName(): string
     {
         return 'ClickHouse';
     }
@@ -32,7 +32,7 @@ class ClickHouseKeywords extends KeywordList
     /**
      * {@inheritdoc}
      */
-    protected function getKeywords() : array
+    protected function getKeywords(): array
     {
         //TODO actualize it!
         return [

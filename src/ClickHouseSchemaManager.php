@@ -51,6 +51,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
 
     /**
      * {@inheritdoc}
+     * @throws \Doctrine\DBAL\Exception
      */
     protected function _getPortableViewDefinition($view) : View
     {

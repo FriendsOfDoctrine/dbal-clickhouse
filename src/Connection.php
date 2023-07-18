@@ -25,6 +25,7 @@ class Connection extends \Doctrine\DBAL\Connection
 {
     /**
      * {@inheritDoc}
+     * @throws \FOD\DBALClickHouse\ClickHouseException
      */
     public function executeUpdate($query, array $params = [], array $types = []) : int
     {

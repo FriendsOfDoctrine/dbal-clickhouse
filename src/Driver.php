@@ -15,6 +15,9 @@ declare(strict_types=1);
 namespace FOD\DBALClickHouse;
 
 use Doctrine\DBAL\Connection;
+use Doctrine\DBAL\Driver\API\ExceptionConverter;
+use Doctrine\DBAL\Platforms\AbstractPlatform;
+use JetBrains\PhpStorm\Pure;
 
 /**
  * ClickHouse Driver
@@ -23,6 +26,7 @@ class Driver implements \Doctrine\DBAL\Driver
 {
     /**
      * {@inheritDoc}
+     * @throws \FOD\DBALClickHouse\ClickHouseException
      */
     public function connect(array $params, $username = null, $password = null, array $driverOptions = []) : ClickHouseConnection
     {
@@ -56,7 +60,7 @@ class Driver implements \Doctrine\DBAL\Driver
     /**
      * {@inheritDoc}
      */
-    public function getDatabasePlatform() : ClickHousePlatform
+    #[Pure] public function getDatabasePlatform() : ClickHousePlatform
     {
         return new ClickHousePlatform();
     }
@@ -64,9 +68,9 @@ class Driver implements \Doctrine\DBAL\Driver
     /**
      * {@inheritDoc}
      */
-    public function getSchemaManager(Connection $conn) : ClickHouseSchemaManager
+    #[Pure] public function getSchemaManager(Connection $conn, AbstractPlatform $platform) : ClickHouseSchemaManager
     {
-        return new ClickHouseSchemaManager($conn);
+        return new ClickHouseSchemaManager($conn, $platform);
     }
 
     /**
@@ -85,5 +89,10 @@ class Driver implements \Doctrine\DBAL\Driver
         $params = $conn->getParams();
 
         return $params['dbname'] ?? $conn->fetchOne('SELECT currentDatabase() as dbname');
+    }
+
+    #[Pure] public function getExceptionConverter(): ExceptionConverter
+    {
+        return new ClickHouseExceptionConverter();
     }
 }

@@ -1,5 +1,5 @@
 {
-    "name": "friendsofdoctrine/dbal-clickhouse",
+    "name": "marfatech/dbal-clickhouse",
     "type": "library",
     "description": "Doctrine DBAL driver for ClickHouse",
     "keywords": [
@@ -8,7 +8,7 @@
         "clickhouse",
         "driver"
     ],
-    "homepage": "http://github.com/friendsofdoctrine/dbal-clickhouse",
+    "homepage": "http://github.com/marfatech/dbal-clickhouse",
     "license": "MIT",
     "authors": [
         {
@@ -25,10 +25,10 @@
         }
     ],
     "require": {
-        "php": "^7.1 || ^8.0",
+        "php": "^8.0",
         "ext-pdo": "*",
         "ext-pcre": "*",
-        "doctrine/dbal": "^2.7",
+        "doctrine/dbal": "^3.0",
         "smi2/phpclickhouse": "^1.0"
     },
     "require-dev": {
