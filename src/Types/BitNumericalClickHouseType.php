@@ -21,5 +21,5 @@ interface BitNumericalClickHouseType extends NumericalClickHouseType
     public const THIRTY_TWO_BIT = 32;
     public const SIXTY_FOUR_BIT = 64;
 
-    public function getBits() : int;
+    public function getBits(): int;
 }

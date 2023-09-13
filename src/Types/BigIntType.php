@@ -17,15 +17,12 @@ namespace FOD\DBALClickHouse\Types;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 
-/**
- * BigInt Type
- */
 class BigIntType extends \Doctrine\DBAL\Types\BigIntType
 {
     /**
      * {@inheritdoc}
      */
-    public function getBindingType() : int
+    public function getBindingType(): int
     {
         return ParameterType::INTEGER;
     }
@@ -33,7 +30,7 @@ class BigIntType extends \Doctrine\DBAL\Types\BigIntType
     /**
      * {@inheritdoc}
      */
-    public function convertToDatabaseValue($value, AbstractPlatform $platform) : int
+    public function convertToDatabaseValue($value, AbstractPlatform $platform): int
     {
         return (int) $value;
     }
@@ -41,8 +38,8 @@ class BigIntType extends \Doctrine\DBAL\Types\BigIntType
     /**
      * {@inheritdoc}
      */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        return (empty($fieldDeclaration['unsigned']) ? '' : 'U') . 'Int64';
+        return (empty($column['unsigned']) ? '' : 'U') . 'Int64';
     }
 }

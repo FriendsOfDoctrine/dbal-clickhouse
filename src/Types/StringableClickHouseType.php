@@ -14,7 +14,7 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Types;
 
-interface StringClickHouseType extends ClickHouseType
+interface StringableClickHouseType extends ClickHouseType
 {
     public const TYPE_STRING       = 'String';
     public const TYPE_FIXED_STRING = 'FixedString';

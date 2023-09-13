@@ -16,25 +16,14 @@ namespace FOD\DBALClickHouse;
 
 use Doctrine\DBAL\Platforms\Keywords\KeywordList;
 
-/**
- * ClickHouse Keywordlist
- */
 class ClickHouseKeywords extends KeywordList
 {
     /**
      * {@inheritdoc}
      */
-    public function getName() : string
+    protected function getKeywords(): array
     {
-        return 'ClickHouse';
-    }
-
-    /**
-     * {@inheritdoc}
-     */
-    protected function getKeywords() : array
-    {
-        //TODO actualize it!
+        // @todo actualize it!
         return [
             'ADD',
             'ALL',
@@ -265,5 +254,13 @@ class ClickHouseKeywords extends KeywordList
             'TUPLE',
             'ANY',
         ];
+    }
+
+    /**
+     * {@inheritdoc}
+     */
+    public function getName(): string
+    {
+        return 'ClickHouse';
     }
 }

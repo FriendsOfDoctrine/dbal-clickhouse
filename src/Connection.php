@@ -14,43 +14,42 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse;
 
-use function strtoupper;
-use function substr;
+use Doctrine\DBAL\Exception;
+
+use function mb_strtoupper;
+use function mb_substr;
 use function trim;
 
-/**
- * ClickHouse Connection
- */
 class Connection extends \Doctrine\DBAL\Connection
 {
     /**
      * {@inheritDoc}
      */
-    public function executeUpdate($query, array $params = [], array $types = []) : int
+    public function delete($table, array $criteria, array $types = []): int
     {
-        // ClickHouse has no UPDATE or DELETE statements
-        $command = strtoupper(substr(trim($query), 0, 6));
-        if ($command === 'UPDATE' || $command === 'DELETE') {
-            throw new ClickHouseException('UPDATE and DELETE are not allowed in ClickHouse');
+        throw Exception::notSupported(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function update($table, array $data, array $criteria, array $types = []): int
+    {
+        throw Exception::notSupported(__METHOD__);
+    }
+
+    /**
+     * {@inheritDoc}
+     */
+    public function executeStatement($sql, array $params = [], array $types = []): int|string
+    {
+        $command = mb_strtoupper(mb_substr(trim($sql), 0, 6));
+
+        if (in_array($command, ['DELETE', 'UPDATE'], true)) {
+            throw Exception::notSupported($command);
         }
 
-        return parent::executeUpdate($query, $params, $types);
-    }
-
-    /**
-     * @throws ClickHouseException
-     */
-    public function delete($tableExpression, array $identifier, array $types = []) : int
-    {
-        throw ClickHouseException::notSupported(__METHOD__);
-    }
-
-    /**
-     * @throws ClickHouseException
-     */
-    public function update($tableExpression, array $data, array $identifier, array $types = []) : int
-    {
-        throw ClickHouseException::notSupported(__METHOD__);
+        return parent::executeStatement($sql, $params, $types);
     }
 
     /**
@@ -58,114 +57,114 @@ class Connection extends \Doctrine\DBAL\Connection
      */
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function setTransactionIsolation($level) : int
+    public function setTransactionIsolation($level): int
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function getTransactionIsolation() : int
+    public function getTransactionIsolation(): int
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function getTransactionNestingLevel() : int
+    public function getTransactionNestingLevel(): int
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function transactional(\Closure $func) : void
+    public function transactional(\Closure $func): void
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function setNestTransactionsWithSavepoints($nestTransactionsWithSavepoints) : void
+    public function setNestTransactionsWithSavepoints($nestTransactionsWithSavepoints): void
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function getNestTransactionsWithSavepoints() : bool
+    public function getNestTransactionsWithSavepoints(): bool
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function beginTransaction() : bool
+    public function beginTransaction(): bool
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function commit() : bool
+    public function commit(): bool
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function rollBack() : bool
+    public function rollBack(): bool
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function createSavepoint($savepoint) : void
+    public function createSavepoint($savepoint): void
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function releaseSavepoint($savepoint) : void
+    public function releaseSavepoint($savepoint): void
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function rollbackSavepoint($savepoint) : void
+    public function rollbackSavepoint($savepoint): void
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function setRollbackOnly() : void
+    public function setRollbackOnly(): void
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 
     /**
-     * @throws ClickHouseException
+     * {@inheritDoc}
      */
-    public function isRollbackOnly() : bool
+    public function isRollbackOnly(): bool
     {
-        throw ClickHouseException::notSupported(__METHOD__);
+        throw Exception::notSupported(__METHOD__);
     }
 }

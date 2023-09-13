@@ -14,40 +14,32 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Types;
 
-use Doctrine\DBAL\DBALException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Types\Type;
-use function array_key_exists;
-use function sprintf;
-use function strtolower;
 
-/**
- * Array(*) Types basic class
- */
+use function array_key_exists;
+use function mb_strtolower;
+use function sprintf;
+
 abstract class ArrayType extends Type implements ClickHouseType
 {
     protected const ARRAY_TYPES = [
-        'array(int8)' => ArrayInt8Type::class,
-        'array(int16)' => ArrayInt16Type::class,
-        'array(int32)' => ArrayInt32Type::class,
-        'array(int64)' => ArrayInt64Type::class,
-        'array(uint8)' => ArrayUInt8Type::class,
-        'array(uint16)' => ArrayUInt16Type::class,
-        'array(uint32)' => ArrayUInt32Type::class,
-        'array(uint64)' => ArrayUInt64Type::class,
-        'array(float32)' => ArrayFloat32Type::class,
-        'array(float64)' => ArrayFloat64Type::class,
-        'array(string)' => ArrayStringType::class,
+        'array(int8)'     => ArrayInt8Type::class,
+        'array(int16)'    => ArrayInt16Type::class,
+        'array(int32)'    => ArrayInt32Type::class,
+        'array(int64)'    => ArrayInt64Type::class,
+        'array(uint8)'    => ArrayUInt8Type::class,
+        'array(uint16)'   => ArrayUInt16Type::class,
+        'array(uint32)'   => ArrayUInt32Type::class,
+        'array(uint64)'   => ArrayUInt64Type::class,
+        'array(float32)'  => ArrayFloat32Type::class,
+        'array(float64)'  => ArrayFloat64Type::class,
+        'array(string)'   => ArrayStringableType::class,
         'array(datetime)' => ArrayDateTimeType::class,
-        'array(date)' => ArrayDateType::class,
+        'array(date)'     => ArrayDateType::class,
     ];
 
-    /**
-     * Register Array types to the type map.
-     *
-     * @throws DBALException
-     */
-    public static function registerArrayTypes(AbstractPlatform $platform) : void
+    public static function registerArrayTypes(AbstractPlatform $platform): void
     {
         foreach (self::ARRAY_TYPES as $typeName => $className) {
             if (self::hasType($typeName)) {
@@ -55,6 +47,7 @@ abstract class ArrayType extends Type implements ClickHouseType
             }
 
             self::addType($typeName, $className);
+
             foreach (Type::getType($typeName)->getMappedDatabaseTypes($platform) as $dbType) {
                 $platform->registerDoctrineTypeMapping($dbType, $typeName);
             }
@@ -64,7 +57,7 @@ abstract class ArrayType extends Type implements ClickHouseType
     /**
      * {@inheritDoc}
      */
-    public function getMappedDatabaseTypes(AbstractPlatform $platform) : array
+    public function getMappedDatabaseTypes(AbstractPlatform $platform): array
     {
         return [$this->getName()];
     }
@@ -72,23 +65,23 @@ abstract class ArrayType extends Type implements ClickHouseType
     /**
      * {@inheritDoc}
      */
-    public function getSQLDeclaration(array $fieldDeclaration, AbstractPlatform $platform) : string
+    public function getSQLDeclaration(array $column, AbstractPlatform $platform): string
     {
-        return $this->getDeclaration($fieldDeclaration);
+        return $this->getDeclaration($column);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getName() : string
+    public function getName(): string
     {
-        return strtolower($this->getDeclaration());
+        return mb_strtolower($this->getDeclaration());
     }
 
     /**
-     * @param mixed[] $fieldDeclaration
+     * @param array $fieldDeclaration
      */
-    protected function getDeclaration(array $fieldDeclaration = []) : string
+    protected function getDeclaration(array $fieldDeclaration = []): string
     {
         return sprintf(
             array_key_exists(

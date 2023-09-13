@@ -1,4 +1,7 @@
 <?php
+
+declare(strict_types=1);
+
 /*
  * This file is part of the FODDBALClickHouse package -- Doctrine DBAL library
  * for ClickHouse (a column-oriented DBMS for OLAP <https://clickhouse.yandex/>)
@@ -11,6 +14,7 @@
 
 namespace FOD\DBALClickHouse\Tests;
 
+use Doctrine\DBAL\ParameterType;
 use FOD\DBALClickHouse\Connection;
 use PHPUnit\Framework\TestCase;
 
@@ -21,14 +25,13 @@ use PHPUnit\Framework\TestCase;
  */
 class InsertTest extends TestCase
 {
-    /** @var  Connection */
-    protected $connection;
+    private Connection $connection;
 
     public function setUp() : void
     {
         $this->connection = CreateConnectionTest::createConnection();
 
-        $fromSchema = $this->connection->getSchemaManager()->createSchema();
+        $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
         $newTable = $toSchema->createTable('test_insert_table');
@@ -39,59 +42,78 @@ class InsertTest extends TestCase
         $newTable->setPrimaryKey(['id']);
 
         foreach ($fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()) as $sql) {
-            $this->connection->exec($sql);
+            $this->connection->executeStatement($sql);
         }
     }
 
-    public function tearDown() : void
+    public function tearDown(): void
     {
-        $this->connection->exec('DROP TABLE test_insert_table');
+        $this->connection->executeStatement('DROP TABLE test_insert_table');
     }
 
-    public function testExecInsert()
+    public function testExecInsert(): void
     {
-        $this->connection->exec("INSERT INTO test_insert_table(id, payload) VALUES (1, 'v1'), (2, 'v2')");
-        $this->assertEquals([['payload' => 'v1'], ['payload' => 'v2']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (1, 2) ORDER BY id"));
+        $this->connection->executeStatement("INSERT INTO test_insert_table(id, payload) VALUES (1, 'v1'), (2, 'v2')");
+
+        $this->assertEquals(
+            [['payload' => 'v1'], ['payload' => 'v2']],
+            $this->connection->fetchAllAssociative("SELECT payload from test_insert_table WHERE id IN (1, 2) ORDER BY id")
+        );
     }
 
-    public function testFunctionInsert()
+    public function testFunctionInsert(): void
     {
         $this->connection->insert('test_insert_table', ['id' => 3, 'payload' => 'v3']);
-        $this->connection->insert('test_insert_table', ['id' => 4, 'payload' => 'v4'], ['id' => \PDO::PARAM_INT, 'payload' => \PDO::PARAM_STR]);
-        $this->assertEquals([['payload' => 'v3'], ['payload' => 'v4']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (3, 4) ORDER BY id"));
+        $this->connection->insert('test_insert_table', ['id' => 4, 'payload' => 'v4'], ['id' => ParameterType::INTEGER, 'payload' => ParameterType::STRING]);
+
+        $this->assertEquals(
+            [['payload' => 'v3'], ['payload' => 'v4']],
+            $this->connection->fetchAllAssociative("SELECT payload from test_insert_table WHERE id IN (3, 4) ORDER BY id")
+        );
     }
 
-    public function testInsertViaQueryBuilder()
+    public function testInsertViaQueryBuilder(): void
     {
-        $qb = $this->connection->createQueryBuilder();
+        $queryBuilder = $this->connection->createQueryBuilder();
 
-        $qb
+        $queryBuilder
             ->insert('test_insert_table')
             ->setValue('id', ':id')
             ->setValue('payload', ':payload')
-            ->setParameter('id', 5, \PDO::PARAM_INT)
+            ->setParameter('id', 5, ParameterType::INTEGER)
             ->setParameter('payload', 'v5')
-            ->execute();
+            ->executeStatement();
 
-        $qb
+        $queryBuilder
             ->setParameter('id', 6)
             ->setParameter('payload', 'v6')
-            ->execute();
+            ->executeStatement();
 
-        $this->assertEquals([['payload' => 'v5'], ['payload' => 'v6']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (5, 6) ORDER BY id"));
+        $this->assertEquals(
+            [['payload' => 'v5'], ['payload' => 'v6']],
+            $this->connection->fetchAllAssociative("SELECT payload from test_insert_table WHERE id IN (5, 6) ORDER BY id")
+        );
     }
 
-    public function testStatementInsertWithoutKeyName()
+    public function testStatementInsertWithoutKeyName(): void
     {
         $statement = $this->connection->prepare('INSERT INTO test_insert_table(id, payload) VALUES (?, ?), (?, ?)');
-        $statement->execute([7, 'v?7', 8, 'v8']);
-        $this->assertEquals([['payload' => 'v?7'], ['payload' => 'v8']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (7, 8) ORDER BY id"));
+        $statement->executeStatement([7, 'v?7', 8, 'v8']);
+
+        $this->assertEquals(
+            [['payload' => 'v?7'], ['payload' => 'v8']],
+            $this->connection->fetchAllAssociative("SELECT payload from test_insert_table WHERE id IN (7, 8) ORDER BY id")
+        );
     }
 
-    public function testStatementInsertWithKeyName()
+    public function testStatementInsertWithKeyName(): void
     {
         $statement = $this->connection->prepare('INSERT INTO test_insert_table(id, payload) VALUES (:v0, :v1), (:v2, :v3)');
-        $statement->execute(['v0' => 9, 'v1' => 'v?9', 'v2' => 10, 'v3' => 'v10']);
-        $this->assertEquals([['payload' => 'v?9'], ['payload' => 'v10']], $this->connection->fetchAll("SELECT payload from test_insert_table WHERE id IN (9, 10) ORDER BY id"));
+        $statement->executeStatement(['v0' => 9, 'v1' => 'v?9', 'v2' => 10, 'v3' => 'v10']);
+
+        $this->assertEquals(
+            [['payload' => 'v?9'], ['payload' => 'v10']],
+            $this->connection->fetchAllAssociative("SELECT payload from test_insert_table WHERE id IN (9, 10) ORDER BY id")
+        );
     }
 }
