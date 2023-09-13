@@ -8,7 +8,7 @@
         "clickhouse",
         "driver"
     ],
-    "homepage": "http://github.com/friendsofdoctrine/dbal-clickhouse",
+    "homepage": "https://github.com/friendsofdoctrine/dbal-clickhouse",
     "license": "MIT",
     "authors": [
         {
@@ -20,7 +20,7 @@
             "email": "mitrofanovnk@yandex.ru"
         },
         {
-            "name": "Sanikovich Aleksey",
+            "name": "Sanikovich Aliaksei",
             "email": "asanikovich@gmail.com"
         }
     ],

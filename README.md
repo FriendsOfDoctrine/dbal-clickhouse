@@ -1,16 +1,17 @@
-If you want to become a maintainer of this package -- please, contact me via a@mochalygin.ru
-
-
-[![Build Status](https://travis-ci.org/FriendsOfDoctrine/dbal-clickhouse.svg?branch=master)](https://travis-ci.org/FriendsOfDoctrine/dbal-clickhouse)
-[![Total Downloads](https://poser.pugx.org/friendsofdoctrine/dbal-clickhouse/d/total.svg)](https://packagist.org/packages/friendsofdoctrine/dbal-clickhouse)
-[![Latest Stable Version](https://poser.pugx.org/friendsofdoctrine/dbal-clickhouse/v/stable.svg)](https://packagist.org/packages/friendsofdoctrine/dbal-clickhouse)
-[![License](https://poser.pugx.org/friendsofdoctrine/dbal-clickhouse/license.svg)](https://packagist.org/packages/friendsofdoctrine/dbal-clickhouse)
-
 # Doctrine DBAL ClickHouse Driver
 
-Doctrine DBAL driver for ClickHouse -- an open-source column-oriented database management system by Yandex (https://clickhouse.yandex/)
+[![Latest Version on Packagist](https://img.shields.io/packagist/v/FriendsOfDoctrine/dbal-clickhouse.svg?style=flat-square)](https://packagist.org/packages/FriendsOfDoctrine/dbal-clickhouse)
+[![GitHub Tests Status](https://img.shields.io/github/actions/workflow/status/FriendsOfDoctrine/dbal-clickhouse/tests.yml?branch=master&label=tests&style=flat-square)](https://github.com/FriendsOfDoctrine/dbal-clickhouse/actions/workflows/tests.yml?query=branch%3Amaster)
+[![GitHub Code Style Status](https://img.shields.io/github/actions/workflow/status/FriendsOfDoctrine/dbal-clickhouse/phpstan.yml?branch=master&label=code%20style&style=flat-square)](https://github.com/FriendsOfDoctrine/dbal-clickhouse/actions/workflows/phpstan.yml?query=branch%3Amaster)
+[![Total Downloads](https://img.shields.io/packagist/dt/FriendsOfDoctrine/dbal-clickhouse.svg?style=flat-square)](https://packagist.org/packages/FriendsOfDoctrine/dbal-clickhouse)
+[![Licence](https://img.shields.io/packagist/l/FriendsOfDoctrine/dbal-clickhouse.svg?style=flat-square)](https://packagist.org/packages/FriendsOfDoctrine/dbal-clickhouse)
 
-Driver is suitable for Symfony or any other framework using Doctrine.
+Doctrine DBAL driver for ClickHouse - an open-source column-oriented database management system by [Yandex](https://clickhouse.yandex/)
+
+**Driver is suitable for Symfony or any other framework using Doctrine.**
+
+* [v2](https://github.com/FriendsOfDoctrine/dbal-clickhouse/releases?q=v2.) supports Doctrine DBAL 3+ and PHP 8.0+ [BETA release]
+* [v1](https://github.com/FriendsOfDoctrine/dbal-clickhouse/releases?q=v1.) supports Doctrine DBAL 2+ and PHP 7.1+
 
 ## Installation
 
