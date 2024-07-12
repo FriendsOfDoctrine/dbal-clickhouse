@@ -48,7 +48,7 @@ class ClickHouseStatement implements Statement
     public function __construct(Client $client, string $statement, AbstractPlatform $platform)
     {
         $this->client    = $client;
-        $this->statement = $statement;
+        $this->statement = trim($statement);
         $this->platform  = $platform;
     }
 
