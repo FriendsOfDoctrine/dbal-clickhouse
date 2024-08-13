@@ -124,7 +124,8 @@ class ClickHouseStatement implements Statement
                 new \ArrayIterator(
                     mb_stripos($statement, 'select') === 0 ||
                     mb_stripos($statement, 'show') === 0 ||
-                    mb_stripos($statement, 'describe') === 0
+                    mb_stripos($statement, 'describe') === 0 ||
+                    preg_match('/with(.*)\)\s*select/ms', mb_strtolower($statement)) == 1
                         ? $this->client->select($statement)->rows()
                         : $this->client->write($statement)->rows()
                 )
