@@ -21,6 +21,7 @@ use Doctrine\DBAL\Driver\Statement;
 use Doctrine\DBAL\Exception as DBALException;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
+use Doctrine\DBAL\Types\Exception\InvalidType;
 use FOD\DBALClickHouse\Driver\Exception\Exception;
 
 use function array_map;
@@ -55,12 +56,10 @@ class ClickHouseStatement implements Statement
     /**
      * {@inheritDoc}
      */
-    public function bindValue($param, $value, $type = ParameterType::STRING): bool
+    public function bindValue(int|string $param, mixed $value, ParameterType $type = ParameterType::STRING): void
     {
         $this->values[$param] = $value;
         $this->types[$param]  = $type;
-
-        return true;
     }
 
     /**
@@ -149,7 +148,7 @@ class ClickHouseStatement implements Statement
             if (is_int(current($value)) || is_float(current($value))) {
                 foreach ($value as $item) {
                     if (!is_int($item) && !is_float($item)) {
-                        throw new DBALException('Array values must all be int/float or string, mixes not allowed');
+                        throw new InvalidType('Array values must all be int/float or string, mixes not allowed');
                     }
                 }
             } else {

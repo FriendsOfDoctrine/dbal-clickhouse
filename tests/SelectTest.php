@@ -32,6 +32,7 @@ class SelectTest extends TestCase
     {
         $this->connection = CreateConnectionTest::createConnection();
 
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -43,7 +44,11 @@ class SelectTest extends TestCase
         $newTable->addOption('engine', 'Memory');
         $newTable->setPrimaryKey(['id']);
 
-        foreach ($fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()) as $sql) {
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
+
+        foreach ($migrationSQLs as $sql) {
             $this->connection->executeStatement($sql);
         }
 

@@ -14,6 +14,7 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Tests;
 
+use Doctrine\DBAL\Connection\StaticServerVersionProvider;
 use FOD\DBALClickHouse\ClickHouseConnection;
 use FOD\DBALClickHouse\ClickHousePlatform;
 use FOD\DBALClickHouse\ClickHouseSchemaManager;
@@ -44,7 +45,7 @@ class DriverTest extends TestCase
 
     public function testGetDatabasePlatform(): void
     {
-        $this->assertInstanceOf(ClickHousePlatform::class, $this->connection->getDriver()->getDatabasePlatform());
+        $this->assertInstanceOf(ClickHousePlatform::class, $this->connection->getDriver()->getDatabasePlatform(new StaticServerVersionProvider('')));
     }
 
     public function testGetSchemaManager(): void

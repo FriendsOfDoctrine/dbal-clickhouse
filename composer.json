@@ -28,7 +28,7 @@
         "php": "^8.0",
         "ext-pcre": "*",
         "ext-mbstring": "*",
-        "doctrine/dbal": "^3.0",
+        "doctrine/dbal": "^4.0",
         "smi2/phpclickhouse": "^1.0"
     },
     "require-dev": {

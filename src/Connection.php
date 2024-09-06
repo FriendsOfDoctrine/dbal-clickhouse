@@ -16,6 +16,8 @@ namespace FOD\DBALClickHouse;
 
 use Doctrine\DBAL\Exception;
 
+use Doctrine\DBAL\Platforms\Exception\NotSupported;
+use Doctrine\DBAL\TransactionIsolationLevel;
 use function mb_strtoupper;
 use function mb_substr;
 use function trim;
@@ -25,28 +27,28 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * {@inheritDoc}
      */
-    public function delete($table, array $criteria, array $types = []): int
+    public function delete(string $table, array $criteria = [], array $types = []): int|string
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function update($table, array $data, array $criteria, array $types = []): int
+    public function update(string $table, array $data, array $criteria = [], array $types = []): int|string
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function executeStatement($sql, array $params = [], array $types = []): int|string
+    public function executeStatement(string $sql, array $params = [], array $types = []): int|string
     {
         $command = mb_strtoupper(mb_substr(trim($sql), 0, 6));
 
         if (in_array($command, ['DELETE', 'UPDATE'], true)) {
-            throw Exception::notSupported($command);
+            throw NotSupported::new($command);
         }
 
         return parent::executeStatement($sql, $params, $types);
@@ -59,17 +61,17 @@ class Connection extends \Doctrine\DBAL\Connection
     /**
      * {@inheritDoc}
      */
-    public function setTransactionIsolation($level): int
+    public function setTransactionIsolation(TransactionIsolationLevel $level): void
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getTransactionIsolation(): int
+    public function getTransactionIsolation(): TransactionIsolationLevel
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
@@ -77,15 +79,15 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function getTransactionNestingLevel(): int
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function transactional(\Closure $func): void
+    public function transactional(\Closure $func): mixed
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
@@ -93,7 +95,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function setNestTransactionsWithSavepoints($nestTransactionsWithSavepoints): void
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
@@ -101,31 +103,31 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function getNestTransactionsWithSavepoints(): bool
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function beginTransaction(): bool
+    public function beginTransaction(): void
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function commit(): bool
+    public function commit(): void
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function rollBack(): bool
+    public function rollBack(): void
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
@@ -133,7 +135,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function createSavepoint($savepoint): void
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
@@ -141,7 +143,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function releaseSavepoint($savepoint): void
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
@@ -149,7 +151,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function rollbackSavepoint($savepoint): void
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
@@ -157,7 +159,7 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function setRollbackOnly(): void
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
@@ -165,6 +167,6 @@ class Connection extends \Doctrine\DBAL\Connection
      */
     public function isRollbackOnly(): bool
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 }

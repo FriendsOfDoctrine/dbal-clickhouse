@@ -186,6 +186,7 @@ class ArraysTest extends TestCase
 
     private function createTempTable(string $arrayType): void
     {
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -197,7 +198,11 @@ class ArraysTest extends TestCase
         $newTable->addColumn('arr', $arrayType);
         $newTable->addOption('engine', 'Memory');
 
-        foreach ($fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()) as $sql) {
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
+
+        foreach ($migrationSQLs as $sql) {
             $this->connection->executeStatement($sql);
         }
     }
