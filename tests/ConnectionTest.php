@@ -14,8 +14,8 @@ declare(strict_types=1);
 
 namespace FOD\DBALClickHouse\Tests;
 
-use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
-use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Platforms\Exception\NotSupported;
+use Doctrine\DBAL\TransactionIsolationLevel;
 use FOD\DBALClickHouse\Connection;
 use PHPUnit\Framework\TestCase;
 
@@ -35,56 +35,56 @@ class ConnectionTest extends TestCase
 
     public function testDelete(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->delete('test', ['id' => 1]);
     }
 
     public function testUpdate(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->update('test', ['name' => 'test'], ['id' => 1]);
     }
 
     public function testExecuteStatementDelete(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->executeStatement('DELETE FROM test WHERE id = :id', ['id' => 1]);
     }
 
     public function testExecuteStatementUpdate(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->executeStatement('UPDATE test SET name = :name WHERE id = :id', ['name' => 'test', 'id' => 1]);
     }
 
     public function testSetTransactionIsolation(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
-        $this->connection->setTransactionIsolation(1);
+        $this->connection->setTransactionIsolation(TransactionIsolationLevel::READ_COMMITTED);
     }
 
     public function testGetTransactionIsolation(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->getTransactionIsolation();
     }
 
     public function testGetTransactionNestingLevel(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->getTransactionNestingLevel();
     }
 
     public function testTransactional(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->transactional(function () {
         });
@@ -92,91 +92,84 @@ class ConnectionTest extends TestCase
 
     public function testSetNestTransactionsWithSavepoints(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->setNestTransactionsWithSavepoints(true);
     }
 
     public function testGetNestTransactionsWithSavepoints(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->getNestTransactionsWithSavepoints();
     }
 
     public function testBeginTransaction(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->beginTransaction();
     }
 
     public function testCommit(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->commit();
     }
 
     public function testRollBack(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->rollBack();
     }
 
     public function testCreateSavepoint(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->createSavepoint('1');
     }
 
     public function testReleaseSavepoint(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->releaseSavepoint('1');
     }
 
     public function testRollbackSavepoint(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->rollbackSavepoint('1');
     }
 
     public function testSetRollbackOnly(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->setRollbackOnly();
     }
 
     public function testIsRollbackOnly(): void
     {
-        $this->expectException(Exception::class);
+        $this->expectException(NotSupported::class);
 
         $this->connection->isRollbackOnly();
     }
 
     public function testGetServerVersion(): void
     {
-        $conn = $this->connection->getWrappedConnection();
+        $conn = $this->connection->getNativeConnection();
 
-        if ($conn instanceof ServerInfoAwareConnection) {
-            $pattern = '/^\d+\.\d+\.\d+\.\d+$/';
+        $pattern = '/^\d+\.\d+\.\d+\.\d+$/';
 
-            if (method_exists($this, 'assertMatchesRegularExpression')) {
-                $this->assertMatchesRegularExpression($pattern, $conn->getServerVersion());
-            } else {
-                $this->assertRegExp($pattern, $conn->getServerVersion());
-            }
+        if (method_exists($this, 'assertMatchesRegularExpression')) {
+            $this->assertMatchesRegularExpression($pattern, $conn->getServerVersion());
         } else {
-            $this->fail(
-                sprintf('`%s` does not implement the `%s` interface', \get_class($conn),
-                ServerInfoAwareConnection::class)
-            );
+            $this->assertRegExp($pattern, $conn->getServerVersion());
         }
     }
 }

@@ -65,7 +65,7 @@ class ArrayDateType extends ArrayType implements DatableClickHouseType
     /**
      * {@inheritDoc}
      */
-    public function getBindingType(): int
+    public function getBindingType(): ParameterType
     {
         return ParameterType::INTEGER;
     }

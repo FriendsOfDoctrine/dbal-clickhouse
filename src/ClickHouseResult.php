@@ -22,7 +22,7 @@ class ClickHouseResult implements Result
     {
     }
 
-    public function fetchNumeric()
+    public function fetchNumeric(): array|false
     {
         $row = $this->iterator->current();
 
@@ -35,7 +35,7 @@ class ClickHouseResult implements Result
         return array_values($row);
     }
 
-    public function fetchAssociative()
+    public function fetchAssociative(): array|false
     {
         $row = $this->iterator->current();
 
@@ -48,7 +48,7 @@ class ClickHouseResult implements Result
         return $row;
     }
 
-    public function fetchOne()
+    public function fetchOne(): mixed
     {
         $row = $this->iterator->current();
 

@@ -18,15 +18,13 @@ use ClickHouseDB\Client;
 use ClickHouseDB\Exception\ClickHouseException;
 use Doctrine\DBAL\Driver\Connection;
 use Doctrine\DBAL\Driver\Result;
-use Doctrine\DBAL\Driver\ServerInfoAwareConnection;
 use Doctrine\DBAL\Driver\Statement;
-use Doctrine\DBAL\Exception;
-use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 
+use Doctrine\DBAL\Platforms\Exception\NotSupported;
 use function array_merge;
 
-class ClickHouseConnection implements Connection, ServerInfoAwareConnection
+class ClickHouseConnection implements Connection
 {
     protected Client $client;
 
@@ -69,13 +67,9 @@ class ClickHouseConnection implements Connection, ServerInfoAwareConnection
     /**
      * {@inheritDoc}
      */
-    public function quote($value, $type = ParameterType::STRING)
+    public function quote(string $value): string
     {
-        if ($type === ParameterType::STRING) {
-            return $this->platform->quoteStringLiteral($value);
-        }
-
-        return $value;
+        return $this->platform->quoteStringLiteral($value);
     }
 
     /**
@@ -89,33 +83,33 @@ class ClickHouseConnection implements Connection, ServerInfoAwareConnection
     /**
      * {@inheritDoc}
      */
-    public function lastInsertId($name = null)
+    public function lastInsertId(): int|string
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function beginTransaction(): bool
+    public function beginTransaction(): void
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function commit(): bool
+    public function commit(): void
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
      * {@inheritDoc}
      */
-    public function rollBack(): bool
+    public function rollBack(): void
     {
-        throw Exception::notSupported(__METHOD__);
+        throw NotSupported::new(__METHOD__);
     }
 
     /**
@@ -128,5 +122,10 @@ class ClickHouseConnection implements Connection, ServerInfoAwareConnection
         } catch (ClickHouseException) {
             return '';
         }
+    }
+
+    public function getNativeConnection()
+    {
+        return $this;
     }
 }

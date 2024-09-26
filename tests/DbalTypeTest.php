@@ -34,12 +34,12 @@ class DbalTypeTest extends TestCase
     {
         $this->connection = CreateConnectionTest::createConnection();
 
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
         $newTable = $toSchema->createTable('test_dbal_type_table');
 
-        $newTable->addColumn('typeArray', Types::ARRAY);
         $newTable->addColumn('typeSimpleArray', Types::SIMPLE_ARRAY);
         $newTable->addColumn('typeJsonArray', Types::JSON);
         $newTable->addColumn('typeBigInt', Types::BIGINT);
@@ -50,7 +50,6 @@ class DbalTypeTest extends TestCase
         $newTable->addColumn('typeTime', Types::TIME_MUTABLE);
         $newTable->addColumn('typeDecimal', Types::DECIMAL);
         $newTable->addColumn('typeInteger', Types::INTEGER);
-        $newTable->addColumn('typeObject', Types::OBJECT);
         $newTable->addColumn('typeSmallInt', Types::SMALLINT);
         $newTable->addColumn('typeString', Types::STRING);
         $newTable->addColumn('typeText', Types::TEXT);
@@ -60,7 +59,9 @@ class DbalTypeTest extends TestCase
         $newTable->addColumn('typeGUID', Types::GUID);
         $newTable->addOption('engine', 'Memory');
 
-        $this->schemaSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+        $this->schemaSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
 
         foreach ($this->schemaSQLs as $sql) {
             $this->connection->executeStatement($sql);
@@ -74,14 +75,7 @@ class DbalTypeTest extends TestCase
 
     public function testCreateSchema(): void
     {
-        $this->assertEquals('CREATE TABLE test_dbal_type_table (typeArray String, typeSimpleArray String, typeJsonArray String, typeBigInt String, typeBoolean UInt8, typeDateTime DateTime, typeDateTimeTZ DateTime, typeDate Date, typeTime String, typeDecimal String, typeInteger Int32, typeObject String, typeSmallInt Int16, typeString String, typeText String, typeBinary String, typeBlob String, typeFloat Float64, typeGUID FixedString(36)) ENGINE = Memory', implode(';', $this->schemaSQLs));
-    }
-
-    public function testTypeArray(): void
-    {
-        $this->connection->insert('test_dbal_type_table', ['typeArray' => ['v1' => 123, 'v2' => 234]], ['typeArray' => Types::ARRAY]);
-
-        $this->assertEquals(serialize(['v1' => 123, 'v2' => 234]), $this->connection->fetchOne('SELECT typeArray FROM test_dbal_type_table'));
+        $this->assertEquals('CREATE TABLE test_dbal_type_table (typeSimpleArray String, typeJsonArray String, typeBigInt String, typeBoolean UInt8, typeDateTime DateTime, typeDateTimeTZ DateTime, typeDate Date, typeTime String, typeDecimal String, typeInteger Int32, typeSmallInt Int16, typeString String, typeText String, typeBinary String, typeBlob String, typeFloat Float64, typeGUID FixedString(36)) ENGINE = Memory', implode(';', $this->schemaSQLs));
     }
 
     public function testTypeSimpleArray(): void
@@ -111,6 +105,7 @@ class DbalTypeTest extends TestCase
 
         $this->connection = CreateConnectionTest::createConnection();
 
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -119,7 +114,11 @@ class DbalTypeTest extends TestCase
         $newTable->addColumn('typeBigInt', Types::BIGINT);
         $newTable->addOption('engine', 'Memory');
 
-        foreach ($fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()) as $sql) {
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
+
+        foreach ($migrationSQLs as $sql) {
             $this->connection->executeStatement($sql);
 
             $this->assertEquals('CREATE TABLE test_dbal_type_bigint_table (typeBigInt Int64) ENGINE = Memory', $sql);
@@ -179,13 +178,6 @@ class DbalTypeTest extends TestCase
         $this->connection->insert('test_dbal_type_table', ['typeInteger' => 142], ['typeInteger' => Types::INTEGER]);
 
         $this->assertEquals(142, $this->connection->fetchOne('SELECT typeInteger FROM test_dbal_type_table'));
-    }
-
-    public function testTypeObject(): void
-    {
-        $this->connection->insert('test_dbal_type_table', ['typeObject' => (object)['foo' => 'bar']], ['typeObject' => Types::OBJECT]);
-
-        $this->assertEquals(serialize((object)['foo' => 'bar']), $this->connection->fetchOne('SELECT typeObject FROM test_dbal_type_table'));
     }
 
     public function testTypeSmallInt(): void

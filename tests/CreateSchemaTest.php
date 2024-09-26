@@ -17,6 +17,7 @@ namespace FOD\DBALClickHouse\Tests;
 use Doctrine\DBAL\Exception;
 use Doctrine\DBAL\ParameterType;
 use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Table;
 use Doctrine\DBAL\Types\Types;
 use FOD\DBALClickHouse\ClickHouseSchemaManager;
 use FOD\DBALClickHouse\Connection;
@@ -44,21 +45,24 @@ class CreateSchemaTest extends TestCase
 
     public function testCreateNewTableSQL(): void
     {
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
         $newTable = $toSchema->createTable('test_table');
 
-        $newTable->addColumn('id', 'integer', ['unsigned' => true]);
-        $newTable->addColumn('payload', 'string');
+        $newTable->addColumn('id', Types::INTEGER, ['unsigned' => true]);
+        $newTable->addColumn('payload', Types::STRING);
         $newTable->addColumn('oneVal', Types::FLOAT);
         $newTable->addColumn('twoVal', Types::DECIMAL);
         $newTable->addColumn('flag', Types::BOOLEAN);
         $newTable->addColumn('mask', Types::SMALLINT);
-        $newTable->addColumn('hash', 'string', ['length' => 32, 'fixed' => true]);
+        $newTable->addColumn('hash', Types::STRING, ['length' => 32, 'fixed' => true]);
         $newTable->setPrimaryKey(['id']);
 
-        $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
 
         $this->assertEquals(
             "CREATE TABLE test_table (EventDate Date DEFAULT today(), id UInt32, payload String, oneVal Float64, twoVal String, flag UInt8, mask Int16, hash FixedString(32)) ENGINE = ReplacingMergeTree(EventDate, (id), 8192)",
@@ -74,21 +78,26 @@ class CreateSchemaTest extends TestCase
 
     public function testCreateDropTable(): void
     {
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
         $newTable = $toSchema->createTable('test_table');
 
-        $newTable->addColumn('id', 'integer', ['unsigned' => true]);
-        $newTable->addColumn('payload', 'string');
+        $newTable->addColumn('id', Types::INTEGER, ['unsigned' => true]);
+        $newTable->addColumn('payload', Types::STRING);
         $newTable->addColumn('oneVal', Types::FLOAT);
         $newTable->addColumn('twoVal', Types::DECIMAL);
         $newTable->addColumn('flag', Types::BOOLEAN);
         $newTable->addColumn('mask', Types::SMALLINT);
-        $newTable->addColumn('hash', 'string', ['length' => 32, 'fixed' => true]);
+        $newTable->addColumn('hash', Types::STRING, ['length' => 32, 'fixed' => true]);
         $newTable->setPrimaryKey(['id']);
 
-        foreach ($fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()) as $sql) {
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
+
+        foreach ($migrationSQLs as $sql) {
             $this->connection->executeStatement($sql);
         }
 
@@ -99,6 +108,7 @@ class CreateSchemaTest extends TestCase
 
     public function testIndexGranularityOption(): void
     {
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -109,7 +119,9 @@ class CreateSchemaTest extends TestCase
         $newTable->setPrimaryKey(['id']);
         $newTable->addOption('indexGranularity', 4096);
 
-        $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
         $generatedSQL = implode(';', $migrationSQLs);
 
         $this->assertEquals(
@@ -126,6 +138,7 @@ class CreateSchemaTest extends TestCase
 
     public function testEngineMergeOption(): void
     {
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -136,7 +149,9 @@ class CreateSchemaTest extends TestCase
         $newTable->setPrimaryKey(['id']);
         $newTable->addOption('engine', 'MergeTree');
 
-        $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
         $generatedSQL = implode(';', $migrationSQLs);
 
         $this->assertEquals(
@@ -153,6 +168,7 @@ class CreateSchemaTest extends TestCase
 
     public function testEngineMemoryOption(): void
     {
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -163,7 +179,9 @@ class CreateSchemaTest extends TestCase
         $newTable->setPrimaryKey(['id']);
         $newTable->addOption('engine', 'Memory');
 
-        $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
         $generatedSQL = implode(';', $migrationSQLs);
 
         $this->assertEquals("CREATE TABLE test_table (id UInt32, payload String) ENGINE = Memory", $generatedSQL);
@@ -177,6 +195,7 @@ class CreateSchemaTest extends TestCase
 
     public function testEventDateColumnOption(): void
     {
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -188,7 +207,9 @@ class CreateSchemaTest extends TestCase
         $newTable->addOption('eventDateColumn', 'event_date');
         $newTable->setPrimaryKey(['id']);
 
-        $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
         $generatedSQL = implode(';', $migrationSQLs);
 
         $this->assertEquals(
@@ -205,6 +226,7 @@ class CreateSchemaTest extends TestCase
 
     public function testEventDateColumnBadOption(): void
     {
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -217,7 +239,9 @@ class CreateSchemaTest extends TestCase
         $newTable->setPrimaryKey(['id']);
 
         $this->expectException(\Exception::class);
-        $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
         $generatedSQL = implode(';', $migrationSQLs);
 
         $this->assertEquals(
@@ -234,6 +258,7 @@ class CreateSchemaTest extends TestCase
 
     public function testEventDateProviderColumnOption(): void
     {
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -245,7 +270,11 @@ class CreateSchemaTest extends TestCase
         $newTable->addOption('eventDateProviderColumn', 'updated_at');
         $newTable->setPrimaryKey(['id']);
 
-        $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
+
         $generatedSQL = implode(';', $migrationSQLs);
 
         $this->assertEquals(
@@ -262,6 +291,7 @@ class CreateSchemaTest extends TestCase
 
     public function testEventDateProviderColumnBadOption(): void
     {
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -274,7 +304,9 @@ class CreateSchemaTest extends TestCase
         $newTable->setPrimaryKey(['id']);
 
         $this->expectException(\Exception::class);
-        $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
         $generatedSQL = implode(';', $migrationSQLs);
 
         $this->assertEquals(
@@ -291,6 +323,7 @@ class CreateSchemaTest extends TestCase
 
     public function testListTableIndexes(): void
     {
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -302,7 +335,9 @@ class CreateSchemaTest extends TestCase
         $newTable->addOption('eventDateColumn', 'event_date');
         $newTable->setPrimaryKey(['id', 'event_date']);
 
-        $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
 
         foreach ($migrationSQLs as $sql) {
             $this->connection->executeStatement($sql);
@@ -324,6 +359,7 @@ class CreateSchemaTest extends TestCase
 
     public function testTableWithSamplingExpression(): void
     {
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -336,7 +372,9 @@ class CreateSchemaTest extends TestCase
         $newTable->addOption('samplingExpression', 'intHash32(id)');
         $newTable->setPrimaryKey(['id', 'event_date']);
 
-        $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
 
         $generatedSQL = implode(';', $migrationSQLs);
 
@@ -365,6 +403,7 @@ class CreateSchemaTest extends TestCase
 
     public function testNullableColumns(): void
     {
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -380,7 +419,9 @@ class CreateSchemaTest extends TestCase
         $newTable->setPrimaryKey(['id']);
         $newTable->addOption('engine', 'Memory');
 
-        $migrationSQLs = $fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform());
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
 
         $generatedSQL = implode(';', $migrationSQLs);
 
@@ -451,7 +492,7 @@ class CreateSchemaTest extends TestCase
 
         $this->assertEquals(
             2,
-            (int) $this->connection->fetchOne("SELECT count() from test_table_nullable WHERE {$this->connection->getDatabasePlatform()->getIsNullExpression('status')}")
+            (int) $this->connection->fetchOne("SELECT count() from test_table_nullable WHERE isNULL(status)")
         );
 
         $this->connection->executeStatement('DROP TABLE test_table_nullable');

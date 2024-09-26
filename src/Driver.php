@@ -17,44 +17,46 @@ namespace FOD\DBALClickHouse;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\API\ExceptionConverter;
 use Doctrine\DBAL\Driver\Connection as DriverConnection;
-use Doctrine\DBAL\Exception;
+use Doctrine\DBAL\Exception\InvalidArgumentException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
+use Doctrine\DBAL\ServerVersionProvider;
 
 class Driver implements \Doctrine\DBAL\Driver
 {
     /**
      * {@inheritDoc}
      */
-    public function connect(array $params): DriverConnection
-    {
+    public function connect(
+        #[\SensitiveParameter] array $params
+    ): DriverConnection {
         if (!isset($params['user'])) {
-            throw new Exception('Connection parameter `user` is required');
+            throw new InvalidArgumentException('Connection parameter `user` is required');
         }
 
         $user = $params['user'];
 
         if (!isset($params['password'])) {
-            throw new Exception('Connection parameter `password` is required');
+            throw new InvalidArgumentException('Connection parameter `password` is required');
         }
 
         $password = $params['password'];
 
         if (!isset($params['host'])) {
-            throw new Exception('Connection parameter `host` is required');
+            throw new InvalidArgumentException('Connection parameter `host` is required');
         }
 
         if (!isset($params['port'])) {
-            throw new Exception('Connection parameter `port` is required');
+            throw new InvalidArgumentException('Connection parameter `port` is required');
         }
 
-        return new ClickHouseConnection($params, (string) $user, (string) $password, $this->getDatabasePlatform());
+        return new ClickHouseConnection($params, (string) $user, (string) $password, $this->getDatabasePlatform(new Connection\StaticServerVersionProvider('')));
     }
 
     /**
      * {@inheritDoc}
      */
-    public function getDatabasePlatform(): AbstractPlatform
+    public function getDatabasePlatform(ServerVersionProvider $versionProvider): AbstractPlatform
     {
         return new ClickHousePlatform();
     }

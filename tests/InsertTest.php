@@ -31,6 +31,7 @@ class InsertTest extends TestCase
     {
         $this->connection = CreateConnectionTest::createConnection();
 
+        $comparator = $this->connection->createSchemaManager()->createComparator();
         $fromSchema = $this->connection->createSchemaManager()->introspectSchema();
         $toSchema = clone $fromSchema;
 
@@ -41,7 +42,11 @@ class InsertTest extends TestCase
         $newTable->addOption('engine', 'Memory');
         $newTable->setPrimaryKey(['id']);
 
-        foreach ($fromSchema->getMigrateToSql($toSchema, $this->connection->getDatabasePlatform()) as $sql) {
+        $migrationSQLs = $this->connection->getDatabasePlatform()->getAlterSchemaSQL(
+            $comparator->compareSchemas($fromSchema, $toSchema)
+        );
+
+        foreach ($migrationSQLs as $sql) {
             $this->connection->executeStatement($sql);
         }
     }
@@ -98,7 +103,12 @@ class InsertTest extends TestCase
     public function testStatementInsertWithoutKeyName(): void
     {
         $statement = $this->connection->prepare('INSERT INTO test_insert_table(id, payload) VALUES (?, ?), (?, ?)');
-        $statement->executeStatement([7, 'v?7', 8, 'v8']);
+        $statement->bindValue(1, 7);
+        $statement->bindValue(2, 'v?7');
+        $statement->bindValue(3, 8);
+        $statement->bindValue(4, 'v8');
+
+        $statement->executeStatement();
 
         $this->assertEquals(
             [['payload' => 'v?7'], ['payload' => 'v8']],
@@ -109,8 +119,13 @@ class InsertTest extends TestCase
     public function testStatementInsertWithKeyName(): void
     {
         $statement = $this->connection->prepare('INSERT INTO test_insert_table(id, payload) VALUES (:v0, :v1), (:v2, :v3)');
-        $statement->executeStatement(['v0' => 9, 'v1' => 'v?9', 'v2' => 10, 'v3' => 'v10']);
 
+        $statement->bindValue('v0', 9);
+        $statement->bindValue('v1', 'v?9');
+        $statement->bindValue('v2', 10);
+        $statement->bindValue('v3', 'v10');
+
+        $statement->executeStatement();
         $this->assertEquals(
             [['payload' => 'v?9'], ['payload' => 'v10']],
             $this->connection->fetchAllAssociative("SELECT payload from test_insert_table WHERE id IN (9, 10) ORDER BY id")
