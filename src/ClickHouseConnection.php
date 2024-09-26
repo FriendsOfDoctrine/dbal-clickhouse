@@ -36,15 +36,21 @@ class ClickHouseConnection implements Connection
         string $password,
         AbstractPlatform $platform
     ) {
-        $this->client   = new Client(
-            [
-                'host'     => $params['host'] ?? 'localhost',
-                'port'     => $params['port'] ?? 8123,
-                'username' => $user,
-                'password' => $password,
-            ],
-            array_merge(['database' => $params['dbname'] ?? 'default'], $params['driverOptions'] ?? [])
-        );
+        $connectParams = [
+            'host'     => $params['host'] ?? 'localhost',
+            'port'     => $params['port'] ?? 8123,
+            'username' => $user,
+            'password' => $password,
+        ];
+
+        if (isset($params['driverOptions']['sslCA'])) {
+            $connectParams['sslCA'] = $params['driverOptions']['sslCA'];
+            unset($params['driverOptions']['sslCA']);
+        }
+
+        $clientParams = array_merge(['database' => $params['dbname'] ?? 'default'], $params['driverOptions'] ?? []);
+
+        $this->client = new Client($connectParams, $clientParams);
         $this->platform = $platform;
     }
 

@@ -61,6 +61,7 @@ doctrine:
                 options:
                     enable_http_compression: 1
                     max_execution_time: 60
+                    sslCA: '/usr/local/share/ca-certificates/Yandex/YandexInternalRootCA.crt'
             #mysql:
             #   ...
 ```
