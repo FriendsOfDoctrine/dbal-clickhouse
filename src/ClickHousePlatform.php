@@ -665,7 +665,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCreateForeignKeySQL(ForeignKeyConstraint $foreignKey, $table): string
+    public function getCreateForeignKeySQL(ForeignKeyConstraint $foreignKey, string $table): string
     {
         throw NotSupported::new(__METHOD__);
     }
@@ -740,7 +740,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    protected function getRenameIndexSQL($oldIndexName, Index $index, $tableName): array
+    protected function getRenameIndexSQL(string $oldIndexName, Index $index, string $tableName): array
     {
         throw NotSupported::new(__METHOD__);
     }
@@ -757,7 +757,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getColumnDeclarationSQL($name, array $column): string
+    public function getColumnDeclarationSQL(string $name, array $column): string
     {
         if (isset($column['columnDefinition'])) {
             $columnDef = $column['columnDefinition'];
@@ -821,7 +821,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getForeignKeyReferentialActionSQL($action): string
+    public function getForeignKeyReferentialActionSQL(string $action): string
     {
         throw NotSupported::new(__METHOD__);
     }
@@ -869,7 +869,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getListViewsSQL($database): string
+    public function getListViewsSQL(string $database): string
     {
         return "SELECT name FROM system.tables WHERE database != 'system' AND engine = 'View'";
     }
@@ -877,7 +877,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCreateViewSQL($name, $sql): string
+    public function getCreateViewSQL(string $name, string $sql): string
     {
         return 'CREATE VIEW ' . $this->quoteIdentifier($name) . ' AS ' . $sql;
     }
@@ -885,7 +885,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDropViewSQL($name): string
+    public function getDropViewSQL(string $name): string
     {
         return 'DROP TABLE ' . $this->quoteIdentifier($name);
     }
@@ -893,7 +893,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getCreateDatabaseSQL($name): string
+    public function getCreateDatabaseSQL(string $name): string
     {
         return 'CREATE DATABASE ' . $name;
     }
@@ -960,7 +960,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    protected function doModifyLimitQuery($query, $limit, $offset): string
+    protected function doModifyLimitQuery(string $query, ?int $limit, int $offset): string
     {
         if ($limit === null) {
             return $query;
@@ -968,7 +968,7 @@ class ClickHousePlatform extends AbstractPlatform
 
         $query .= ' LIMIT ';
 
-        if ($offset !== null) {
+        if ($offset > 0) {
             $query .= $offset . ', ';
         }
 
@@ -980,7 +980,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getEmptyIdentityInsertSQL($quotedTableName, $quotedIdentifierColumnName): string
+    public function getEmptyIdentityInsertSQL(string $quotedTableName, string $quotedIdentifierColumnName): string
     {
         throw NotSupported::new(__METHOD__);
     }
@@ -988,7 +988,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getTruncateTableSQL($tableName, $cascade = false): string
+    public function getTruncateTableSQL(string $tableName, bool $cascade = false): string
     {
         /**
          * For MergeTree* engines may be done with next workaround:
@@ -1002,7 +1002,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function createSavePoint($savepoint): string
+    public function createSavePoint(string $savepoint): string
     {
         throw NotSupported::new(__METHOD__);
     }
@@ -1010,7 +1010,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function releaseSavePoint($savepoint): string
+    public function releaseSavePoint(string $savepoint): string
     {
         throw NotSupported::new(__METHOD__);
     }
@@ -1018,7 +1018,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function rollbackSavePoint($savepoint): string
+    public function rollbackSavePoint(string $savepoint): string
     {
         throw NotSupported::new(__METHOD__);
     }
@@ -1026,7 +1026,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDefaultValueDeclarationSQL($column): string
+    public function getDefaultValueDeclarationSQL(array $column): string
     {
         if (!isset($column['default'])) {
             return '';
@@ -1062,7 +1062,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function getDoctrineTypeMapping($dbType): string
+    public function getDoctrineTypeMapping(string $dbType): string
     {
         if (mb_stripos($dbType, 'fixedstring') === 0) {
             $dbType = 'fixedstring';
@@ -1082,7 +1082,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function quoteStringLiteral($str): string
+    public function quoteStringLiteral(string $str): string
     {
         return parent::quoteStringLiteral(addslashes($str));
     }
@@ -1090,7 +1090,7 @@ class ClickHousePlatform extends AbstractPlatform
     /**
      * {@inheritDoc}
      */
-    public function quoteSingleIdentifier($str): string
+    public function quoteSingleIdentifier(string $str): string
     {
         return parent::quoteSingleIdentifier(addslashes($str));
     }

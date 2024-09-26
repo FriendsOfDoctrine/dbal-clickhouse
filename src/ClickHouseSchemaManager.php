@@ -53,7 +53,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
     /**
      * {@inheritdoc}
      */
-    protected function _getPortableViewDefinition($view): View
+    protected function _getPortableViewDefinition(array $view): View
     {
         $statement = $this->connection->fetchOne('SHOW CREATE TABLE ' . $view['name']);
 
@@ -95,7 +95,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
     /**
      * {@inheritdoc}
      */
-    protected function _getPortableTableColumnDefinition($tableColumn): Column
+    protected function _getPortableTableColumnDefinition(array $tableColumn): Column
     {
         $tableColumn = array_change_key_case($tableColumn, CASE_LOWER);
 
