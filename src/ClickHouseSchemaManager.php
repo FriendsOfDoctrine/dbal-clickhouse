@@ -137,7 +137,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
             'default'       => $default,
             'notnull'       => $notnull,
             'autoincrement' => false,
-            'comment'       => null,
+            'comment'       => $tableColumn['name'] ?? null,
         ];
 
         return new Column(
