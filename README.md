@@ -10,6 +10,7 @@ Doctrine DBAL driver for ClickHouse - an open-source column-oriented database ma
 
 **Driver is suitable for Symfony or any other framework using Doctrine.**
 
+* [v3](https://github.com/FriendsOfDoctrine/dbal-clickhouse/releases?q=v3.) supports Doctrine DBAL 4+ and PHP 8.1+
 * [v2](https://github.com/FriendsOfDoctrine/dbal-clickhouse/releases?q=v2.) supports Doctrine DBAL 3+ and PHP 8.0+
 * [v1](https://github.com/FriendsOfDoctrine/dbal-clickhouse/releases?q=v1.) supports Doctrine DBAL 2+ and PHP 7.1+
 
