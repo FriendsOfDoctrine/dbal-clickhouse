@@ -17,7 +17,7 @@ namespace FOD\DBALClickHouse;
 use Doctrine\DBAL\Connection;
 use Doctrine\DBAL\Driver\API\ExceptionConverter;
 use Doctrine\DBAL\Driver\Connection as DriverConnection;
-use Doctrine\DBAL\InvalidArgumentException;
+use Doctrine\DBAL\Exception\InvalidArgumentException;
 use Doctrine\DBAL\Platforms\AbstractPlatform;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\ServerVersionProvider;
