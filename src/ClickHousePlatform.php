@@ -364,7 +364,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateAddMinutesExpression(string $date, string $minutes): string
     {
-        return $date . ' + ' . $minutes * self::TIME_MINUTE;
+        return $date . ' + ' . ((int) $minutes * self::TIME_MINUTE);
     }
 
     /**
@@ -372,7 +372,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateSubMinutesExpression(string $date, string $minutes): string
     {
-        return $date . ' - ' . $minutes * self::TIME_MINUTE;
+        return $date . ' - ' . ((int) $minutes * self::TIME_MINUTE);
     }
 
     /**
@@ -380,7 +380,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateAddHourExpression(string $date, string $hours): string
     {
-        return $date . ' + ' . $hours * self::TIME_HOUR;
+        return $date . ' + ' . ((int) $hours * self::TIME_HOUR);
     }
 
     /**
@@ -388,7 +388,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateSubHourExpression(string $date, string $hours): string
     {
-        return $date . ' - ' . $hours * self::TIME_HOUR;
+        return $date . ' - ' . ((int) $hours * self::TIME_HOUR);
     }
 
     /**
@@ -396,7 +396,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateAddDaysExpression(string $date, string $days): string
     {
-        return $date . ' + ' . $days * self::TIME_DAY;
+        return $date . ' + ' . ((int) $days * self::TIME_DAY);
     }
 
     /**
@@ -404,7 +404,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateSubDaysExpression(string $date, string $days): string
     {
-        return $date . ' - ' . $days * self::TIME_DAY;
+        return $date . ' - ' . ((int) $days * self::TIME_DAY);
     }
 
     /**
@@ -412,7 +412,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateAddWeeksExpression(string $date, string $weeks): string
     {
-        return $date . ' + ' . $weeks * self::TIME_WEEK;
+        return $date . ' + ' . ((int) $weeks * self::TIME_WEEK);
     }
 
     /**
@@ -420,7 +420,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateSubWeeksExpression(string $date, string $weeks): string
     {
-        return $date . ' - ' . $weeks * self::TIME_WEEK;
+        return $date . ' - ' . ((int) $weeks * self::TIME_WEEK);
     }
 
     /**
@@ -1108,6 +1108,7 @@ class ClickHousePlatform extends AbstractPlatform
         $func = match($operator) {
             '+' => 'plus',
             '-' => 'minus',
+            default => throw new \InvalidArgumentException(\sprintf('Unsupported operator "%s".', $operator)),
         };
 
         $seconds = ((int) $interval) * match ($unit) {
@@ -1121,7 +1122,7 @@ class ClickHousePlatform extends AbstractPlatform
             DateIntervalUnit::YEAR => 31536000,
         };
 
-        return $func(\sprintf('(%s, %s)', $date, $seconds));
+        return $this->$func(\sprintf('(%s, %s)', $date, $seconds));
     }
 
     public function getSetTransactionIsolationSQL(TransactionIsolationLevel $level): string

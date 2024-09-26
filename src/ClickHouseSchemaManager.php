@@ -63,7 +63,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
     /**
      * {@inheritdoc}
      */
-    public function listTableIndexes($table): array
+    public function listTableIndexes(string $table): array
     {
         $tableView = $this->_getPortableViewDefinition(['name' => $table]);
 
@@ -111,7 +111,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
 
         if (mb_stripos($columnType, 'fixedstring') === 0) {
             // get length from FixedString definition
-            $length = preg_replace('~.*\(([0-9]*)\).*~', '$1', $columnType);
+            $length = (int) preg_replace('~.*\(([0-9]*)\).*~', '$1', $columnType);
             $dbType = 'fixedstring';
             $fixed  = true;
         }
@@ -200,7 +200,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
 
     protected function selectIndexColumns(string $databaseName, ?string $tableName = null): Result
     {
-        // Table information_schema.statistics do not exists return empty result
+        // Table information_schema.statistics do not exist return empty result
         return $this->connection->executeQuery('SELECT * FROM INFORMATION_SCHEMA.TABLES WHERE 1 != 1');
     }
 
