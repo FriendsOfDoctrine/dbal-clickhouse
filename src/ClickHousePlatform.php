@@ -64,11 +64,6 @@ use function trim;
 
 class ClickHousePlatform extends AbstractPlatform
 {
-    protected const TIME_MINUTE = 60;
-    protected const TIME_HOUR   = self::TIME_MINUTE * 60;
-    protected const TIME_DAY    = self::TIME_HOUR * 24;
-    protected const TIME_WEEK   = self::TIME_DAY * 7;
-
     /**
      * {@inheritDoc}
      */
@@ -348,7 +343,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateAddSecondsExpression(string $date, string $seconds): string
     {
-        return $date . ' + ' . $seconds;
+        return $this->getDateArithmeticIntervalExpression($date, '+', $seconds, DateIntervalUnit::SECOND);
     }
 
     /**
@@ -356,7 +351,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateSubSecondsExpression(string $date, string $seconds): string
     {
-        return $date . ' - ' . $seconds;
+        return $this->getDateArithmeticIntervalExpression($date, '-', $seconds, DateIntervalUnit::SECOND);
     }
 
     /**
@@ -364,7 +359,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateAddMinutesExpression(string $date, string $minutes): string
     {
-        return $date . ' + ' . ((int) $minutes * self::TIME_MINUTE);
+        return $this->getDateArithmeticIntervalExpression($date, '+', $minutes, DateIntervalUnit::MINUTE);
     }
 
     /**
@@ -372,7 +367,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateSubMinutesExpression(string $date, string $minutes): string
     {
-        return $date . ' - ' . ((int) $minutes * self::TIME_MINUTE);
+        return $this->getDateArithmeticIntervalExpression($date, '-', $minutes, DateIntervalUnit::MINUTE);
     }
 
     /**
@@ -380,7 +375,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateAddHourExpression(string $date, string $hours): string
     {
-        return $date . ' + ' . ((int) $hours * self::TIME_HOUR);
+        return $this->getDateArithmeticIntervalExpression($date, '+', $hours, DateIntervalUnit::HOUR);
     }
 
     /**
@@ -388,7 +383,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateSubHourExpression(string $date, string $hours): string
     {
-        return $date . ' - ' . ((int) $hours * self::TIME_HOUR);
+        return $this->getDateArithmeticIntervalExpression($date, '-', $hours, DateIntervalUnit::HOUR);
     }
 
     /**
@@ -396,7 +391,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateAddDaysExpression(string $date, string $days): string
     {
-        return $date . ' + ' . ((int) $days * self::TIME_DAY);
+        return $this->getDateArithmeticIntervalExpression($date, '+', $days, DateIntervalUnit::DAY);
     }
 
     /**
@@ -404,7 +399,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateSubDaysExpression(string $date, string $days): string
     {
-        return $date . ' - ' . ((int) $days * self::TIME_DAY);
+        return $this->getDateArithmeticIntervalExpression($date, '-', $days, DateIntervalUnit::DAY);
     }
 
     /**
@@ -412,7 +407,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateAddWeeksExpression(string $date, string $weeks): string
     {
-        return $date . ' + ' . ((int) $weeks * self::TIME_WEEK);
+        return $this->getDateArithmeticIntervalExpression($date, '+', $weeks, DateIntervalUnit::WEEK);
     }
 
     /**
@@ -420,7 +415,7 @@ class ClickHousePlatform extends AbstractPlatform
      */
     public function getDateSubWeeksExpression(string $date, string $weeks): string
     {
-        return $date . ' - ' . ((int) $weeks * self::TIME_WEEK);
+        return $this->getDateArithmeticIntervalExpression($date, '-', $weeks, DateIntervalUnit::WEEK);
     }
 
     /**
@@ -1105,24 +1100,10 @@ class ClickHousePlatform extends AbstractPlatform
 
     protected function getDateArithmeticIntervalExpression(string $date, string $operator, string $interval, DateIntervalUnit $unit): string
     {
-        $func = match($operator) {
-            '+' => 'plus',
-            '-' => 'minus',
-            default => throw new \InvalidArgumentException(\sprintf('Unsupported operator "%s".', $operator)),
-        };
+        $operation = '+' === $operator ? 'date_add' : 'date_sub';
+        $toDateFunction = strlen($date) > 10 ? 'toDateTime' : 'toDate';
 
-        $seconds = ((int) $interval) * match ($unit) {
-            DateIntervalUnit::SECOND => 1,
-            DateIntervalUnit::MINUTE => 60,
-            DateIntervalUnit::HOUR => 3600,
-            DateIntervalUnit::DAY => 86400,
-            DateIntervalUnit::WEEK => 604800,
-            DateIntervalUnit::MONTH => 2592000,
-            DateIntervalUnit::QUARTER => 7884000,
-            DateIntervalUnit::YEAR => 31536000,
-        };
-
-        return $this->$func(\sprintf('(%s, %s)', $date, $seconds));
+        return \sprintf('%s(%s, %d, %s(\'%s\'))', $operation, $unit->value, (int) $interval, $toDateFunction, $date);
     }
 
     public function getSetTransactionIsolationSQL(TransactionIsolationLevel $level): string
