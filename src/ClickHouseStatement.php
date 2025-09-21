@@ -128,8 +128,8 @@ class ClickHouseStatement implements Statement
                         : $this->client->write($statement)->rows()
                 )
             );
-        } catch (ClickHouseException $exception) {
-            throw new Exception(previous: $exception, sqlState: $exception->getMessage());
+        } catch (ClickHouseException $e) {
+            throw new Exception($e->getMessage(), code: $e->getCode(), previous: $e, sqlState: $this->statement);
         }
     }
 

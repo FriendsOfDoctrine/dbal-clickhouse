@@ -5,8 +5,7 @@ on:
   pull_request:
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
-    cancel-in-progress: true
+    group: ${{ github.workflow }}-${{ github.ref_name }}
 
 permissions:
   contents: read
@@ -16,23 +15,35 @@ jobs:
     name: PHPStan
     runs-on: ubuntu-latest
 
+    strategy:
+      matrix:
+        php-versions: [8.1]
+
     steps:
-      - name: Checkout
+      - name: Checkout code
         uses: actions/checkout@v4
 
       - name: Setup PHP
         uses: shivammathur/setup-php@v2
         with:
-          php-version: '8.2'
-          extensions: pdo
+          php-version: ${{ matrix.php-versions }}
+          extensions: pdo, mbstring, pcre, curl, json
           ini-values: "memory_limit=-1"
-          coverage: none
-          tools: phpstan
+          tools: composer:v2, phpstan
+
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-${{ matrix.php-versions }}-composer-${{ hashFiles('composer.json') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.php-versions }}-composer-
 
       - name: Install dependencies
-        run: |
-          composer config --no-plugins allow-plugins.dealerdirect/phpcodesniffer-composer-installer false
-          composer install --prefer-dist
+        run: composer install --no-progress --prefer-dist --no-interaction
 
-      - name: phpstan
-        run: phpstan analyse -l 5 src
+      - name: Run PHPStan
+        run: phpstan analyse -vvv -l 5 src

@@ -73,7 +73,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
             $matches
         );
 
-        if (is_array($matches) && array_key_exists(2, $matches)) {
+        if (array_key_exists(2, $matches)) {
             $indexColumns = array_filter(
                 array_map('trim', explode(',', $matches[2])),
                 fn (string $column): bool => !str_contains($column, '(')

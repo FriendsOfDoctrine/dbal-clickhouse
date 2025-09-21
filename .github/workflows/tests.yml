@@ -5,7 +5,7 @@ on:
   pull_request:
 
 concurrency:
-    group: ${{ github.workflow }}-${{ github.head_ref || github.run_id }}
+    group: ${{ github.workflow }}-${{ github.ref_name }}
     cancel-in-progress: true
 
 permissions:
@@ -19,7 +19,7 @@ jobs:
 
     strategy:
       matrix:
-        php-versions: ['8.1', '8.2', '8.3']
+        php-versions: ['8.1', '8.2', '8.3', '8.4']
       fail-fast: false
 
     services:
@@ -38,11 +38,22 @@ jobs:
           php-version: ${{ matrix.php-versions }}
           extensions: pdo
           ini-values: "memory_limit=-1"
-          tools: composer
+          tools: composer:v2
           coverage: xdebug
 
+      - name: Get composer cache directory
+        id: composer-cache
+        run: echo "::set-output name=dir::$(composer config cache-files-dir)"
+
+      - name: Cache composer dependencies
+        uses: actions/cache@v3
+        with:
+          path: ${{ steps.composer-cache.outputs.dir }}
+          key: ${{ runner.os }}-${{ matrix.php-versions }}-composer-${{ hashFiles('composer.json') }}
+          restore-keys: ${{ runner.os }}-${{ matrix.php-versions }}-composer-
+
       - name: Install dependencies
-        run: composer install --prefer-dist
+        run: composer install --no-progress --prefer-dist --no-interaction
 
       - name: Run tests
         run: ./vendor/bin/phpunit --configuration ./phpunit.xml.dist --coverage-text

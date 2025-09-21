@@ -33,7 +33,8 @@
     },
     "require-dev": {
         "doctrine/coding-standard": "^4.0 || ^9.0",
-        "phpunit/phpunit": "^9.5 || ^10.0 || ^11.0"
+        "phpunit/phpunit": "^9.5 || ^10.0 || ^11.0",
+        "phpstan/phpstan": "*"
     },
     "autoload": {
         "psr-4": {
