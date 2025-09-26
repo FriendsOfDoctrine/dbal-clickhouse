@@ -248,4 +248,20 @@ class SelectTest extends TestCase
 
         $this->assertEquals('t2', $result->fetchOne());
     }
+
+    public function testWith(): void
+    {
+        $result = $this->connection->executeQuery("
+            WITH subselect as (
+                SELECT id
+                FROM test_select_table
+                WHERE payload = 'v4'
+            )
+            SELECT *
+            FROM test_select_table tbl
+            JOIN subselect sub ON sub.id = tbl.id
+        ");
+
+        $this->assertEquals(2, $result->columnCount());
+    }
 }
