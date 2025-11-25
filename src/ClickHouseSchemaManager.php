@@ -164,7 +164,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
             <<<'SQL'
             SELECT table_name
             FROM INFORMATION_SCHEMA.TABLES
-            WHERE  table_schema = ? AND table_type != 'BASE TABLE'
+            WHERE  table_schema = ? AND table_type = 'BASE TABLE'
             SQL,
             [$databaseName]
         );
@@ -182,7 +182,7 @@ class ClickHouseSchemaManager extends AbstractSchemaManager
 
         return $this->connection->executeQuery(
             \sprintf(<<<'SQL'
-            SELECT c.column_name AS field,
+            SELECT c.column_name AS name,
                    c.table_name,
                    c.column_type as `type`,
                    c.is_nullable AS `null`,
