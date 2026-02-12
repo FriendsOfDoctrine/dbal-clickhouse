@@ -27,6 +27,8 @@ use Doctrine\DBAL\Platforms\TrimMode;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Metadata\MetadataProvider;
+use Doctrine\DBAL\Schema\Name\UnquotedIdentifierFolding;
 use Doctrine\DBAL\Schema\TableDiff;
 use Doctrine\DBAL\Schema\UniqueConstraint;
 use Doctrine\DBAL\TransactionIsolationLevel;
@@ -64,6 +66,11 @@ use function trim;
 
 class ClickHousePlatform extends AbstractPlatform
 {
+    public function __construct(?UnquotedIdentifierFolding $unquotedIdentifierFolding = null)
+    {
+        parent::__construct($unquotedIdentifierFolding ?? UnquotedIdentifierFolding::NONE);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -1119,5 +1126,10 @@ class ClickHousePlatform extends AbstractPlatform
     public function createSchemaManager(Connection $connection): AbstractSchemaManager
     {
         return new ClickHouseSchemaManager($connection, $this);
+    }
+
+    public function createMetadataProvider(Connection $connection): MetadataProvider
+    {
+        return new ClickHouseMetadataProvider($connection, $this);
     }
 }
