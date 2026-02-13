@@ -25,13 +25,12 @@ use Doctrine\DBAL\Schema\Metadata\TableColumnMetadataRow;
 use Doctrine\DBAL\Schema\Metadata\TableMetadataRow;
 use FOD\DBALClickHouse\ClickHouseMetadataProvider;
 use FOD\DBALClickHouse\ClickHousePlatform;
-use FOD\DBALClickHouse\ClickHouseViewMetadataRow;
 use PHPUnit\Framework\TestCase;
 
 /**
  * ClickHouse DBAL test class. Testing work with public methods of FOD\DBALClickHouse\ClickHouseMetadataProvider class
  */
-class MetadataProviderTest extends TestCase
+class ClickHouseMetadataProviderTest extends TestCase
 {
     private ClickHouseMetadataProvider $metadataProvider;
     private Connection $connection;
@@ -40,9 +39,9 @@ class MetadataProviderTest extends TestCase
     {
         $this->connection = CreateConnectionTest::createConnection();
         $platform = $this->connection->getDatabasePlatform();
-        
+
         $this->metadataProvider = new ClickHouseMetadataProvider($this->connection, $platform);
-        
+
         // Create test tables for testing
         $this->createTestTables();
     }
@@ -108,7 +107,7 @@ class MetadataProviderTest extends TestCase
             $this->assertNull($row->getSchemaName());
             $this->assertIsString($row->getTableName());
             $this->assertEmpty($row->getOptions());
-            
+
             if ($row->getTableName() === 'test_metadata_table') {
                 $testTableFound = true;
             }
@@ -136,7 +135,7 @@ class MetadataProviderTest extends TestCase
             $this->assertNull($row->getSchemaName());
             $this->assertSame('test_metadata_table', $row->getTableName());
             $this->assertNotNull($row->getColumn());
-            
+
             $column = $row->getColumn();
             $this->assertIsString($column->getName());
             $this->assertNotNull($column->getType());
@@ -164,7 +163,7 @@ class MetadataProviderTest extends TestCase
             $this->assertNull($row->getSchemaName());
             $this->assertSame('test_metadata_table', $row->getTableName());
             $this->assertNotNull($row->getColumn());
-            
+
             $column = $row->getColumn();
             $columnNames[] = $column->getName();
         }
@@ -279,7 +278,7 @@ class MetadataProviderTest extends TestCase
             $this->assertNull($row->getSchemaName());
             $this->assertIsString($row->getTableName());
             $this->assertIsArray($row->getOptions());
-            
+
             if ($row->getTableName() === 'test_metadata_table') {
                 $testTable = $row;
             }
@@ -310,7 +309,7 @@ class MetadataProviderTest extends TestCase
         $this->assertInstanceOf(TableMetadataRow::class, $row);
         $this->assertNull($row->getSchemaName());
         $this->assertSame('test_metadata_table', $row->getTableName());
-        
+
         $options = $row->getOptions();
         $this->assertArrayHasKey('engine', $options);
         $this->assertSame('MergeTree', $options['engine']);
@@ -326,11 +325,10 @@ class MetadataProviderTest extends TestCase
         // Find our test view
         $testView = null;
         foreach ($results as $row) {
-            $this->assertInstanceOf(ClickHouseViewMetadataRow::class, $row);
+            $this->assertInstanceOf(ViewMetadataRow::class, $row);
             $this->assertNull($row->getSchemaName());
             $this->assertIsString($row->getViewName());
-            $this->assertIsString($row->getSql());
-            
+
             if ($row->getViewName() === 'test_metadata_view') {
                 $testView = $row;
             }

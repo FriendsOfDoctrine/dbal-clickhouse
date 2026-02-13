@@ -486,6 +486,18 @@ class ClickHousePlatform extends AbstractPlatform
      */
     protected function _getCreateTableSQL(string $name, array $columns, array $options = []): array
     {
+        /** @var array{
+         *     engine: string|null,
+         *     uniqueConstraints: array|null,
+         *     indexes: array|null,
+         *     indexGranularity: int|null,
+         *     eventDateProviderColumn: string|null,
+         *     eventDateColumn: string|null,
+         *     primary: array|null,
+         *     samplingExpression: string|null,
+         *     versionColumn: string|null,
+         * } $options
+         */
         $engine        = !empty($options['engine']) ? $options['engine'] : 'ReplacingMergeTree';
         $engineOptions = '';
 
@@ -544,7 +556,7 @@ class ClickHousePlatform extends AbstractPlatform
                     !($columns[$options['eventDateProviderColumn']]['type'] instanceof DecimalType) &&
                     (
                         !($columns[$options['eventDateProviderColumn']]['type'] instanceof StringType) ||
-                        $columns[$options['eventDateProviderColumn']]['fixed']
+                        $columns[$options['eventDateProviderColumn']]['fixed'] // @phpstan-ignore offsetAccess.notFound
                     )
                 ) {
                     throw new \Exception(
@@ -656,7 +668,7 @@ class ClickHousePlatform extends AbstractPlatform
         $sql[] = sprintf(
             'CREATE TABLE %s (%s) ENGINE = %s%s',
             $name,
-            $this->getColumnDeclarationListSQL($columns),
+            $this->getColumnDeclarationListSQL(array_values($columns)),
             $engine,
             $engineOptions
         );

@@ -25,6 +25,7 @@ use Doctrine\DBAL\Schema\Metadata\MetadataProvider;
 use Doctrine\DBAL\Schema\Metadata\PrimaryKeyConstraintColumnRow;
 use Doctrine\DBAL\Schema\Metadata\TableColumnMetadataRow;
 use Doctrine\DBAL\Schema\Metadata\TableMetadataRow;
+use Doctrine\DBAL\Schema\Metadata\ViewMetadataRow;
 
 use function implode;
 use function sprintf;
@@ -252,7 +253,7 @@ class ClickHouseMetadataProvider implements MetadataProvider
         $sql = "SELECT name, create_table_query FROM system.tables WHERE database = ? AND engine = 'View' ORDER BY name";
 
         foreach ($this->connection->iterateNumeric($sql, [$this->databaseName]) as $row) {
-            yield new ClickHouseViewMetadataRow(null, $row[0], $row[1]);
+            yield new ViewMetadataRow(null, $row[0], $row[1]);
         }
     }
 
