@@ -27,6 +27,8 @@ use Doctrine\DBAL\Platforms\TrimMode;
 use Doctrine\DBAL\Schema\AbstractSchemaManager;
 use Doctrine\DBAL\Schema\ForeignKeyConstraint;
 use Doctrine\DBAL\Schema\Index;
+use Doctrine\DBAL\Schema\Metadata\MetadataProvider;
+use Doctrine\DBAL\Schema\Name\UnquotedIdentifierFolding;
 use Doctrine\DBAL\Schema\TableDiff;
 use Doctrine\DBAL\Schema\UniqueConstraint;
 use Doctrine\DBAL\TransactionIsolationLevel;
@@ -64,6 +66,11 @@ use function trim;
 
 class ClickHousePlatform extends AbstractPlatform
 {
+    public function __construct(?UnquotedIdentifierFolding $unquotedIdentifierFolding = null)
+    {
+        parent::__construct($unquotedIdentifierFolding ?? UnquotedIdentifierFolding::NONE);
+    }
+
     /**
      * {@inheritDoc}
      */
@@ -479,6 +486,18 @@ class ClickHousePlatform extends AbstractPlatform
      */
     protected function _getCreateTableSQL(string $name, array $columns, array $options = []): array
     {
+        /** @var array{
+         *     engine: string|null,
+         *     uniqueConstraints: array|null,
+         *     indexes: array|null,
+         *     indexGranularity: int|null,
+         *     eventDateProviderColumn: string|null,
+         *     eventDateColumn: string|null,
+         *     primary: array|null,
+         *     samplingExpression: string|null,
+         *     versionColumn: string|null,
+         * } $options
+         */
         $engine        = !empty($options['engine']) ? $options['engine'] : 'ReplacingMergeTree';
         $engineOptions = '';
 
@@ -537,7 +556,7 @@ class ClickHousePlatform extends AbstractPlatform
                     !($columns[$options['eventDateProviderColumn']]['type'] instanceof DecimalType) &&
                     (
                         !($columns[$options['eventDateProviderColumn']]['type'] instanceof StringType) ||
-                        $columns[$options['eventDateProviderColumn']]['fixed']
+                        $columns[$options['eventDateProviderColumn']]['fixed'] // @phpstan-ignore offsetAccess.notFound
                     )
                 ) {
                     throw new \Exception(
@@ -649,7 +668,7 @@ class ClickHousePlatform extends AbstractPlatform
         $sql[] = sprintf(
             'CREATE TABLE %s (%s) ENGINE = %s%s',
             $name,
-            $this->getColumnDeclarationListSQL($columns),
+            $this->getColumnDeclarationListSQL(array_values($columns)),
             $engine,
             $engineOptions
         );
@@ -1119,5 +1138,10 @@ class ClickHousePlatform extends AbstractPlatform
     public function createSchemaManager(Connection $connection): AbstractSchemaManager
     {
         return new ClickHouseSchemaManager($connection, $this);
+    }
+
+    public function createMetadataProvider(Connection $connection): MetadataProvider
+    {
+        return new ClickHouseMetadataProvider($connection, $this);
     }
 }
