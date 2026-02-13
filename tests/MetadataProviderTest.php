@@ -329,6 +329,7 @@ class ClickHouseMetadataProviderTest extends TestCase
             $this->assertInstanceOf(ViewMetadataRow::class, $row);
             $this->assertNull($row->getSchemaName());
             $this->assertIsString($row->getViewName());
+            $this->assertIsString($row->getDefinition());
 
             if ($row->getViewName() === 'test_metadata_view') {
                 $testView = $row;
@@ -337,6 +338,7 @@ class ClickHouseMetadataProviderTest extends TestCase
 
         $this->assertNotNull($testView);
         $this->assertSame('test_metadata_view', $testView->getViewName());
+        $this->assertStringContainsString('CREATE VIEW default.test_metadata_view (`id` UInt32, `name` String) AS SELECT id, name FROM default.test_metadata', $testView->getDefinition());
     }
 
     public function testGetAllSequencesThrowsNotSupported(): void
