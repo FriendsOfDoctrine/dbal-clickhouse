@@ -23,6 +23,7 @@ use Doctrine\DBAL\Schema\Metadata\MetadataProvider;
 use Doctrine\DBAL\Schema\Metadata\PrimaryKeyConstraintColumnRow;
 use Doctrine\DBAL\Schema\Metadata\TableColumnMetadataRow;
 use Doctrine\DBAL\Schema\Metadata\TableMetadataRow;
+use Doctrine\DBAL\Schema\Metadata\ViewMetadataRow;
 use FOD\DBALClickHouse\ClickHouseMetadataProvider;
 use FOD\DBALClickHouse\ClickHousePlatform;
 use PHPUnit\Framework\TestCase;
