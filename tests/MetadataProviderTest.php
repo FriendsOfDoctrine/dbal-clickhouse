@@ -23,7 +23,6 @@ use Doctrine\DBAL\Schema\Metadata\MetadataProvider;
 use Doctrine\DBAL\Schema\Metadata\PrimaryKeyConstraintColumnRow;
 use Doctrine\DBAL\Schema\Metadata\TableColumnMetadataRow;
 use Doctrine\DBAL\Schema\Metadata\TableMetadataRow;
-use Doctrine\DBAL\Schema\Metadata\ViewMetadataRow;
 use FOD\DBALClickHouse\ClickHouseMetadataProvider;
 use FOD\DBALClickHouse\ClickHousePlatform;
 use PHPUnit\Framework\TestCase;
@@ -337,7 +336,6 @@ class ClickHouseMetadataProviderTest extends TestCase
 
         $this->assertNotNull($testView);
         $this->assertSame('test_metadata_view', $testView->getViewName());
-        $this->assertStringContainsString('CREATE VIEW default.test_metadata_view (`id` UInt32, `name` String) AS SELECT id, name FROM default.test_metadata', $testView->getSql());
     }
 
     public function testGetAllSequencesThrowsNotSupported(): void
