@@ -123,7 +123,8 @@ class ClickHouseStatement implements Statement
                 new \ArrayIterator(
                     mb_stripos($statement, 'select') === 0 ||
                     mb_stripos($statement, 'show') === 0 ||
-                    mb_stripos($statement, 'describe') === 0
+                    mb_stripos($statement, 'describe') === 0 ||
+                    mb_stripos($statement, 'exists') === 0
                         ? $this->client->select($statement)->rows()
                         : $this->client->write($statement)->rows()
                 )

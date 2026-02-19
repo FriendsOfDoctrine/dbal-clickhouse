@@ -248,4 +248,18 @@ class SelectTest extends TestCase
 
         $this->assertEquals('t2', $result->fetchOne());
     }
+
+    public function testExists(): void
+    {
+        $result = $this->connection->executeQuery('EXISTS TABLE test_select_table');
+
+        $this->assertEquals(1, $result->fetchOne());
+    }
+
+    public function testExistsNotExists(): void
+    {
+        $result = $this->connection->executeQuery('EXISTS TABLE non_existent_table');
+
+        $this->assertEquals(0, $result->fetchOne());
+    }
 }
